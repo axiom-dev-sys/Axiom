@@ -1,0 +1,20 @@
+# Build files
+/build/
+/out/
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.user
+*.log
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+
+# Windows
+*.exe
+*.obj
+*.pdb
