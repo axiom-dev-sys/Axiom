@@ -13,7 +13,12 @@ target_include_directories(glad PUBLIC external/glad/include)
 add_executable(Axiom
     src/main.cpp
     src/Core/Engine.cpp
+    src/Core/Layer.cpp
+    src/Core/LayerStack.cpp
+    src/Core/Log.cpp
+    src/Core/Time.cpp
     src/Core/Window.cpp
+    src/Input/Input.cpp
     src/Renderer/Renderer.cpp
 )
 

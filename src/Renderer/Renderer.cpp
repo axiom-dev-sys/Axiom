@@ -8,7 +8,10 @@ namespace Axiom {
 void Renderer::init()
 {
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
 		std::cout << "GLAD init failed\n";
+		abort();
+	}
 }
 
 void Renderer::clear()

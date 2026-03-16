@@ -3,44 +3,64 @@
 
 namespace Axiom {
 
-	Window::Window(int width, int height, const char* title)
-	{
-		if (!glfwInit())
-			std::cout << "GLFW init failed\n";
+    Window::Window(int width, int height, const char* title)
+    {
+        if (!glfwInit())
+        {
+            std::cout << "GLFW init failed\n";
+            abort();
+        }
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-		m_Window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
+        m_Window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 
-	}
+        if (!m_Window)
+        {
+            std::cout << "Window creation failed\n";
+            glfwTerminate();
+            abort();
+        }
 
-	Window::~Window()
-	{
-		glfwDestroyWindow(m_Window);
-		glfwTerminate();
-	}
+        glfwMakeContextCurrent(m_Window);
 
-	bool Window::shouldClose() const
-	{
-		return glfwWindowShouldClose(m_Window);
-	}
 
-	void Window::pollEvents()
-	{
-		glfwPollEvents();
-	}
+        glfwSetKeyCallback(m_Window,
+            [](GLFWwindow* window, int key, int scancode, int action, int mods)
+            {
+                if (action == GLFW_PRESS)
+                {
+                    std::cout << "Key pressed: " << key << std::endl;
+                }
+            });
+    }
 
-	void Window::swapBuffers()
-	{
-		glfwSwapBuffers(m_Window);
-	}
+    Window::~Window()
+    {
+        glfwDestroyWindow(m_Window);
+        glfwTerminate();
+    }
 
-	GLFWwindow* Window::getNative() const
-	{
-		return m_Window;
-	}
+    bool Window::shouldClose() const
+    {
+        return glfwWindowShouldClose(m_Window);
+    }
+
+    void Window::pollEvents()
+    {
+        glfwPollEvents();
+    }
+
+    void Window::swapBuffers()
+    {
+        glfwSwapBuffers(m_Window);
+    }
+
+    GLFWwindow* Window::getNative() const
+    {
+        return m_Window;
+    }
 
 }
