@@ -1,12 +1,17 @@
 # Build files
 /build/
 /out/
+Debug/
+Release/
+
+# Source file
+src/stb_image.cpp
 
 # Visual Studio
 .vs/
 *.vcxproj
 *.vcxproj.filters
-*.sln
+# *.sln
 *.user
 *.log
 
@@ -18,3 +23,7 @@ CMakeFiles/
 *.exe
 *.obj
 *.pdb
+
+# OS
+.DS_Store
+Thumbs.db
