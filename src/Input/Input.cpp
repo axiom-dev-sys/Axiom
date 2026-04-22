@@ -1,5 +1,7 @@
 #include "Axiom/Input/Input.hpp"
 
+
+
 namespace Axiom {
 
     GLFWwindow* Input::s_Window = nullptr;

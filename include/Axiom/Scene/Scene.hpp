@@ -1,5 +1,7 @@
 #pragma once
 #include "Entity.hpp"
+
+
 #include <vector>
 
 namespace Axiom {
@@ -16,6 +18,12 @@ namespace Axiom {
         std::vector<Entity>& getEntities()
         {
             return m_Entities;
+        }
+
+        void onUpdate()
+        {
+            for (auto& entity : m_Entities)
+                entity.onUpdate();
         }
 
     private:

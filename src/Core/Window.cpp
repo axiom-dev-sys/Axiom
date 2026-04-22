@@ -1,4 +1,5 @@
 #include "Axiom/Core/Window.hpp"
+#include <glad/glad.h> 
 #include <iostream>
 
 namespace Axiom {
@@ -25,6 +26,14 @@ namespace Axiom {
         }
 
         glfwMakeContextCurrent(m_Window);
+
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            std::cout << "Failed to init GLAD\n";
+            abort();
+        }
+
+        glViewport(0, 0, width, height);
 
 
         glfwSetKeyCallback(m_Window,

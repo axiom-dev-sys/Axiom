@@ -1,48 +1,48 @@
+#pragma warning(disable : 26812)
+
 #include "Axiom/Core/Engine.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
+#include "Axiom/Renderer/Shader.hpp"
+#include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Game/GameLayer.hpp"
 #include "Axiom/Input/Input.hpp"
+#include "Axiom/Core/Time.hpp"
 
 namespace Axiom {
 
-	Engine::Engine()
-	{
-		m_Window = new Window(1280, 720, "Axiom");
-		Renderer::init();
+    Engine::Engine()
+    {
+        m_Window = new Window(1280, 720, "Axiom");
 
-		Input::setWindow(m_Window->getNative());
+        Shader::init();
+        Renderer::init();
 
-		m_LayerStack.pushLayer(new GameLayer());
-	}
+        Input::setWindow(m_Window->getNative());
 
-	Engine::~Engine()
-	{
-		delete m_Window;
-	}
+        m_LayerStack.pushLayer(new GameLayer());
 
-	void Engine::onEvent(Event& event)
-	{
-		for (Layer* layer : m_LayerStack)
-		{
-			layer->onEvent(event);
+        ResourceManager::init();
+    }
 
-			if (event.handled)
-				break;
-		}
-	}
+    Engine::~Engine()
+    {
+        delete m_Window;
+    }
 
-	void Engine::run()
-	{
-		while (!m_Window->shouldClose())
-		{
-			for (Layer* layer : m_LayerStack)
-				layer->onUpdate();
+    void Engine::run()
+    {
+        while (!m_Window->shouldClose())
+        {
+            Time::update();
 
-			Renderer::clear();
+            Renderer::clear();
 
-			m_Window->swapBuffers();
-			m_Window->pollEvents();
-		}
+            for (Layer* layer : m_LayerStack)
+                layer->onUpdate();
 
-		}
-	}
+            m_Window->swapBuffers();
+            m_Window->pollEvents();
+        }
+    }
+
+}

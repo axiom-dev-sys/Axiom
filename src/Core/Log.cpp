@@ -1,4 +1,5 @@
 #include "Axiom/Core/Log.hpp"
+
 #include <iostream>
 
 namespace Axiom {

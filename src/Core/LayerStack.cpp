@@ -1,5 +1,7 @@
 #include "Axiom/Core/LayerStack.hpp"
 
+
+
 namespace Axiom {
 
     void LayerStack::pushLayer(Layer* layer)

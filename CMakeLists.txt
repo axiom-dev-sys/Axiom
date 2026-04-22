@@ -19,9 +19,18 @@ add_executable(Axiom
     src/Core/Time.cpp
     src/Core/Window.cpp
     src/Input/Input.cpp
+    src/Renderer/Texture.cpp
+    src/Renderer/Shader.cpp
     src/Renderer/Renderer.cpp
+    src/Resource/ResourceManager.cpp
 )
 
 target_include_directories(Axiom PUBLIC include)
 
 target_link_libraries(Axiom glfw glad)
+
+add_custom_command(TARGET Axiom POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_BINARY_DIR}/assets
+)
