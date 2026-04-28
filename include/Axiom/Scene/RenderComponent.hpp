@@ -2,10 +2,8 @@
 #include "Axiom/Scene/Component.hpp"
 #include "Axiom/Scene/Transform.hpp"
 #include "Axiom/Scene/SpriteComponent.hpp"
-#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/AnimationComponent.hpp"
-
-
+#include "Axiom/Renderer/Renderer.hpp"
 
 namespace Axiom {
 
@@ -19,22 +17,20 @@ namespace Axiom {
             m_Sprite(sprite),
             m_Animation(animation) {}
 
-        void onUpdate() override
+        Texture* getTexture() const
         {
-            if (!m_Transform) return;
+            if (m_Animation)
+                return m_Animation->getCurrentFrame();
 
-            Texture* texture = nullptr;
+            if (m_Sprite)
+                return m_Sprite->getTexture();
 
-                if (m_Animation)
-                    texture = m_Animation->getCurrentFrame();
-                else if (m_Sprite)
-                    texture = m_Sprite->getTexture();
+            return nullptr;
+        }
 
-            if (!texture) return;
-
-            texture->bind();
-
-            Renderer::draw(*texture, { m_Transform->x, m_Transform->y });
+        Transform* getTransform() const
+        {
+            return m_Transform;
         }
 
     private:

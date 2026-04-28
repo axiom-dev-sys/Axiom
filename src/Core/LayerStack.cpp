@@ -1,7 +1,5 @@
 #include "Axiom/Core/LayerStack.hpp"
 
-
-
 namespace Axiom {
 
     void LayerStack::pushLayer(Layer* layer)
@@ -23,4 +21,15 @@ namespace Axiom {
         }
     }
 
+    void LayerStack::onUpdate(float dt)
+    {
+        for (Layer* layer : m_Layers)
+            layer->onUpdate(dt);
+    }
+
+    void LayerStack::onRender()
+    {
+        for (Layer* layer : m_Layers)
+            layer->onRender();
+    }
 }

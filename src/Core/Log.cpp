@@ -1,17 +1,38 @@
 #include "Axiom/Core/Log.hpp"
 
-#include <iostream>
-
 namespace Axiom {
 
-    void Log::info(const std::string& message)
+    void Log::message(Level level, const std::string& msg)
     {
-        std::cout << "[Axiom] " << message << std::endl;
+        switch (level)
+        {
+        case Level::Info:
+            std::cout << "[INFO] " << msg << std::endl;
+            break;
+
+        case Level::Warn:
+            std::cout << "[WARN] " << msg << std::endl;
+            break;
+
+        case Level::Error:
+            std::cerr << "[ERROR] " << msg << std::endl;
+            break;
+        }
     }
 
-    void Log::error(const std::string& message)
+    void Log::info(const std::string& msg)
     {
-        std::cout << "[Axiom ERROR] " << message << std::endl;
+        message(Level::Info, msg);
+    }
+
+    void Log::warn(const std::string& msg)
+    {
+        message(Level::Warn, msg);
+    }
+
+    void Log::error(const std::string& msg)
+    {
+        message(Level::Error, msg);
     }
 
 }

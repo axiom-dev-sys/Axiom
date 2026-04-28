@@ -14,7 +14,6 @@ namespace Axiom {
     {
         m_Window = new Window(1280, 720, "Axiom");
 
-        Shader::init();
         Renderer::init();
 
         Input::setWindow(m_Window->getNative());
@@ -35,14 +34,18 @@ namespace Axiom {
         {
             Time::update();
 
+            float dt = Time::getDeltaTime();
+
+            for (Layer* layer : m_LayerStack)
+                layer->onUpdate(dt);
+
             Renderer::clear();
 
             for (Layer* layer : m_LayerStack)
-                layer->onUpdate();
+                layer->onRender();
 
             m_Window->swapBuffers();
             m_Window->pollEvents();
         }
     }
-
 }

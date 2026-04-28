@@ -1,33 +1,37 @@
 #pragma once
 #include "Entity.hpp"
-
+#include "Axiom/Renderer/Camera.hpp"
 
 #include <vector>
+#include <memory>
 
 namespace Axiom {
 
     class Scene
     {
     public:
+        Camera camera;
+
+        void onUpdate(float dt);
+
+        void onRender();
+
+
         Entity* createEntity(const std::string& name)
         {
-            m_Entities.emplace_back(name);
-            return &m_Entities.back();
+            m_Entities.emplace_back(std::make_unique<Entity>(name));
+            return m_Entities.back().get();
         }
 
-        std::vector<Entity>& getEntities()
-        {
-            return m_Entities;
-        }
-
-        void onUpdate()
+        template<typename Func>
+        void forEach(Func func)
         {
             for (auto& entity : m_Entities)
-                entity.onUpdate();
+                func(entity.get());
         }
 
     private:
-        std::vector<Entity> m_Entities;
+        std::vector<std::unique_ptr<Entity>> m_Entities;
     };
 
 }

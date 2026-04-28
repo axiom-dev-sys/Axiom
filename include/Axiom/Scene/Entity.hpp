@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.hpp"
-
-
+#include <unordered_map>
+#include <typeindex>
 #include <type_traits>
 #include <memory>
 #include <vector>
@@ -20,25 +20,22 @@ namespace Axiom {
         template<typename T, typename... Args>
         T* addComponent(Args&&... args)
         {
-            static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
+            static_assert(std::is_base_of<Component, T>::value);
 
             auto component = std::make_unique<T>(std::forward<Args>(args)...);
+            T* raw = component.get();
 
-            T* rawPtr = component.get();
+            m_Components[typeid(T)] = std::move(component);
 
-            m_Components.push_back(std::move(component));
-
-            return rawPtr;
+            return raw;
         }
 
         template<typename T>
         T* getComponent()
         {
-            for (auto& component : m_Components)
-            {
-                if (T* cast = dynamic_cast<T*>(component.get()))
-                    return cast;
-            }
+            auto it = m_Components.find(typeid(T));
+            if (it != m_Components.end())
+                return static_cast<T*>(it->second.get());
 
             return nullptr;
         }
@@ -50,14 +47,14 @@ namespace Axiom {
 
         void onUpdate()
         {
-            for (auto& component : m_Components)
+            for (auto& [type, component] : m_Components)
                 component->onUpdate();
         }
 
     private:
 
         std::string m_Name;
-        std::vector<std::unique_ptr<Component>> m_Components;
+        std::unordered_map<std::type_index, std::unique_ptr<Component>> m_Components;
     };
 
 }

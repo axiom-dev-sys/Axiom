@@ -1,6 +1,5 @@
-#include "Camera2D.hpp"
+#include "Axiom/Renderer/Camera.hpp"
 
 namespace Axiom {
-    float Camera2D::x = 0;
-    float Camera2D::y = 0;
+
 }

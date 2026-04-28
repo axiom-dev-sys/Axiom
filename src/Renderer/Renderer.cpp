@@ -1,28 +1,28 @@
 ﻿#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/Shader.hpp"
-
+#include "Axiom/Renderer/Camera.hpp"
+#include "Axiom/Math/Vec2.hpp"
 #include <glad/glad.h>
-#include <iostream>
 
 namespace Axiom {
 
-    static GLuint VAO = 0;
-    static GLuint VBO = 0;
+    static Shader shader;
 
-    float Renderer::camX = 0;
-    float Renderer::camY = 0;
+    unsigned int Renderer::VAO = 0;
+    unsigned int Renderer::VBO = 0;
 
     void Renderer::init()
     {
-        float vertices[] = {
-            // pos      // uv
-            -0.5f, -0.5f,  0.0f, 0.0f,
-             0.5f, -0.5f,  1.0f, 0.0f,
-             0.5f,  0.5f,  1.0f, 1.0f,
+        shader.init();
 
-             0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.0f, 0.0f
+        float v[] = {
+            -0.5f,-0.5f, 0,0,
+             0.5f,-0.5f, 1,0,
+             0.5f, 0.5f, 1,1,
+
+             0.5f, 0.5f, 1,1,
+            -0.5f, 0.5f, 0,1,
+            -0.5f,-0.5f, 0,0
         };
 
         glGenVertexArrays(1, &VAO);
@@ -31,22 +31,13 @@ namespace Axiom {
         glBindVertexArray(VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
 
-        // position
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
-        // uv
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-        glBindVertexArray(0);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        std::cout << "Renderer initialized\n";
     }
 
     void Renderer::clear()
@@ -55,32 +46,31 @@ namespace Axiom {
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void Renderer::setCamera(float x, float y)
+    void Renderer::draw(Texture& tex, Vec2 pos)
     {
-        camX = x;
-        camY = y;
-    }
+        shader.use();
 
-    void Renderer::draw(Texture& texture, Vec2 position)
-    {
-        if (texture.getID() == 0)
-        {
-            std::cout << "Texture ID = 0\n";
-            return;
-        }
+        float w = 100.0f;
+        float h = 100.0f;
 
-        Shader::use();
+        float vertices[] = {
+            pos.x,     pos.y,     0,0,
+            pos.x + w,   pos.y,     1,0,
+            pos.x + w,   pos.y + h,   1,1,
 
-        texture.bind(0);
+            pos.x,     pos.y,     0,0,
+            pos.x + w,   pos.y + h,   1,1,
+            pos.x,     pos.y + h,   0,1
+        };
 
-        Shader::setTransform(
-            position.x,
-            position.y,
-            1.0f,
-            1.0f
-        );
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex.getID());
+        shader.setInt("uTex", 0);
 
         glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 

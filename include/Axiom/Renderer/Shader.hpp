@@ -3,15 +3,19 @@
 
 namespace Axiom {
 
-    class Shader
-    {
+    class Shader {
     public:
-        static void init();
-        static void use();
-        static void setTransform(float x, float y, float sx, float sy);
+        void init();
+        void use();
+        void setInt(const char* name, int value);
 
     private:
-        static GLuint program;
+        static unsigned int program;
+
+        GLuint compile(GLenum type, const char* src);
+
+        static const char* vs;
+        static const char* fs;
     };
 
 }

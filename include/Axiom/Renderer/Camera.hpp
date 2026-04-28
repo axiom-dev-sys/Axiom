@@ -1,12 +1,13 @@
 #pragma once
+#include "Axiom/Math/Vec2.hpp"
 
 namespace Axiom {
 
-    class Camera
-    {
+    class Camera {
     public:
-        static float x;
-        static float y;
+        Vec2 position;
+
+        static void set(float x, float y);
     };
 
 }

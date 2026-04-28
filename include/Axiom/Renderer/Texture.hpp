@@ -1,26 +1,21 @@
 #pragma once
-
-#include <string>
 #include <glad/glad.h>
+#include <string>
 
 namespace Axiom {
 
-    class Texture
-    {
+    class Texture {
     public:
-        Texture();
-        explicit Texture(const std::string& path);
+        Texture(const std::string& path);
         ~Texture();
+        Texture() = default;
 
-        bool loadFromFile(const std::string& path);
         void bind(unsigned int slot = 0) const;
-
-        static Texture createFallback();
-
-        unsigned int getID() const { return id; }
+        GLuint getID() const { return id; }
 
     private:
-        unsigned int id = 0;
+        GLuint id = 0;
+        bool valid = false;
     };
 
 }

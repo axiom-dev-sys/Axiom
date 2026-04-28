@@ -2,13 +2,12 @@
 #include "Axiom/Scene/Component.hpp"
 #include "Axiom/Renderer/Texture.hpp"
 
-
-
 namespace Axiom {
 
     class SpriteComponent : public Component
     {
     public:
+        Texture* texture = nullptr;
         SpriteComponent(Texture* texture,
             float r = 1.0f,
             float g = 1.0f,
