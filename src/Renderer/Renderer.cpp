@@ -31,7 +31,7 @@ namespace Axiom {
         glBindVertexArray(VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_DYNAMIC_DRAW);
 
         glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
@@ -46,9 +46,11 @@ namespace Axiom {
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void Renderer::draw(Texture& tex, Vec2 pos)
+    void Renderer::draw(Texture& tex, Vec2 pos, const float* cameraMatrix)
     {
         shader.use();
+
+        shader.setMat4("uProjection", cameraMatrix);
 
         float w = 100.0f;
         float h = 100.0f;

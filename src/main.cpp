@@ -18,12 +18,11 @@ int main()
 
     gladLoadGL();
 
-    Axiom::Shader shader;
     Axiom::Renderer::init();
 
     std::cout << "Before layer\n";
 
-    GameLayer* layer = new GameLayer();
+    GameLayer layer;
 
     std::cout << "After layer\n";
 
@@ -31,7 +30,7 @@ int main()
     {
         Axiom::Renderer::clear();
 
-        layer->onRender(); // 👈 вызываем рендер слоя
+        layer.onRender(); // 👈 вызываем рендер слоя
 
         glfwSwapBuffers(window);
         glfwPollEvents();

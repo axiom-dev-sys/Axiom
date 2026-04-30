@@ -5,9 +5,14 @@ namespace Axiom {
 
     class Camera {
     public:
-        Vec2 position;
+        Vec2 position{ 0, 0 };
 
-        static void set(float x, float y);
+        void updateMatrix();
+
+        const float* getMatrix() const { return m_Matrix; }
+
+    private:
+        float m_Matrix[16] = { 0 };
     };
 
 }
