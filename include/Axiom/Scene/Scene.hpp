@@ -10,7 +10,7 @@ namespace Axiom {
     class Scene
     {
     public:
-        Camera camera;
+        Camera camera{};
 
         void onUpdate(float dt);
 

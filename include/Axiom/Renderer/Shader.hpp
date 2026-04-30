@@ -8,9 +8,10 @@ namespace Axiom {
         void init();
         void use();
         void setInt(const char* name, int value);
+        void setMat4(const char* name, const float* value);
 
     private:
-        static unsigned int program;
+        unsigned int program;
 
         GLuint compile(GLenum type, const char* src);
 

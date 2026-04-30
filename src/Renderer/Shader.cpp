@@ -2,15 +2,14 @@
 
 namespace Axiom {
 
-    unsigned int Axiom::Shader::program = 0;
-
         const char* Shader::vs = R"(
 #version 330 core
 layout(location=0) in vec2 aPos;
 layout(location=1) in vec2 aUV;
 out vec2 vUV;
+uniform mat4 uProjection;
 void main() {
-    gl_Position = vec4(aPos, 0.0, 1.0);
+    gl_Position = uProjection * vec4(aPos, 0.0, 1.0);
     vUV = aUV;
 }
 )";
@@ -59,6 +58,11 @@ void main() {
         {
             glUseProgram(program);
             glUniform1i(glGetUniformLocation(program, name), value);
+        }
+
+        void Shader::setMat4(const char* name, const float* value)
+        {
+            glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_FALSE, value);
         }
 
 }
