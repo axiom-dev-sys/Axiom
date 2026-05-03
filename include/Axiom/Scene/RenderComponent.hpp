@@ -22,6 +22,7 @@ namespace Axiom {
             if (m_Animation)
                 return m_Animation->getCurrentFrame();
 
+
             if (m_Sprite)
                 return m_Sprite->getTexture();
 

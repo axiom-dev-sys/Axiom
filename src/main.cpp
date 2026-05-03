@@ -16,7 +16,11 @@ int main()
     GLFWwindow* window = glfwCreateWindow(1280, 720, "Axiom", NULL, NULL);
     glfwMakeContextCurrent(window);
 
-    gladLoadGL();
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to init GLAD\n";
+        return -1;
+    }
 
     Axiom::Renderer::init();
 

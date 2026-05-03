@@ -6,14 +6,14 @@
 
 namespace Axiom {
 
-    static Shader shader;
+    Shader Renderer::s_Shader;
 
     unsigned int Renderer::VAO = 0;
     unsigned int Renderer::VBO = 0;
 
     void Renderer::init()
     {
-        shader.init();
+        s_Shader.init();
 
         float v[] = {
             -0.5f,-0.5f, 0,0,
@@ -48,9 +48,9 @@ namespace Axiom {
 
     void Renderer::draw(Texture& tex, Vec2 pos, const float* cameraMatrix)
     {
-        shader.use();
+        s_Shader.use();
 
-        shader.setMat4("uProjection", cameraMatrix);
+        s_Shader.setMat4("uProjection", cameraMatrix);
 
         float w = 100.0f;
         float h = 100.0f;
@@ -67,7 +67,7 @@ namespace Axiom {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex.getID());
-        shader.setInt("uTex", 0);
+        s_Shader.setInt("uTex", 0);
 
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
