@@ -71,16 +71,6 @@ void GameLayer::onRender()
 {
     Axiom::Renderer::clear();
 
-    static Axiom::Texture tex("assets/office.png");
-
-    Axiom::Renderer::draw(tex, { 0, 0 }, scene.camera.getMatrix());
-    Axiom::Renderer::draw(tex, { 200, 0 }, scene.camera.getMatrix());
-    Axiom::Renderer::draw(tex, { 0, 200 }, scene.camera.getMatrix());
-    Axiom::Renderer::draw(tex, { 200, 200 }, scene.camera.getMatrix());
-    Axiom::Renderer::draw(tex, { 640, 360 }, scene.camera.getMatrix());
-
-    scene.camera.updateMatrix();
-
     scene.onRender();
 
     std::cout << "RENDER CALL" << std::endl;

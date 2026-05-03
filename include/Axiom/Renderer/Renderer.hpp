@@ -2,6 +2,7 @@
 #include "Axiom/Renderer/Camera.hpp"
 #include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Math/Vec2.hpp"
+#include "Axiom/Renderer/Shader.hpp"
 
 namespace Axiom {
 
@@ -14,6 +15,7 @@ namespace Axiom {
 
     private:
         static unsigned int VAO, VBO;
+        static Shader s_Shader;
     };
 
 }
