@@ -1,38 +1,29 @@
 #pragma once
 #include "Axiom/Scene/Component.hpp"
-#include "Axiom/Scene/Transform.hpp"
-#include "Axiom/Scene/SpriteComponent.hpp"
-#include "Axiom/Scene/AnimationComponent.hpp"
-#include "Axiom/Renderer/Renderer.hpp"
+#include "Axiom/Renderer/Texture.hpp"
 
 namespace Axiom {
 
-    class RenderComponent : public Component
+    class Texture;
+    class Transform;
+    class SpriteComponent;
+    class AnimationComponent;
+
+    struct RenderComponent : public Component
     {
     public:
-        RenderComponent(Transform* transform,
-            SpriteComponent* sprite,
-            AnimationComponent* animation = nullptr)
-            : m_Transform(transform),
-            m_Sprite(sprite),
-            m_Animation(animation) {}
+        RenderComponent() = default;
 
-        Texture* getTexture() const
-        {
-            if (m_Animation)
-                return m_Animation->getCurrentFrame();
+        void setTexture(Texture* tex);
+        Texture* getTexture() const;
 
-
-            if (m_Sprite)
-                return m_Sprite->getTexture();
-
-            return nullptr;
-        }
-
-        Transform* getTransform() const
+        Transform* getTransform()
         {
             return m_Transform;
         }
+
+    public:
+        Texture* texture = nullptr;
 
     private:
         Transform* m_Transform;

@@ -1,79 +1,51 @@
 ﻿#include "Axiom/Renderer/Renderer.hpp"
-#include "Axiom/Renderer/Shader.hpp"
-#include "Axiom/Renderer/Camera.hpp"
-#include "Axiom/Math/Vec2.hpp"
-#include <glad/glad.h>
+#include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
+#include "Axiom/Renderer/RenderCommand.hpp"
+#include <memory>
+#include <iostream>
 
 namespace Axiom {
 
-    Shader Renderer::s_Shader;
+    std::unique_ptr<RendererAPI> Renderer::s_API =
+        std::make_unique<OpenGLRenderer>();
 
-    unsigned int Renderer::VAO = 0;
-    unsigned int Renderer::VBO = 0;
+    std::vector<DrawCommand> Renderer::s_Queue;
 
-    void Renderer::init()
-    {
-        s_Shader.init();
-
-        float v[] = {
-            -0.5f,-0.5f, 0,0,
-             0.5f,-0.5f, 1,0,
-             0.5f, 0.5f, 1,1,
-
-             0.5f, 0.5f, 1,1,
-            -0.5f, 0.5f, 0,1,
-            -0.5f,-0.5f, 0,0
-        };
-
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        glBindVertexArray(VAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_DYNAMIC_DRAW);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+    void Renderer::init() {
+        s_API->init();
     }
 
-    void Renderer::clear()
-    {
-        glClearColor(1, 0, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+    void Renderer::clear() {
+        s_API->clear();
     }
 
-    void Renderer::draw(Texture& tex, Vec2 pos, const float* cameraMatrix)
+    void Renderer::beginScene(const Camera& camera)
     {
-        s_Shader.use();
+        s_Camera = &camera;
+    }
 
-        s_Shader.setMat4("uProjection", cameraMatrix);
+    void Renderer::submit(Texture* tex, Vec2 pos)
+    {
+        if (!tex) return;
 
-        float w = 100.0f;
-        float h = 100.0f;
+        s_Queue.push_back({ tex, pos });
 
-        float vertices[] = {
-            pos.x,     pos.y,     0,0,
-            pos.x + w,   pos.y,     1,0,
-            pos.x + w,   pos.y + h,   1,1,
+        std::cout << "SUBMIT CALLED\n";
+    }
 
-            pos.x,     pos.y,     0,0,
-            pos.x + w,   pos.y + h,   1,1,
-            pos.x,     pos.y + h,   0,1
-        };
+    void Renderer::endScene()
+    {
+        flush();
+    }
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, tex.getID());
-        s_Shader.setInt("uTex", 0);
+    void Renderer::flush()
+    {
+        for (auto& cmd : s_Queue)
+        {
+            s_API->draw(*cmd.texture, cmd.position);
+        }
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        s_Queue.clear();
     }
 
 }

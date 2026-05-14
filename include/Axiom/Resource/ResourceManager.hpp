@@ -18,7 +18,7 @@ namespace Axiom {
 
     private:
         static std::unordered_map<std::string, std::unique_ptr<Texture>> s_Textures;
-        static Texture* s_FallbackTexture; // ?? добавь
+        static Texture* s_FallbackTexture;
     };
 
 }

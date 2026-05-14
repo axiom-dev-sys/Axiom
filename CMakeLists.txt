@@ -12,17 +12,24 @@ target_include_directories(glad PUBLIC external/glad/include)
 
 add_executable(Axiom
     src/main.cpp
+    src/Core/Application.cpp
     src/Core/Engine.cpp
     src/Core/Layer.cpp
     src/Core/LayerStack.cpp
     src/Core/Log.cpp
     src/Core/Time.cpp
-    src/Core/Window.cpp
+    src/Game/GameLayer.cpp
+    src/Platform/GLFW/Window.cpp
     src/Input/Input.cpp
-    src/Renderer/Texture.cpp
-    src/Renderer/Shader.cpp
+    src/Camera/Camera.cpp
+    src/Camera/Camera2D.cpp
+    src/Renderer/API/OpenGL/Graphics/Texture.cpp
+    src/Renderer/API/OpenGL/Graphics/Shader.cpp
     src/Renderer/Renderer.cpp
     src/Resource/ResourceManager.cpp
+    src/Renderer/API/OpenGL/OpenGLRenderer.cpp
+    src/stb_image.cpp
+    src/Scene/Scene.cpp
 )
 
 target_include_directories(Axiom PUBLIC include)
@@ -34,3 +41,5 @@ add_custom_command(TARGET Axiom POST_BUILD
     ${CMAKE_SOURCE_DIR}/assets
     ${CMAKE_BINARY_DIR}/assets
 )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

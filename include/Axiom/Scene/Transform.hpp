@@ -1,19 +1,13 @@
 #pragma once
+#include "Axiom/Math/Vec2.hpp"
 #include "Component.hpp"
-
-
 
 namespace Axiom {
 
-    class Transform: public Component
+    struct Transform: public Component
     {
-    public:
-
-        float x = 0.0f;
-        float y = 0.0f;
-
-        float scaleX = 1.0f;
-        float scaleY = 1.0f;
+        Vec2 position{ 0.0f, 0.0f };
+        Vec2 scale{ 1.0f, 1.0f };
 
         float rotation = 0.0f;
     };

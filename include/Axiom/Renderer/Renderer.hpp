@@ -1,21 +1,27 @@
 #pragma once
 #include "Axiom/Renderer/Camera.hpp"
 #include "Axiom/Renderer/Texture.hpp"
-#include "Axiom/Math/Vec2.hpp"
-#include "Axiom/Renderer/Shader.hpp"
+#include "RendererAPI.hpp"
+#include <memory>
+#include <vector>
 
 namespace Axiom {
 
-    class Renderer {
-    public:
-        static void init();
-        static void clear();
-
-        static void draw(Texture& tex, Vec2 pos, const float* cameraMatrix);
-
-    private:
-        static unsigned int VAO, VBO;
-        static Shader s_Shader;
+    struct DrawCommand
+    {
+        Texture* texture;
+        Vec2 position;
     };
 
+    class Renderer {
+    public:
+        static void init(); 
+        static void clear();
+        
+        virtual void draw(Texture& texture, const Vec2& position) = 0;
+
+        static void beginScene(const Camera& camera);
+        static void submit(Texture* tex, Vec2 pos);
+        static void endScene();
+        static void flush();
 }

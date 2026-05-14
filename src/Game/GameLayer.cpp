@@ -2,40 +2,34 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Scene/RenderComponent.hpp"
 #include "Axiom/Renderer/Camera.hpp"
+#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/SpriteComponent.hpp"
 #include "Axiom/Core/Window.hpp"
 #include "Axiom/Core/Log.hpp"
-#include <iostream>
+
+namespace Axiom {
 
 GameLayer::GameLayer()
 {
-    std::cout << "GameLayer ctor" << std::endl;
 
-    officeTex = Axiom::ResourceManager::getTexture(
+    officeTex = ResourceManager::getTexture(
         Axiom::Paths::getAsset("office.png")
     );
 
     player = scene.createEntity("Player");
-    transform = player->addComponent<Axiom::Transform>();
 
-    auto sprite1 = player->addComponent<Axiom::SpriteComponent>(officeTex);
+    auto* playerTransform = player->addComponent<Transform>();
 
-    player->addComponent<Axiom::RenderComponent>(
-        transform,
-        sprite1,
-        nullptr
-    );
+    auto* playerRender = player->addComponent<RenderComponent>();
+    playerRender->texture = officeTex;
 
-    auto e2 = scene.createEntity("Test");
+    auto entity = scene.createEntity("Test");
 
-    auto t2 = e2->addComponent<Axiom::Transform>();
-    t2->x = 300.0f;
+    auto transform = entity->addComponent<Transform>();
+    transform->position = {100.0f, 100.0f};
 
-    auto sprite2 = e2->addComponent<Axiom::SpriteComponent>(officeTex);
-
-    auto r2 = e2->addComponent<Axiom::RenderComponent>(
-        t2, sprite2, nullptr
-    );
+    auto render = entity->addComponent<RenderComponent>();
+    render->texture = officeTex;
 
 }
 
@@ -45,19 +39,19 @@ void GameLayer::onUpdate(float dt)
 
     float speed = 3.0f * dt;
 
-    if (Axiom::Input::isKeyPressed(GLFW_KEY_W))
+    if (Input::isKeyPressed(GLFW_KEY_W))
         scene.camera.position.y += speed;
 
-    if (Axiom::Input::isKeyPressed(GLFW_KEY_S))
+    if (Input::isKeyPressed(GLFW_KEY_S))
         scene.camera.position.y -= speed;
 
-    if (Axiom::Input::isKeyPressed(GLFW_KEY_A))
+    if (Input::isKeyPressed(GLFW_KEY_A))
         scene.camera.position.x -= speed;
 
-    if (Axiom::Input::isKeyPressed(GLFW_KEY_D))
+    if (Input::isKeyPressed(GLFW_KEY_D))
         scene.camera.position.x += speed;
 
-    bool tabNow = Axiom::Input::isKeyPressed(GLFW_KEY_TAB);
+    bool tabNow = Input::isKeyPressed(GLFW_KEY_TAB);
 
     if (tabNow && !tabPressed)
         ctx.cameraOn = !ctx.cameraOn;
@@ -69,9 +63,9 @@ void GameLayer::onUpdate(float dt)
 
 void GameLayer::onRender()
 {
-    Axiom::Renderer::clear();
+    Renderer::clear();
 
     scene.onRender();
+}
 
-    std::cout << "RENDER CALL" << std::endl;
 }

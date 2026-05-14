@@ -18,9 +18,11 @@ namespace Axiom {
 
         Input::setWindow(m_Window->getNative());
 
-        m_LayerStack.pushLayer(new GameLayer());
-
         ResourceManager::init();
+
+        m_Application.init();
+
+        m_Application.pushLayer(new GameLayer());
     }
 
     Engine::~Engine()
@@ -47,5 +49,7 @@ namespace Axiom {
             m_Window->swapBuffers();
             m_Window->pollEvents();
         }
+
+        glfwTerminate();
     }
 }

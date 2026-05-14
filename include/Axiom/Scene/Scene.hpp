@@ -13,11 +13,15 @@ namespace Axiom {
         Camera camera{};
 
         void onUpdate(float dt);
+        {
+            for (auto& e : m_Entities)
+                e->onUpdate();
+        }    
 
-        void onRender();
+        void onRender(); 
 
 
-        Entity* createEntity(const std::string& name)
+        Entity* createEntity(const std::string& name) 
         {
             m_Entities.emplace_back(std::make_unique<Entity>(name));
             return m_Entities.back().get();
