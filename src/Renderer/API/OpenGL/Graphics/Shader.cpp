@@ -7,21 +7,26 @@ namespace Axiom {
 #version 330 core
 layout(location=0) in vec2 aPos;
 layout(location=1) in vec2 aUV;
-out vec2 vUV;
-uniform mat4 uProjection;
+
+out vec2 TexCoord;
+uniform vec2 uPos;
+
 void main() {
-    gl_Position = uProjection * vec4(aPos, 0.0, 1.0);
-    vUV = aUV;
+    vec2 finalPos = aPos + uPos;
+    gl_Position = vec4(finalPos, 0.0, 1.0);
+    TexCoord = aUV;
 }
 )";
 
     const char* Shader::fs = R"(
 #version 330 core
-in vec2 vUV;
 out vec4 FragColor;
+
+in vec2 TexCoord;
 uniform sampler2D uTex;
+
 void main() {
-    FragColor = texture(uTex, vUV);
+    FragColor = texture(uTex, TexCoord);
 }
 )";
 
@@ -46,26 +51,17 @@ void main() {
 
     void Shader::init()
     {
-        GLuint v = compile(GL_VERTEX_SHADER, vs);
-        GLuint f = compile(GL_FRAGMENT_SHADER, fs);
+
+        GLuint vsID = compile(GL_VERTEX_SHADER, vs);
+        GLuint fsID = compile(GL_FRAGMENT_SHADER, fs);
 
         program = glCreateProgram();
-        glAttachShader(program, v);
-        glAttachShader(program, f);
+        glAttachShader(program, vsID);
+        glAttachShader(program, fsID);
         glLinkProgram(program);
 
-        GLint success;
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-        if (!success)
-        {
-            char log[512];
-            glGetProgramInfoLog(program, 512, nullptr, log);
-            std::cout << "Shader link error:\n" << log << std::endl;
-        }
-
-        glDeleteShader(v);
-        glDeleteShader(f);
+        glDeleteShader(vsID);
+        glDeleteShader(fsID);
 
         glUseProgram(program);
     }
@@ -83,6 +79,11 @@ void main() {
     void Shader::setMat4(const char* name, const float* value)
     {
         glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_FALSE, value);
+    }
+
+    void Shader::setVec2(const char* name, float x, float y)
+    {
+        glUniform2f(glGetUniformLocation(program, name), x, y);
     }
 
 }

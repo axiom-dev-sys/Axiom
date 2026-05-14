@@ -6,20 +6,23 @@ namespace Axiom {
 
     Texture::Texture(const std::string& path)
     {
+        valid = false;
+        id = 0;
+
         int w, h, c;
         stbi_set_flip_vertically_on_load(true);
         unsigned char* data = stbi_load(path.c_str(), &w, &h, &c, 0);
 
         if (!data)
         {
-            std::cout << "FAILED: " << path << std::endl;
+            std::cout << "FAILED: " << path << std::endl; // [RISK] нет причины ошибки (файл? путь? формат?)
             return;
         }
 
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D, id);
 
-        GLenum format = (c == 4) ? GL_RGBA : GL_RGB;
+        GLenum format = (c == 4) ? GL_RGBA : GL_RGB; // [RISK] нет обработки других форматов (например grayscale)
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
 
@@ -28,7 +31,7 @@ namespace Axiom {
 
         stbi_image_free(data);
 
-        valid = true;
+        valid = true; // [STABLE] корректный жизненный цикл
     }
 
     Texture::~Texture()
@@ -38,10 +41,10 @@ namespace Axiom {
 
     void Texture::bind(unsigned int slot) const
     {
-        if (!valid) return;
+        if (!valid) return; // [STABLE] защита от краша
 
         glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, id);
+        glBindTexture(GL_TEXTURE_2D, id); // [RISK] нет проверки диапазона slot
     }
 
 }

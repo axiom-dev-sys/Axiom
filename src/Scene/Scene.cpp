@@ -3,6 +3,8 @@
 #include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Core/Log.hpp"
+#include "Axiom/Scene/TextureComponent.hpp"
+#include "Axiom/Scene/Transform.hpp"
 
 namespace Axiom {
 
@@ -13,22 +15,19 @@ namespace Axiom {
 
     void Scene::onRender()
     {
-        camera.updateMatrix();
+        Renderer::beginScene(camera);
 
-        forEach([&](Entity* e)
-            {
-                auto rc = e->getComponent<RenderComponent>();
-                if (!rc) return;
+for (auto& entity : m_Entities)
+{
+    auto transform = entity->getComponent<Transform>();
+    auto render = entity->getComponent<RenderComponent>();
 
-                    Texture* tex = rc->getTexture();
-                if (!tex) return;
+    if (!transform || !render || !render->texture)
+        continue;
 
-                Transform* tr = rc->getTransform();
-                if (!tr) return;
+    Renderer::submit(render->texture, transform->position);
+}
 
-                Axiom::Renderer::draw(*tex,
-                    { tr->x, tr->y },
-                    camera.getMatrix());
-            });
+        Renderer::endScene();
     }
 }

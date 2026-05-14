@@ -14,6 +14,11 @@
 #include "Axiom/Game/GameContext.hpp"
 #include "Axiom/Renderer/Texture.hpp"
 
+#include "Axiom/Scene/SpriteComponent.hpp"
+#include "Axiom/Renderer/Shader.hpp"
+
+namespace Axiom {
+
 class GameLayer : public Axiom::Layer
 {
 public:
@@ -37,3 +42,5 @@ private:
 
     Axiom::Texture* officeTex = nullptr;
 };
+
+}
