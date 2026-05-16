@@ -1,6 +1,6 @@
 #pragma once
 #include "Entity.hpp"
-#include "Axiom/Renderer/Camera.hpp"
+#include "Axiom/Camera/Camera.hpp"
 
 #include <vector>
 #include <memory>
@@ -12,11 +12,7 @@ namespace Axiom {
     public:
         Camera camera{};
 
-        void onUpdate(float dt);
-        {
-            for (auto& e : m_Entities)
-                e->onUpdate();
-        }    
+        void onUpdate(float dt);    
 
         void onRender(); 
 

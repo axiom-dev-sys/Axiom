@@ -5,8 +5,6 @@
 #include "Axiom/Scene/Transform.hpp"
 #include "Axiom/Input/Input.hpp"
 
-
-
 namespace Axiom {
 
     class MovementComponent : public Component

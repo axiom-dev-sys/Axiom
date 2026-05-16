@@ -2,8 +2,6 @@
 #include "Component.hpp"
 #include "Transform.hpp"
 
-
-
 namespace Axiom {
 
     class ColliderComponent : public Component

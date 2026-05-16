@@ -1,8 +1,5 @@
 ﻿#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
-#include "Axiom/Renderer/RenderCommand.hpp"
-#include <memory>
-#include <iostream>
 
 namespace Axiom {
 
@@ -10,6 +7,8 @@ namespace Axiom {
         std::make_unique<OpenGLRenderer>();
 
     std::vector<DrawCommand> Renderer::s_Queue;
+
+    const Camera* Renderer::s_Camera = nullptr;
 
     void Renderer::init() {
         s_API->init();
@@ -29,8 +28,6 @@ namespace Axiom {
         if (!tex) return;
 
         s_Queue.push_back({ tex, pos });
-
-        std::cout << "SUBMIT CALLED\n";
     }
 
     void Renderer::endScene()
