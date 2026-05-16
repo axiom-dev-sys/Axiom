@@ -1,4 +1,4 @@
-#include "Axiom/Renderer/Camera.hpp"
+#include "Axiom/Camera/Camera.hpp"
 
 namespace Axiom {
 

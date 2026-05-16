@@ -1,7 +1,7 @@
 #include "Axiom/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Scene/RenderComponent.hpp"
-#include "Axiom/Renderer/Camera.hpp"
+#include "Axiom/Camera/Camera.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/SpriteComponent.hpp"
 #include "Axiom/Core/Window.hpp"
@@ -13,7 +13,7 @@ GameLayer::GameLayer()
 {
 
     officeTex = ResourceManager::getTexture(
-        Axiom::Paths::getAsset("office.png")
+        Paths::getAsset("office.png")
     );
 
     player = scene.createEntity("Player");

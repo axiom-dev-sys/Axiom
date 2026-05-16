@@ -2,8 +2,6 @@
 #include <GLFW/glfw3.h>
 #include "Axiom/Core/Time.hpp"
 
-
-
 namespace Axiom {
 
     float Time::s_DeltaTime = 0.0f;

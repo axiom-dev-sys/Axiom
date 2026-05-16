@@ -1,5 +1,6 @@
 #pragma once
-#include <glad/glad.h> 
+
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 namespace Axiom {
@@ -17,7 +18,7 @@ namespace Axiom {
 		GLFWwindow* getNative() const;
 
 	private:
-		GLFWwindow* m_Window;
+		GLFWwindow* m_Window = nullptr;
 	};
 
 }

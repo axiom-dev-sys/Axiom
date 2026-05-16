@@ -17,7 +17,7 @@ namespace Axiom {
         unsigned int VBO = 0;
         unsigned int EBO = 0;
 
-        // Shader m_Shader;
+        Shader m_Shader;
     };
 
 }

@@ -4,7 +4,6 @@
 
 namespace Axiom {
 
-    // ?? static members definition
     std::unordered_map<std::string, std::unique_ptr<Texture>> ResourceManager::s_Textures;
     Texture* ResourceManager::s_FallbackTexture = nullptr;
 
@@ -19,7 +18,6 @@ namespace Axiom {
 
     }
 
-    // ?? shutdown
     void ResourceManager::shutdown()
     {
         std::cout << "[ResourceManager] shutdown\n";
@@ -31,7 +29,6 @@ namespace Axiom {
         s_FallbackTexture = nullptr;
     }
 
-    // ?? load texture
     Texture* ResourceManager::loadTexture(const std::string& path)
     {
 
@@ -53,7 +50,6 @@ namespace Axiom {
         return rawPtr;
     }
 
-    // ?? get texture
     Texture* ResourceManager::getTexture(const std::string& path)
     {
         auto it = s_Textures.find(path);

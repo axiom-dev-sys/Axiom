@@ -4,7 +4,7 @@
 
 namespace Axiom {
 
-    struct Texture; // forward declaration
+    struct Texture;
 
     struct RenderCommand
     {

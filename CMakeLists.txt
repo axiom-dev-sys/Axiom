@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(Axiom)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 
 # GLFW
 add_subdirectory(external/glfw)
@@ -32,7 +33,10 @@ add_executable(Axiom
     src/Scene/Scene.cpp
 )
 
-target_include_directories(Axiom PUBLIC include)
+target_include_directories(Axiom PUBLIC
+${CMAKE_SOURCE_DIR}/include
+${CMAKE_SOURCE_DIR}/src
+)
 
 target_link_libraries(Axiom glfw glad)
 
@@ -41,5 +45,3 @@ add_custom_command(TARGET Axiom POST_BUILD
     ${CMAKE_SOURCE_DIR}/assets
     ${CMAKE_BINARY_DIR}/assets
 )
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
