@@ -1,37 +1,34 @@
 #include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Core/Paths.hpp"
 #include <iostream>
 #include <filesystem>
 
 namespace Axiom {
 
-    // ?? static members definition
     std::unordered_map<std::string, std::unique_ptr<Texture>> ResourceManager::s_Textures;
-    Texture* ResourceManager::s_FallbackTexture = nullptr;
+    std::unique_ptr<Texture> ResourceManager::s_FallbackTexture = nullptr;
 
-    // ?? init
     void ResourceManager::init()
     {
         std::cout << "[ResourceManager] init\n";
 
         s_Textures.clear();
 
-        s_FallbackTexture = new Texture("assets/fallback.png");
+        s_FallbackTexture = nullptr;
+
+        std::cout << std::filesystem::current_path() << std::endl;
 
     }
 
-    // ?? shutdown
     void ResourceManager::shutdown()
     {
         std::cout << "[ResourceManager] shutdown\n";
 
         s_Textures.clear();
 
-        delete s_FallbackTexture;
-
         s_FallbackTexture = nullptr;
     }
 
-    // ?? load texture
     Texture* ResourceManager::loadTexture(const std::string& path)
     {
 
@@ -44,7 +41,7 @@ namespace Axiom {
         if (!tex || tex->getID() == 0)
         {
             std::cout << "[ResourceManager] Failed: " << path << std::endl;
-            return s_FallbackTexture;
+            return getFallback();
         }
 
         Texture* rawPtr = tex.get();
@@ -53,7 +50,6 @@ namespace Axiom {
         return rawPtr;
     }
 
-    // ?? get texture
     Texture* ResourceManager::getTexture(const std::string& path)
     {
         auto it = s_Textures.find(path);
@@ -61,6 +57,14 @@ namespace Axiom {
             return it->second.get();
 
         return loadTexture(path);
+    }
+
+    Texture* ResourceManager::getFallback()
+    {
+    if (!s_FallbackTexture)
+        s_FallbackTexture = std::make_unique<Texture>(Paths::getAsset("fallback.png"));
+
+    return s_FallbackTexture.get();
     }
 
 }

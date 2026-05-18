@@ -4,7 +4,7 @@
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/Shader.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
-#include "Axiom/Game/GameLayer.hpp"
+#include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Time.hpp"
 
@@ -18,9 +18,11 @@ namespace Axiom {
 
         Input::setWindow(m_Window->getNative());
 
-        m_LayerStack.pushLayer(new GameLayer());
-
         ResourceManager::init();
+
+        m_Application.init();
+
+        m_LayerStack.pushLayer(new GameLayer());
     }
 
     Engine::~Engine()
@@ -47,5 +49,7 @@ namespace Axiom {
             m_Window->swapBuffers();
             m_Window->pollEvents();
         }
+
+        glfwTerminate();
     }
 }

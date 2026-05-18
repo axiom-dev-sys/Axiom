@@ -7,12 +7,17 @@
 #include "Axiom/Core/Time.hpp"
 #include "Axiom/Core/Paths.hpp"
 
-#include "Axiom/Game/PowerSystem.hpp"
-#include "Axiom/Game/UISystem.hpp"
+#include "Axiom/Experimental/PowerSystem.hpp"
+#include "Axiom/Experimental/UISystem.hpp"
 #include "Axiom/Scene/Scene.hpp"
-#include "Axiom/Scene/Transform.hpp"
-#include "Axiom/Game/GameContext.hpp"
+#include "Axiom/Scene/Components/TransformComponent.hpp"
+#include "Axiom/Experimental/Game/GameContext.hpp"
 #include "Axiom/Renderer/Texture.hpp"
+
+#include "Axiom/Scene/Components/SpriteComponent.hpp"
+#include "Axiom/Renderer/Shader.hpp"
+
+namespace Axiom {
 
 class GameLayer : public Axiom::Layer
 {
@@ -29,7 +34,7 @@ private:
 
     Axiom::Scene scene;
     Axiom::Entity* player = nullptr;
-    Axiom::Transform* transform = nullptr;
+    Axiom::TransformComponent* transform = nullptr;
     Axiom::GameContext ctx;
 
     Axiom::PowerSystem power;
@@ -37,3 +42,5 @@ private:
 
     Axiom::Texture* officeTex = nullptr;
 };
+
+}

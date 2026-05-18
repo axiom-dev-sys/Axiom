@@ -1,77 +1,57 @@
 ﻿#include "Axiom/Renderer/Renderer.hpp"
-#include "Axiom/Renderer/Shader.hpp"
-#include "Axiom/Renderer/Camera.hpp"
-#include "Axiom/Math/Vec2.hpp"
-#include <glad/glad.h>
+#include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
+#include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Axiom {
 
-    static Shader shader;
+    std::unique_ptr<RendererAPI> Renderer::s_API =
+        std::make_unique<OpenGLRenderer>();
 
-    unsigned int Renderer::VAO = 0;
-    unsigned int Renderer::VBO = 0;
+    std::vector<DrawCommand> Renderer::s_Queue;
 
-    void Renderer::init()
-    {
-        shader.init();
+    const Camera* Renderer::s_Camera = nullptr;
 
-        float v[] = {
-            -0.5f,-0.5f, 0,0,
-             0.5f,-0.5f, 1,0,
-             0.5f, 0.5f, 1,1,
-
-             0.5f, 0.5f, 1,1,
-            -0.5f, 0.5f, 0,1,
-            -0.5f,-0.5f, 0,0
-        };
-
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        glBindVertexArray(VAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 2, GL_FLOAT, false, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+    void Renderer::init() {
+        s_API->init();
     }
 
-    void Renderer::clear()
-    {
-        glClearColor(1, 0, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+    void Renderer::clear() {
+        s_API->clear();
     }
 
-    void Renderer::draw(Texture& tex, Vec2 pos)
+    static Camera s_Camera;
+
+    void Renderer::beginScene(const Camera& camera)
     {
-        shader.use();
+        s_Camera = &camera;
+    }
 
-        float w = 100.0f;
-        float h = 100.0f;
+    void Renderer::submit(Texture* tex, glm::vec2 pos)
+    {
+        if (!tex) return;
 
-        float vertices[] = {
-            pos.x,     pos.y,     0,0,
-            pos.x + w,   pos.y,     1,0,
-            pos.x + w,   pos.y + h,   1,1,
+        std::cout << "[Renderer] submit called\n";;
 
-            pos.x,     pos.y,     0,0,
-            pos.x + w,   pos.y + h,   1,1,
-            pos.x,     pos.y + h,   0,1
-        };
+        s_Queue.push_back({ tex, pos });
+    }
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, tex.getID());
-        shader.setInt("uTex", 0);
+    void Renderer::endScene()
+    {
+        flush();
+    }
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    void Renderer::flush()
+    {
+        for (auto& cmd : s_Queue)
+        {
+            s_API->draw(*cmd.texture, cmd.position);
+            std::cout << "DRAW CALL: " << cmd.position.x << ", " << cmd.position.y << std::endl;
+            std::cout << "[Renderer] flush, size: " << s_Queue.size() << std::endl;
+        }
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        s_Queue.clear();
     }
 
 }

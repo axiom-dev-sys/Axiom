@@ -3,7 +3,6 @@
 #include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Core/Time.hpp"
 
-
 #include <vector>
 
 namespace Axiom {

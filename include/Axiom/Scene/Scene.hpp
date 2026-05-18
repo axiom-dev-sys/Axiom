@@ -1,6 +1,6 @@
 #pragma once
-#include "Entity.hpp"
-#include "Axiom/Renderer/Camera.hpp"
+#include "Axiom/Scene/Entity.hpp"
+#include "Axiom/Camera/Camera.hpp"
 
 #include <vector>
 #include <memory>
@@ -10,14 +10,14 @@ namespace Axiom {
     class Scene
     {
     public:
-        Camera camera;
+        Camera camera{};
 
-        void onUpdate(float dt);
+        void onUpdate(float dt);    
 
-        void onRender();
+        void onRender(); 
 
 
-        Entity* createEntity(const std::string& name)
+        Entity* createEntity(const std::string& name) 
         {
             m_Entities.emplace_back(std::make_unique<Entity>(name));
             return m_Entities.back().get();

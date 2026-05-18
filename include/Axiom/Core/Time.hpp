@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 namespace Axiom {
 
     class Time

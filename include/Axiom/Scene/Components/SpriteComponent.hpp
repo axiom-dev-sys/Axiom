@@ -7,7 +7,6 @@ namespace Axiom {
     class SpriteComponent : public Component
     {
     public:
-        Texture* texture = nullptr;
         SpriteComponent(Texture* texture,
             float r = 1.0f,
             float g = 1.0f,
@@ -17,12 +16,8 @@ namespace Axiom {
 
         Texture* getTexture() const { return m_Texture; }
 
-        float getR() const { return m_R; }
-        float getG() const { return m_G; }
-        float getB() const { return m_B; }
-
     private:
-        Texture* m_Texture;
+        Texture* m_Texture = nullptr;
         float m_R, m_G, m_B;
     };
 

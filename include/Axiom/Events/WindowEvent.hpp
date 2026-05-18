@@ -1,8 +1,6 @@
 #pragma once
 #include "Event.hpp"
 
-
-
 namespace Axiom {
 
     class WindowCloseEvent : public Event

@@ -1,5 +1,5 @@
 #pragma once
-#include "Component.hpp"
+#include "Axiom/Scene/Component.hpp"
 #include <unordered_map>
 #include <typeindex>
 #include <type_traits>
@@ -17,21 +17,20 @@ namespace Axiom {
         Entity(const std::string& name = "Entity")
             : m_Name(name) {}
 
-        template<typename T, typename... Args>
-        T* addComponent(Args&&... args)
-        {
-            static_assert(std::is_base_of<Component, T>::value);
+template<typename T, typename... Args>
+T* addComponent(Args&&... args)
+{
+    auto component = std::make_unique<T>(std::forward<Args>(args)...);
 
-            auto component = std::make_unique<T>(std::forward<Args>(args)...);
-            T* raw = component.get();
+    T* ptr = component.get();
 
-            m_Components[typeid(T)] = std::move(component);
+    m_Components[typeid(T)] = std::move(component);
 
-            return raw;
-        }
+    return ptr;
+}
 
         template<typename T>
-        T* getComponent()
+        T* getComponent() 
         {
             auto it = m_Components.find(typeid(T));
             if (it != m_Components.end())
