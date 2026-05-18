@@ -1,9 +1,9 @@
-#include "Axiom/Game/GameLayer.hpp"
+#include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
-#include "Axiom/Scene/RenderComponent.hpp"
 #include "Axiom/Camera/Camera.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
-#include "Axiom/Scene/SpriteComponent.hpp"
+#include "Axiom/Scene/Components/SpriteComponent.hpp"
+#include "Axiom/Scene/Components/TransformComponent.hpp"
 #include "Axiom/Core/Window.hpp"
 #include "Axiom/Core/Log.hpp"
 
@@ -18,18 +18,16 @@ GameLayer::GameLayer()
 
     player = scene.createEntity("Player");
 
-    auto* playerTransform = player->addComponent<Transform>();
+    auto* playerTransform = player->addComponent<TransformComponent>();
 
-    auto* playerRender = player->addComponent<RenderComponent>();
-    playerRender->texture = officeTex;
+    player->addComponent<SpriteComponent>(officeTex);
 
-    auto entity = scene.createEntity("Test");
+    auto test = scene.createEntity("Test");
 
-    auto transform = entity->addComponent<Transform>();
+    auto* transform = test->addComponent<TransformComponent>();
     transform->position = {100.0f, 100.0f};
 
-    auto render = entity->addComponent<RenderComponent>();
-    render->texture = officeTex;
+    test->addComponent<SpriteComponent>(officeTex);
 
 }
 

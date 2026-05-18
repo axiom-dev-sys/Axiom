@@ -8,7 +8,7 @@ namespace Axiom
     public:
         static std::string getAsset(const std::string& name)
         {
-            return "assets/" + name;
+            return "../assets/" + name;
         }
     };
 }

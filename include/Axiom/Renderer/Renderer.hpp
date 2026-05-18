@@ -2,7 +2,7 @@
 #include "Axiom/Renderer/RendererAPI.hpp"
 #include "Axiom/Camera/Camera.hpp"
 #include "Axiom/Renderer/Texture.hpp"
-#include "Axiom/Math/Vec2.hpp"
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
@@ -11,7 +11,7 @@ namespace Axiom {
     struct DrawCommand
     {
         Texture* texture;
-        Vec2 position;
+        glm::vec2 position;
     };
 
     class Renderer {
@@ -20,7 +20,7 @@ namespace Axiom {
         static void clear();
 
         static void beginScene(const Camera& camera);
-        static void submit(Texture* tex, Vec2 pos);
+        static void submit(Texture* tex, glm::vec2 pos);
         static void endScene();
         static void flush();
 

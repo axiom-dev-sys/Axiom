@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Axiom/Math/Vec2.hpp"
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -9,7 +9,7 @@ namespace Axiom {
     struct RenderCommand
     {
         Texture* texture = nullptr;
-        Vec2 position{ 0.0f, 0.0f };
+        glm::vec2 position{ 0.0f, 0.0f };
     };
 
 }

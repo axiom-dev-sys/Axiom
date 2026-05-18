@@ -1,6 +1,6 @@
 #pragma once
-#include "Component.hpp"
-#include "Transform.hpp"
+#include "Axiom/Scene/Component.hpp"
+#include "Axiom/Scene/Components/TransformComponent.hpp"
 
 namespace Axiom {
 

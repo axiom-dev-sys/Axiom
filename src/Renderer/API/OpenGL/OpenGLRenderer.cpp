@@ -1,6 +1,8 @@
 #include <glad/glad.h>
 #include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Axiom {
 
@@ -48,11 +50,9 @@ namespace Axiom {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        void OpenGLRenderer::draw(Texture& texture, const Vec2& pos)
+        void OpenGLRenderer::draw(Texture& texture, const glm::vec2& pos)
         {
             m_Shader.use();
-
-            m_Shader.setVec2("uPos", pos.x, pos.y);
 
             m_Shader.setInt("uTex", 0);
 

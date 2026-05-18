@@ -11,6 +11,16 @@ add_subdirectory(external/glfw)
 add_library(glad external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 
+include(FetchContent)
+
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.1
+)
+
+FetchContent_MakeAvailable(glm)
+
 add_executable(Axiom
     src/main.cpp
     src/Core/Application.cpp
@@ -38,7 +48,7 @@ ${CMAKE_SOURCE_DIR}/include
 ${CMAKE_SOURCE_DIR}/src
 )
 
-target_link_libraries(Axiom glfw glad)
+target_link_libraries(Axiom glfw glad glm::glm)
 
 add_custom_command(TARGET Axiom POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
