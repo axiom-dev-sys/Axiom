@@ -4,7 +4,7 @@
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/Shader.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
-#include "Axiom/Game/GameLayer.hpp"
+#include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Time.hpp"
 
@@ -22,7 +22,7 @@ namespace Axiom {
 
         m_Application.init();
 
-        m_Application.pushLayer(new GameLayer());
+        m_LayerStack.pushLayer(new GameLayer());
     }
 
     Engine::~Engine()

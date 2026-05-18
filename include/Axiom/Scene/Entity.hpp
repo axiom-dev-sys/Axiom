@@ -1,5 +1,5 @@
 #pragma once
-#include "Component.hpp"
+#include "Axiom/Scene/Component.hpp"
 #include <unordered_map>
 #include <typeindex>
 #include <type_traits>

@@ -1,8 +1,8 @@
 #pragma once
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
-#include "Component.hpp"
-#include "Axiom/Scene/Transform.hpp"
+#include "Axiom/Scene/Component.hpp"
+#include "Axiom/Scene/Components/TransformComponent.hpp"
 #include "Axiom/Input/Input.hpp"
 
 namespace Axiom {

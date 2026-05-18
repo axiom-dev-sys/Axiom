@@ -1,18 +1,21 @@
 #pragma once
-#include "Axiom/Math/Vec2.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Axiom {
 
     class Camera {
     public:
-        Vec2 position{ 0, 0 };
+        glm::vec2 position{ 0, 0 };
 
-        void updateMatrix();
+    glm::mat4 getViewMatrix() const
+    {
+        return glm::translate(
+            glm::mat4(1.0f),
+            glm::vec3(-position.x, -position.y, 0.0f)
+        );
+    }
 
-        const float* getMatrix() const { return m_Matrix; }
-
-    private:
-        float m_Matrix[16] = { 0 };
-    };
+};
 
 }

@@ -1,10 +1,11 @@
 #include "Axiom/Scene/Scene.hpp"
-#include "Axiom/Scene/RenderComponent.hpp"
 #include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
-#include "Axiom/Core/Log.hpp"
-#include "Axiom/Scene/TextureComponent.hpp"
-#include "Axiom/Scene/Transform.hpp"
+
+#include <iostream>
+
+#include "Axiom/Scene/Components/SpriteComponent.hpp"
+#include "Axiom/Scene/Components/TransformComponent.hpp"
 
 namespace Axiom {
 
@@ -15,18 +16,21 @@ namespace Axiom {
 
     void Scene::onRender()
     {
+
         Renderer::beginScene(camera);
+        
+        std::cout << "Entities: " << m_Entities.size() << std::endl;
 
-for (auto& entity : m_Entities)
-{
-    auto transform = entity->getComponent<Transform>();
-    auto render = entity->getComponent<RenderComponent>();
+        for (auto& entity : m_Entities)
+        {
+        auto* transform = entity->getComponent<TransformComponent>();
+        auto sprite = entity->getComponent<SpriteComponent>();
 
-    if (!transform || !render || !render->texture)
-        continue;
+        if (!transform || !sprite || !sprite->getTexture())
+            continue;
 
-    Renderer::submit(render->texture, transform->position);
-}
+        Renderer::submit(sprite->getTexture(), transform->position);
+        }
 
         Renderer::endScene();
     }

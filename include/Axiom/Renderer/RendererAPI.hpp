@@ -1,6 +1,6 @@
 #pragma once
 #include "Axiom/Renderer/Texture.hpp"
-#include "Axiom/Math/Vec2.hpp"
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -10,7 +10,7 @@ namespace Axiom {
 
         virtual void init() = 0;
         virtual void clear() = 0;
-        virtual void draw(Texture& texture, const Vec2& pos) = 0;
+        virtual void draw(Texture& texture, const glm::vec2& pos) = 0;
     };
 
 }

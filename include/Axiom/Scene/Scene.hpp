@@ -1,5 +1,5 @@
 #pragma once
-#include "Entity.hpp"
+#include "Axiom/Scene/Entity.hpp"
 #include "Axiom/Camera/Camera.hpp"
 
 #include <vector>
