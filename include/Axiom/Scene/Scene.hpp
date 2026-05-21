@@ -1,7 +1,7 @@
 #pragma once
 #include "Axiom/Scene/Entity.hpp"
 #include "Axiom/Camera/Camera.hpp"
-
+#include "Axiom/Scene/Systems/RenderSystem.hpp"
 #include <vector>
 #include <memory>
 
@@ -32,6 +32,8 @@ namespace Axiom {
 
     private:
         std::vector<std::unique_ptr<Entity>> m_Entities;
+        
+        RenderSystem m_RenderSystem;
     };
 
 }

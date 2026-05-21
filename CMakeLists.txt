@@ -41,6 +41,7 @@ add_executable(Axiom
     src/Renderer/API/OpenGL/OpenGLRenderer.cpp
     src/stb_image.cpp
     src/Scene/Scene.cpp
+    src/Scene/Systems/RenderSystem.cpp
 )
 
 target_include_directories(Axiom PUBLIC

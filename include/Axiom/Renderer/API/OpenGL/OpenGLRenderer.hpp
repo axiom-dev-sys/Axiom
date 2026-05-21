@@ -9,7 +9,7 @@ namespace Axiom {
     public:
         void init() override;
         void clear() override;
-        void draw(Texture& texture, const glm::vec2& pos) override;
+        void draw(Texture& texture, const glm::vec2& pos, const glm::vec2& scale) override;
 
     private:
         unsigned int VAO = 0;

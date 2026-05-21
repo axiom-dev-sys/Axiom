@@ -21,20 +21,20 @@ namespace Axiom {
         s_API->clear();
     }
 
-    static Camera s_Camera;
-
     void Renderer::beginScene(const Camera& camera)
     {
         s_Camera = &camera;
+
+        s_Queue.clear();
     }
 
-    void Renderer::submit(Texture* tex, glm::vec2 pos)
+    void Renderer::submit(Texture* tex, glm::vec2 pos, glm::vec2 scale)
     {
         if (!tex) return;
 
         std::cout << "[Renderer] submit called\n";;
 
-        s_Queue.push_back({ tex, pos });
+        s_Queue.push_back({ tex, pos, scale });
     }
 
     void Renderer::endScene()
@@ -46,12 +46,13 @@ namespace Axiom {
     {
         for (auto& cmd : s_Queue)
         {
-            s_API->draw(*cmd.texture, cmd.position);
-            std::cout << "DRAW CALL: " << cmd.position.x << ", " << cmd.position.y << std::endl;
-            std::cout << "[Renderer] flush, size: " << s_Queue.size() << std::endl;
-        }
+            s_API->draw(*cmd.texture, cmd.position, cmd.scale);
 
-        s_Queue.clear();
+            std::cout << "[Renderer] draw calls: "
+            << s_Queue.size() << std::endl;
+
+        }
+;
     }
 
 }

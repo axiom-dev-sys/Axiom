@@ -1,8 +1,10 @@
 #include <glad/glad.h>
+#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Axiom {
 
@@ -50,11 +52,34 @@ namespace Axiom {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        void OpenGLRenderer::draw(Texture& texture, const glm::vec2& pos)
+        void OpenGLRenderer::draw(Texture& texture, const glm::vec2& pos, const glm::vec2& scale)
         {
+            glm::mat4 view = Renderer::getCamera()->getViewMatrix();
+
+            glm::mat4 projection = glm::ortho(
+                -1.0f, 1.0f,
+                -1.0f, 1.0f
+            );
+
+            glm::mat4 model = glm::translate(
+            glm::mat4(1.0f),
+            glm::vec3(pos.x, pos.y, 0.0f)
+            );
+
+            model = glm::scale(
+            model,
+            glm::vec3(scale.x, scale.y, 1.0f)
+            );
+
             m_Shader.use();
 
             m_Shader.setInt("uTex", 0);
+
+            m_Shader.setMat4("uModel", glm::value_ptr(model));
+
+            m_Shader.setMat4("uView", glm::value_ptr(view));
+
+            m_Shader.setMat4("uProjection", glm::value_ptr(projection));
 
             glBindVertexArray(VAO);
 

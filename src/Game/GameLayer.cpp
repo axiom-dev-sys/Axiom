@@ -19,13 +19,16 @@ GameLayer::GameLayer()
     player = scene.createEntity("Player");
 
     auto* playerTransform = player->addComponent<TransformComponent>();
+    playerTransform->position = {-0.5f, 0.0f};
+    playerTransform->scale = {0.4f, 0.4f};
 
     player->addComponent<SpriteComponent>(officeTex);
 
     auto test = scene.createEntity("Test");
 
     auto* transform = test->addComponent<TransformComponent>();
-    transform->position = {100.0f, 100.0f};
+    transform->position = {0.5f, 0.0f};
+    transform->scale = {0.4f, 0.4f};
 
     test->addComponent<SpriteComponent>(officeTex);
 
