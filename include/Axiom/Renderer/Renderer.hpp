@@ -12,6 +12,7 @@ namespace Axiom {
     {
         Texture* texture;
         glm::vec2 position;
+        glm::vec2 scale;
     };
 
     class Renderer {
@@ -20,9 +21,14 @@ namespace Axiom {
         static void clear();
 
         static void beginScene(const Camera& camera);
-        static void submit(Texture* tex, glm::vec2 pos);
+        static void submit(Texture* tex, glm::vec2 pos, glm::vec2 scale);
         static void endScene();
         static void flush();
+
+        static const Camera* getCamera()
+        {
+            return s_Camera;
+        }
 
     private:
         static std::unique_ptr<RendererAPI> s_API;
