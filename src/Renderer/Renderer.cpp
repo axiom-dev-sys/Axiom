@@ -1,6 +1,5 @@
 ﻿#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
-#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -10,6 +9,10 @@ namespace Axiom {
         std::make_unique<OpenGLRenderer>();
 
     std::vector<DrawCommand> Renderer::s_Queue;
+
+    glm::mat4 Renderer::s_View = glm::mat4(1.0f);
+
+    glm::mat4 Renderer::s_Projection = glm::mat4(1.0f);
 
     const Camera* Renderer::s_Camera = nullptr;
 
@@ -25,16 +28,17 @@ namespace Axiom {
     {
         s_Camera = &camera;
 
+        s_View = camera.getViewMatrix();
+        s_Projection = camera.getProjectionMatrix();
+
         s_Queue.clear();
     }
 
-    void Renderer::submit(Texture* tex, glm::vec2 pos, glm::vec2 scale)
+    void Renderer::submit(Texture* tex, glm::vec2 pos, glm::vec2 scale, float rotation)
     {
         if (!tex) return;
 
-        std::cout << "[Renderer] submit called\n";;
-
-        s_Queue.push_back({ tex, pos, scale });
+        s_Queue.push_back({ tex, pos, scale, rotation });
     }
 
     void Renderer::endScene()
@@ -46,13 +50,13 @@ namespace Axiom {
     {
         for (auto& cmd : s_Queue)
         {
-            s_API->draw(*cmd.texture, cmd.position, cmd.scale);
-
-            std::cout << "[Renderer] draw calls: "
-            << s_Queue.size() << std::endl;
-
+            s_API->draw(*cmd.texture,
+                        cmd.position, 
+                        cmd.scale, 
+                        cmd.rotation
+                    );
         }
-;
+        s_Queue.clear();
     }
 
 }

@@ -6,31 +6,40 @@
 #include "Axiom/Scene/Components/TransformComponent.hpp"
 #include "Axiom/Core/Window.hpp"
 #include "Axiom/Core/Log.hpp"
-
+#include "Axiom/Scene/Components/VelocityComponent.hpp"
+#include <iostream>
 namespace Axiom {
 
 GameLayer::GameLayer()
 {
 
-    officeTex = ResourceManager::getTexture(
-        Paths::getAsset("office.png")
+    playerTex = ResourceManager::getTexture(
+        Paths::getAsset("player.png")
     );
+
+    testTex = ResourceManager::getTexture(
+        Paths::getAsset("test.png")
+    );
+
+    test = scene.createEntity("Test");
+    
+    auto* testTransform = test->addComponent<TransformComponent>();    
+    testTransform->position = {500.0f, 0.0f};
+    testTransform->scale = {512.0f, 512.0f};
+    testTransform->rotation = 0.0f;
+
+    test->addComponent<SpriteComponent>(testTex);
 
     player = scene.createEntity("Player");
 
     auto* playerTransform = player->addComponent<TransformComponent>();
-    playerTransform->position = {-0.5f, 0.0f};
-    playerTransform->scale = {0.4f, 0.4f};
+    auto* playerVelocity = player->addComponent<VelocityComponent>();
+    playerTransform->position = {0.0f, 0.0f};
+    playerTransform->scale = {128.0f, 128.0f};
+    playerTransform->rotation = 45.0f;
+    playerVelocity->velocity.x = 100.0f;
 
-    player->addComponent<SpriteComponent>(officeTex);
-
-    auto test = scene.createEntity("Test");
-
-    auto* transform = test->addComponent<TransformComponent>();
-    transform->position = {0.5f, 0.0f};
-    transform->scale = {0.4f, 0.4f};
-
-    test->addComponent<SpriteComponent>(officeTex);
+    player->addComponent<SpriteComponent>(playerTex);
 
 }
 
@@ -38,28 +47,49 @@ void GameLayer::onUpdate(float dt)
 {
     ctx.dt = dt;
 
-    float speed = 3.0f * dt;
+    float speed = 500.0f;
+
+    auto* playerVelocity =
+    player->getComponent<VelocityComponent>();
+
+    playerVelocity->velocity = {0.0f, 0.0f};
 
     if (Input::isKeyPressed(GLFW_KEY_W))
-        scene.camera.position.y += speed;
+        playerVelocity->velocity.y = speed;
 
     if (Input::isKeyPressed(GLFW_KEY_S))
-        scene.camera.position.y -= speed;
+        playerVelocity->velocity.y = -speed;
 
     if (Input::isKeyPressed(GLFW_KEY_A))
-        scene.camera.position.x -= speed;
+        playerVelocity->velocity.x = -speed;
 
     if (Input::isKeyPressed(GLFW_KEY_D))
-        scene.camera.position.x += speed;
+        playerVelocity->velocity.x = speed;
 
-    bool tabNow = Input::isKeyPressed(GLFW_KEY_TAB);
+    movementSystem.update(scene, dt);
 
-    if (tabNow && !tabPressed)
-        ctx.cameraOn = !ctx.cameraOn;
+    auto* playerTransform =
+    player->getComponent<TransformComponent>();
 
-    tabPressed = tabNow;
+    std::cout << "Player: "
+          << playerTransform->position.x << " "
+          << playerTransform->position.y << "\n";
 
-    power.update(ctx);
+    playerTransform->rotation += 90.0f * dt;
+    
+    cameraFollowSystem.follow(scene, player);
+
+    std::cout << "Camera: "
+          << scene.camera.position.x << " "
+          << scene.camera.position.y << "\n";
+
+    auto* testTransform =
+    test->getComponent<TransformComponent>();
+
+    std::cout << "Test: "
+          << testTransform->position.x << " "
+          << testTransform->position.y << "\n";
+
 }
 
 void GameLayer::onRender()
@@ -67,6 +97,7 @@ void GameLayer::onRender()
     Renderer::clear();
 
     scene.onRender();
+
 }
 
 }

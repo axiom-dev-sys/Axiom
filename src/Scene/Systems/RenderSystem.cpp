@@ -14,6 +14,11 @@ namespace Axiom {
 
 void RenderSystem::render(Scene& scene)
 {
+
+    int count = 0;
+
+    count++;
+    
     scene.forEach([&](Entity* entity)
     {
         std::cout << "Entity\n";
@@ -43,7 +48,8 @@ void RenderSystem::render(Scene& scene)
         Renderer::submit(
             sprite->getTexture(),
             transform->position,
-            transform->scale
+            transform->scale,
+            transform->rotation
         );
     });
 }

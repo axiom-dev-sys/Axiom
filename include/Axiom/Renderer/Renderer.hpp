@@ -13,6 +13,7 @@ namespace Axiom {
         Texture* texture;
         glm::vec2 position;
         glm::vec2 scale;
+        float rotation;
     };
 
     class Renderer {
@@ -20,8 +21,11 @@ namespace Axiom {
         static void init(); 
         static void clear();
 
+        static glm::mat4 s_View;
+        static glm::mat4 s_Projection;
+
         static void beginScene(const Camera& camera);
-        static void submit(Texture* tex, glm::vec2 pos, glm::vec2 scale);
+        static void submit(Texture* tex, glm::vec2 pos, glm::vec2 scale, float rotation);
         static void endScene();
         static void flush();
 

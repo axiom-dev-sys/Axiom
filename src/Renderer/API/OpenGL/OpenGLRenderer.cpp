@@ -11,10 +11,9 @@ namespace Axiom {
         void OpenGLRenderer::init() {
             glEnable(GL_DEPTH_TEST);
             float vertices[] = {
-                // pos      // tex
                 -0.5f, -0.5f, 0.0f, 0.0f,
-                 0.5f, -0.5f, 1.0f, 0.0f,
-                 0.5f,  0.5f, 1.0f, 1.0f,
+                0.5f, -0.5f, 1.0f, 0.0f,
+                0.5f,  0.5f, 1.0f, 1.0f,
                 -0.5f,  0.5f, 0.0f, 1.0f
             };
 
@@ -25,7 +24,6 @@ namespace Axiom {
                 2, 3, 0
             };
 
-            // VAO/VBO/EBO
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
             glGenBuffers(1, &EBO);
@@ -38,11 +36,9 @@ namespace Axiom {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-            // pos
             glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
 
-            // tex
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
             glEnableVertexAttribArray(1);
         }
@@ -52,18 +48,21 @@ namespace Axiom {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        void OpenGLRenderer::draw(Texture& texture, const glm::vec2& pos, const glm::vec2& scale)
+        void OpenGLRenderer::draw(Texture& texture, const glm::vec2& pos, const glm::vec2& scale, float rotation)
         {
-            glm::mat4 view = Renderer::getCamera()->getViewMatrix();
+            std::cout << "DRAW CALL" << std::endl;
 
-            glm::mat4 projection = glm::ortho(
-                -1.0f, 1.0f,
-                -1.0f, 1.0f
-            );
+            glm::mat4 model(1.0f);
 
-            glm::mat4 model = glm::translate(
+            model = glm::translate(
             glm::mat4(1.0f),
             glm::vec3(pos.x, pos.y, 0.0f)
+            );
+
+            model = glm::rotate(
+            model,
+            glm::radians(rotation),
+            glm::vec3(0.0f, 0.0f, 1.0f)
             );
 
             model = glm::scale(
@@ -73,13 +72,13 @@ namespace Axiom {
 
             m_Shader.use();
 
+            m_Shader.setMat4("uModel", model);
+            
+            m_Shader.setMat4("uView", Renderer::s_View);
+            
+            m_Shader.setMat4("uProjection", Renderer::s_Projection);
+
             m_Shader.setInt("uTex", 0);
-
-            m_Shader.setMat4("uModel", glm::value_ptr(model));
-
-            m_Shader.setMat4("uView", glm::value_ptr(view));
-
-            m_Shader.setMat4("uProjection", glm::value_ptr(projection));
 
             glBindVertexArray(VAO);
 
@@ -87,7 +86,6 @@ namespace Axiom {
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-            std::cout << "DRAW\n";
         }
 
 }

@@ -16,6 +16,15 @@ namespace Axiom {
         );
     }
 
+    glm::mat4 getProjectionMatrix() const
+    {
+        return glm::ortho(
+            -640.0f, 640.0f,
+            -360.0f, 360.0f,
+            -1.0f, 1.0f
+        );
+    }
+
 };
 
 }
