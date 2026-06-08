@@ -17,6 +17,9 @@
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Renderer/Shader.hpp"
 
+#include "Axiom/Scene/Systems/MovementSystem.hpp"
+#include "Axiom/Scene/Systems/CameraFollowSystem.hpp"
+
 namespace Axiom {
 
 class GameLayer : public Axiom::Layer
@@ -34,13 +37,18 @@ private:
 
     Axiom::Scene scene;
     Axiom::Entity* player = nullptr;
+    Axiom::Entity* test = nullptr;
     Axiom::TransformComponent* transform = nullptr;
     Axiom::GameContext ctx;
 
     Axiom::PowerSystem power;
     Axiom::UISystem ui;
 
-    Axiom::Texture* officeTex = nullptr;
+    Axiom::Texture* playerTex = nullptr;
+    Axiom::Texture* testTex = nullptr;
+
+    MovementSystem movementSystem;
+    CameraFollowSystem cameraFollowSystem;
 };
 
 }

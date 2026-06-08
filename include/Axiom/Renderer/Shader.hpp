@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -10,7 +11,7 @@ namespace Axiom {
         void init();
         void use();
         void setInt(const char* name, int value);
-        void setMat4(const char* name, const float* value);
+        void setMat4(const char* name, const glm::mat4& value);
         void setVec2(const char* name, float x, float y);
 
     private:

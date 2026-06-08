@@ -20,6 +20,7 @@ namespace Axiom {
 template<typename T, typename... Args>
 T* addComponent(Args&&... args)
 {
+
     auto component = std::make_unique<T>(std::forward<Args>(args)...);
 
     T* ptr = component.get();
@@ -34,7 +35,7 @@ T* addComponent(Args&&... args)
         {
             auto it = m_Components.find(typeid(T));
             if (it != m_Components.end())
-                return static_cast<T*>(it->second.get());
+                return dynamic_cast<T*>(it->second.get());
 
             return nullptr;
         }

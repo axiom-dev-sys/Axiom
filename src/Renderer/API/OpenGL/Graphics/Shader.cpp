@@ -1,5 +1,6 @@
 #include "Axiom/Renderer/Shader.hpp"
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Axiom {
 
@@ -15,11 +16,7 @@ uniform mat4 uProjection;
 out vec2 TexCoord;
 
 void main() {
-    gl_Position =
-        uProjection *
-        uView *
-        uModel *
-        vec4(aPos, 0.0, 1.0);
+    gl_Position = uProjection * uView * uModel * vec4(aPos, 0.0, 1.0);
 
     TexCoord = aTex;
 }
@@ -67,6 +64,17 @@ void main() {
         glAttachShader(program, fsID);
         glLinkProgram(program);
 
+        GLint success;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        
+        if (!success)
+        {
+            char log[512];
+            glGetProgramInfoLog(program, 512, nullptr, log);
+            std::cout << "Program link error:\n"
+            << log << std::endl;
+        }
+
         glDeleteShader(vsID);
         glDeleteShader(fsID);
 
@@ -83,9 +91,9 @@ void main() {
         glUniform1i(glGetUniformLocation(program, name), value);
     }
 
-    void Shader::setMat4(const char* name, const float* value)
+    void Shader::setMat4(const char* name, const glm::mat4& value)
     {
-        glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_FALSE, value);
+        glUniformMatrix4fv(glGetUniformLocation(program, name), 1, GL_FALSE, glm::value_ptr(value));
     }
 
     void Shader::setVec2(const char* name, float x, float y)

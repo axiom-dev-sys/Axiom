@@ -4,7 +4,7 @@
 #include "Axiom/Scene/Systems/RenderSystem.hpp"
 #include <vector>
 #include <memory>
-
+#include <iostream>
 namespace Axiom {
 
     class Scene
@@ -14,12 +14,16 @@ namespace Axiom {
 
         void onUpdate(float dt);    
 
-        void onRender(); 
-
+        void onRender();
 
         Entity* createEntity(const std::string& name) 
         {
+            std::cout << "CREATE ENTITY: " << name << std::endl;
+
             m_Entities.emplace_back(std::make_unique<Entity>(name));
+
+            std::cout << "TOTAL NOW: " << m_Entities.size() << std::endl;
+            
             return m_Entities.back().get();
         }
 
@@ -32,7 +36,6 @@ namespace Axiom {
 
     private:
         std::vector<std::unique_ptr<Entity>> m_Entities;
-        
         RenderSystem m_RenderSystem;
     };
 

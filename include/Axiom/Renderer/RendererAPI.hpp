@@ -12,7 +12,9 @@ namespace Axiom {
         virtual void clear() = 0;
         virtual void draw(Texture& texture, 
                             const glm::vec2& pos, 
-                            const glm::vec2& scale) = 0;
+                            const glm::vec2& scale,
+                            float rotation
+                        ) = 0;
     };
 
 }
