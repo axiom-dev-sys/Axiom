@@ -2,6 +2,8 @@
 #include "Axiom/Scene/Entity.hpp"
 #include "Axiom/Camera/Camera.hpp"
 #include "Axiom/Scene/Systems/RenderSystem.hpp"
+#include "Axiom/Scene/Systems/MovementSystem.hpp"
+#include "Axiom/Scene/Systems/CameraFollowSystem.hpp"
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -12,8 +14,10 @@ namespace Axiom {
     public:
         Camera camera{};
 
-        void onUpdate(float dt);    
+        void onUpdate(float dt);
 
+        void followCamera(Entity* target);
+        
         void onRender();
 
         Entity* createEntity(const std::string& name) 
@@ -36,6 +40,9 @@ namespace Axiom {
 
     private:
         std::vector<std::unique_ptr<Entity>> m_Entities;
+
+        MovementSystem m_MovementSystem;
+        CameraFollowSystem m_CameraFollowSystem;
         RenderSystem m_RenderSystem;
     };
 
