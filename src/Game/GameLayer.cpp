@@ -66,7 +66,7 @@ void GameLayer::onUpdate(float dt)
     if (Input::isKeyPressed(GLFW_KEY_D))
         playerVelocity->velocity.x = speed;
 
-    movementSystem.update(scene, dt);
+    scene.onUpdate(dt);
 
     auto* playerTransform =
     player->getComponent<TransformComponent>();
@@ -77,7 +77,7 @@ void GameLayer::onUpdate(float dt)
 
     playerTransform->rotation += 90.0f * dt;
     
-    cameraFollowSystem.follow(scene, player);
+    scene.followCamera(player);
 
     std::cout << "Camera: "
           << scene.camera.position.x << " "

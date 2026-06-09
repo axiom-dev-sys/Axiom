@@ -42,6 +42,8 @@ add_executable(Axiom
     src/stb_image.cpp
     src/Scene/Scene.cpp
     src/Scene/Systems/RenderSystem.cpp
+    src/Scene/Systems/MovementSystem.cpp
+    src/Scene/Systems/CameraFollowSystem.cpp
 )
 
 target_include_directories(Axiom PUBLIC
