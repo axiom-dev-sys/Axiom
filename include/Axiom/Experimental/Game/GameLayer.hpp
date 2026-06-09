@@ -47,8 +47,6 @@ private:
     Axiom::Texture* playerTex = nullptr;
     Axiom::Texture* testTex = nullptr;
 
-    MovementSystem movementSystem;
-    CameraFollowSystem cameraFollowSystem;
 };
 
 }
