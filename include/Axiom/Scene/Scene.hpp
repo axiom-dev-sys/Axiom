@@ -4,6 +4,7 @@
 #include "Axiom/Scene/Systems/RenderSystem.hpp"
 #include "Axiom/Scene/Systems/MovementSystem.hpp"
 #include "Axiom/Scene/Systems/CameraFollowSystem.hpp"
+#include "Axiom/Scene/Systems/PlayerInputSystem.hpp"
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -44,6 +45,7 @@ namespace Axiom {
         MovementSystem m_MovementSystem;
         CameraFollowSystem m_CameraFollowSystem;
         RenderSystem m_RenderSystem;
+        PlayerInputSystem m_PlayerInputSystem;
     };
 
 }

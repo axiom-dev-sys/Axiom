@@ -8,6 +8,7 @@ namespace Axiom {
 
     void Scene::onUpdate(float dt)
     {
+        m_PlayerInputSystem.update(*this, dt);
         m_MovementSystem.update(*this, dt);
     }
 
