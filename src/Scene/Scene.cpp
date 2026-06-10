@@ -12,9 +12,9 @@ namespace Axiom {
         m_MovementSystem.update(*this, dt);
     }
 
-    void Scene::followCamera(Entity* target)
+    void Scene::followCamera(Entity* target, float dt)
     {
-        m_CameraFollowSystem.follow(*this, target);
+        m_CameraFollowSystem.follow(*this, target, dt);
     }
 
     void Scene::onRender()

@@ -33,7 +33,6 @@ public:
 private:
     float winTimer = 0.0f;
     float visualTimer = 0.0f;
-    bool tabPressed = false;
 
     Axiom::Scene scene;
     Axiom::Entity* player = nullptr;

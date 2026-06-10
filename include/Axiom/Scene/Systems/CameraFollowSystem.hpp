@@ -8,7 +8,7 @@ namespace Axiom {
 class CameraFollowSystem
 {
 public:
-    void follow(Scene& scene, Entity* target);
+    void follow(Scene& scene, Entity* target, float dt);
 };
 
 }
