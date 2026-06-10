@@ -17,7 +17,7 @@ namespace Axiom {
 
         void onUpdate(float dt);
 
-        void followCamera(Entity* target);
+        void followCamera(Entity* target, float dt);
         
         void onRender();
 

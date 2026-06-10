@@ -10,7 +10,6 @@
 #include "Axiom/Scene/Components/PlayerControllerComponent.hpp"
 #include "Axiom/Scene/Components/PlayerTag.hpp"
 #include <iostream>
-#include <GLFW/glfw3.h>
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -56,24 +55,9 @@ void GameLayer::onUpdate(float dt)
     auto* playerTransform =
     player->getComponent<TransformComponent>();
 
-    std::cout << "Player: "
-          << playerTransform->position.x << " "
-          << playerTransform->position.y << "\n";
-
     playerTransform->rotation += 90.0f * dt;
-
-    std::cout << "Camera: "
-          << scene.camera.position.x << " "
-          << scene.camera.position.y << "\n";
-
-    auto* testTransform =
-    test->getComponent<TransformComponent>();
-
-    std::cout << "Test: "
-          << testTransform->position.x << " "
-          << testTransform->position.y << "\n";
           
-    scene.followCamera(player);
+    scene.followCamera(player, dt);
 
 }
 
