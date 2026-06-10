@@ -7,7 +7,10 @@
 #include "Axiom/Core/Window.hpp"
 #include "Axiom/Core/Log.hpp"
 #include "Axiom/Scene/Components/VelocityComponent.hpp"
+#include "Axiom/Scene/Components/PlayerControllerComponent.hpp"
+#include "Axiom/Scene/Components/PlayerTag.hpp"
 #include <iostream>
+#include <GLFW/glfw3.h>
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -34,10 +37,11 @@ GameLayer::GameLayer()
 
     auto* playerTransform = player->addComponent<TransformComponent>();
     auto* playerVelocity = player->addComponent<VelocityComponent>();
+    player->addComponent<PlayerControllerComponent>();
+    player->addComponent<PlayerTag>();
     playerTransform->position = {0.0f, 0.0f};
     playerTransform->scale = {128.0f, 128.0f};
     playerTransform->rotation = 45.0f;
-    playerVelocity->velocity.x = 100.0f;
 
     player->addComponent<SpriteComponent>(playerTex);
 
@@ -46,25 +50,6 @@ GameLayer::GameLayer()
 void GameLayer::onUpdate(float dt)
 {
     ctx.dt = dt;
-
-    float speed = 500.0f;
-
-    auto* playerVelocity =
-    player->getComponent<VelocityComponent>();
-
-    playerVelocity->velocity = {0.0f, 0.0f};
-
-    if (Input::isKeyPressed(GLFW_KEY_W))
-        playerVelocity->velocity.y = speed;
-
-    if (Input::isKeyPressed(GLFW_KEY_S))
-        playerVelocity->velocity.y = -speed;
-
-    if (Input::isKeyPressed(GLFW_KEY_A))
-        playerVelocity->velocity.x = -speed;
-
-    if (Input::isKeyPressed(GLFW_KEY_D))
-        playerVelocity->velocity.x = speed;
 
     scene.onUpdate(dt);
 
@@ -76,8 +61,6 @@ void GameLayer::onUpdate(float dt)
           << playerTransform->position.y << "\n";
 
     playerTransform->rotation += 90.0f * dt;
-    
-    scene.followCamera(player);
 
     std::cout << "Camera: "
           << scene.camera.position.x << " "
@@ -89,6 +72,8 @@ void GameLayer::onUpdate(float dt)
     std::cout << "Test: "
           << testTransform->position.x << " "
           << testTransform->position.y << "\n";
+          
+    scene.followCamera(player);
 
 }
 
