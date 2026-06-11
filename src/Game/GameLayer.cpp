@@ -6,7 +6,8 @@
 #include "Axiom/Scene/Components/TransformComponent.hpp" 
 #include "Axiom/Scene/Components/VelocityComponent.hpp" 
 #include "Axiom/Scene/Components/PlayerControllerComponent.hpp" 
-#include "Axiom/Scene/Components/PlayerTag.hpp" 
+#include "Axiom/Scene/Components/PlayerTag.hpp"
+#include "Axiom/Scene/Components/ColliderComponent.hpp"
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -27,6 +28,11 @@ GameLayer::GameLayer()
     testTransform->scale = {512.0f, 512.0f};
     testTransform->rotation = 0.0f;
 
+    auto* testCollider = test->addComponent<ColliderComponent>();
+    testCollider->size = {512.0f, 512.0f};
+    testCollider->offset = {0.0f, 0.0f};
+    testCollider->isTrigger = false;
+
     test->addComponent<SpriteComponent>(testTex);
 
     player = scene.createEntity("Player");
@@ -38,6 +44,11 @@ GameLayer::GameLayer()
     playerTransform->position = {0.0f, 0.0f};
     playerTransform->scale = {128.0f, 128.0f};
     playerTransform->rotation = 45.0f;
+
+    auto* playerCollider = player->addComponent<ColliderComponent>();
+    playerCollider->size = {128.0f, 128.0f};
+    playerCollider->offset = {0.0f, 0.0f};
+    playerCollider->isTrigger = false;
 
     player->addComponent<SpriteComponent>(playerTex);
 
