@@ -62,7 +62,14 @@ namespace Axiom {
 
             if (checkAABB(aTransform, aCollider, bTransform, bCollider))
             {
-                // TODO: Handle collision
+                if (aCollider->isTrigger || bCollider->isTrigger)
+                {
+                    // TODO: Handle trigger
+                }
+                else
+                {
+                    // TODO: Handle collision
+                }
             }
         }
     }
