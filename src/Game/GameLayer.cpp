@@ -62,6 +62,8 @@ void GameLayer::onUpdate(float dt)
     auto* playerTransform = player->getComponent<TransformComponent>();
 
     playerTransform->rotation += 90.0f * dt;
+
+    collisionSystem.update(scene);
           
     scene.followCamera(player, dt);
 

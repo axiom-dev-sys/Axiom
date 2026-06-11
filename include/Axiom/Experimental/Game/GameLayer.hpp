@@ -3,6 +3,7 @@
 #include "Axiom/Core/Layer.hpp"
 #include "Axiom/Scene/Scene.hpp"
 #include "Axiom/Renderer/Texture.hpp"
+#include "Axiom/Scene/Systems/CollisionSystem.hpp"
 
 namespace Axiom {
 
@@ -16,6 +17,7 @@ public:
 
 private:
     Scene scene;
+    CollisionSystem collisionSystem;
 
     Entity* player = nullptr;
     Entity* test = nullptr;
