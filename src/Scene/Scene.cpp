@@ -3,7 +3,6 @@
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp"
-#include <iostream>
 namespace Axiom {
 
     void Scene::onUpdate(float dt)
