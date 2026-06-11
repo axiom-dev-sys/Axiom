@@ -31,7 +31,7 @@ GameLayer::GameLayer()
     auto* testCollider = test->addComponent<ColliderComponent>();
     testCollider->size = {512.0f, 512.0f};
     testCollider->offset = {0.0f, 0.0f};
-    testCollider->isTrigger = false;
+    testCollider->isTrigger = true;
 
     test->addComponent<SpriteComponent>(testTex);
 
@@ -48,7 +48,7 @@ GameLayer::GameLayer()
     auto* playerCollider = player->addComponent<ColliderComponent>();
     playerCollider->size = {128.0f, 128.0f};
     playerCollider->offset = {0.0f, 0.0f};
-    playerCollider->isTrigger = false;
+    playerCollider->isTrigger = true;
 
     player->addComponent<SpriteComponent>(playerTex);
 
