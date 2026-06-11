@@ -1,25 +1,17 @@
 #pragma once
+
 #include "Axiom/Scene/Component.hpp"
-#include "Axiom/Scene/Components/TransformComponent.hpp"
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
     class ColliderComponent : public Component
     {
     public:
-        ColliderComponent(Transform* transform, float width = 1.0f, float height = 1.0f)
-            : m_Transform(transform), m_Width(width), m_Height(height) {
-        }
+        glm::vec2 size{1.0f, 1.0f};
+        glm::vec2 offset{0.0f, 0.0f};
 
-        float getLeft()   const { return m_Transform->x - m_Width / 2.0f; }
-        float getRight()  const { return m_Transform->x + m_Width / 2.0f; }
-        float getTop()    const { return m_Transform->y + m_Height / 2.0f; }
-        float getBottom() const { return m_Transform->y - m_Height / 2.0f; }
-
-    private:
-        Transform* m_Transform;
-        float m_Width;
-        float m_Height;
+        bool isTrigger = false;
     };
 
 }
