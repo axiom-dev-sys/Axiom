@@ -8,6 +8,8 @@
 #include "Axiom/Scene/Components/PlayerControllerComponent.hpp" 
 #include "Axiom/Scene/Components/PlayerTag.hpp"
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
+#include "Axiom/Input/Input.hpp"
+#include <GLFW/glfw3.h>
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -58,6 +60,30 @@ void GameLayer::onUpdate(float dt)
 {
 
     scene.onUpdate(dt);
+
+    bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
+
+    if (pauseKeyPressed && !pauseKeyWasPressed)
+    {
+        
+    if (gameState == GameState::Gameplay)
+    {
+        gameState = GameState::Pause;
+    }
+    else if (gameState == GameState::Pause)
+    {
+        gameState = GameState::Gameplay;
+    }
+
+    }
+
+    pauseKeyWasPressed = pauseKeyPressed;
+
+    if (gameState == GameState::Pause)
+    {
+        // TODO: Fix player movement when pausing with movement keys held
+        return;
+    }
 
     auto* playerTransform = player->getComponent<TransformComponent>();
 
