@@ -4,6 +4,7 @@
 #include "Axiom/Scene/Scene.hpp"
 #include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Scene/Systems/CollisionSystem.hpp"
+#include "Axiom/Experimental/Game/GameState.hpp"
 
 namespace Axiom {
 
@@ -18,6 +19,9 @@ public:
 private:
     Scene scene;
     CollisionSystem collisionSystem;
+    GameState gameState = GameState::Gameplay;
+
+    bool pauseKeyWasPressed = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;
