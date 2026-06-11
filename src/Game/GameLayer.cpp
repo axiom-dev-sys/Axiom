@@ -1,15 +1,12 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
-#include "Axiom/Camera/Camera.hpp"
+#include "Axiom/Core/Paths.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
-#include "Axiom/Scene/Components/TransformComponent.hpp"
-#include "Axiom/Core/Window.hpp"
-#include "Axiom/Core/Log.hpp"
-#include "Axiom/Scene/Components/VelocityComponent.hpp"
-#include "Axiom/Scene/Components/PlayerControllerComponent.hpp"
-#include "Axiom/Scene/Components/PlayerTag.hpp"
-#include <iostream>
+#include "Axiom/Scene/Components/TransformComponent.hpp" 
+#include "Axiom/Scene/Components/VelocityComponent.hpp" 
+#include "Axiom/Scene/Components/PlayerControllerComponent.hpp" 
+#include "Axiom/Scene/Components/PlayerTag.hpp" 
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -35,7 +32,7 @@ GameLayer::GameLayer()
     player = scene.createEntity("Player");
 
     auto* playerTransform = player->addComponent<TransformComponent>();
-    auto* playerVelocity = player->addComponent<VelocityComponent>();
+    player->addComponent<VelocityComponent>();
     player->addComponent<PlayerControllerComponent>();
     player->addComponent<PlayerTag>();
     playerTransform->position = {0.0f, 0.0f};
@@ -48,12 +45,10 @@ GameLayer::GameLayer()
 
 void GameLayer::onUpdate(float dt)
 {
-    ctx.dt = dt;
 
     scene.onUpdate(dt);
 
-    auto* playerTransform =
-    player->getComponent<TransformComponent>();
+    auto* playerTransform = player->getComponent<TransformComponent>();
 
     playerTransform->rotation += 90.0f * dt;
           
