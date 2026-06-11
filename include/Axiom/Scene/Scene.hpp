@@ -7,7 +7,6 @@
 #include "Axiom/Scene/Systems/PlayerInputSystem.hpp"
 #include <vector>
 #include <memory>
-#include <iostream>
 namespace Axiom {
 
     class Scene
@@ -23,11 +22,8 @@ namespace Axiom {
 
         Entity* createEntity(const std::string& name) 
         {
-            std::cout << "CREATE ENTITY: " << name << std::endl;
 
             m_Entities.emplace_back(std::make_unique<Entity>(name));
-
-            std::cout << "TOTAL NOW: " << m_Entities.size() << std::endl;
             
             return m_Entities.back().get();
         }

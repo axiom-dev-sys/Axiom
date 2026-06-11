@@ -3,7 +3,6 @@
 #include "Axiom/Scene/Scene.hpp"
 #include "Axiom/Scene/Entity.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp"
-#include "Axiom/Scene/Components/VelocityComponent.hpp"
 
 namespace Axiom {
 
@@ -18,20 +17,12 @@ namespace Axiom {
         if (!transform)
             return;
 
-        auto* velocity = target->getComponent<VelocityComponent>();
-
         auto targetPos = transform->position + scene.camera.offset;
 
         scene.camera.position +=
         (targetPos - scene.camera.position) * 5.0f * dt;
 
         glm::vec2 offset = {0.0f, 0.0f};
-
-        if (velocity)
-        {
-            constexpr float k = 0.1f;
-            offset.x = velocity->velocity.x * k;
-        }
         
         scene.camera.position.x =
         glm::clamp(scene.camera.position.x,
