@@ -23,10 +23,23 @@ namespace Axiom {
 
         Entity* createEntity(const std::string& name) 
         {
-
             m_Entities.emplace_back(std::make_unique<Entity>(name));
             
             return m_Entities.back().get();
+        }
+
+        Entity* findEntityByName(const std::string& name)
+        {
+            for (auto& entity : m_Entities)
+            {
+                if (!entity->isActive() || entity->isDestroyed())
+                continue;
+            
+                if (entity->getName() == name)
+                return entity.get();
+            }
+            
+            return nullptr;
         }
 
         template<typename Func>
