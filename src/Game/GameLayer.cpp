@@ -23,7 +23,10 @@ GameLayer::GameLayer()
         Paths::getAsset("test.png")
     );
 
-    test = scene.createEntity("Test");
+    scene = std::make_shared<Scene>();
+    sceneManager.setActiveScene(scene);
+
+    test = scene->createEntity("Test");
     
     auto* testTransform = test->addComponent<TransformComponent>();    
     testTransform->position = {500.0f, 0.0f};
@@ -37,7 +40,7 @@ GameLayer::GameLayer()
 
     test->addComponent<SpriteComponent>(testTex);
 
-    player = scene.createEntity("Player");
+    player = scene->createEntity("Player");
 
     auto* playerTransform = player->addComponent<TransformComponent>();
     player->addComponent<VelocityComponent>();
@@ -59,7 +62,7 @@ GameLayer::GameLayer()
 void GameLayer::onUpdate(float dt)
 {
 
-    scene.onUpdate(dt);
+    scene->onUpdate(dt);
 
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
@@ -89,9 +92,9 @@ void GameLayer::onUpdate(float dt)
 
     playerTransform->rotation += 90.0f * dt;
 
-    collisionSystem.update(scene);
+    collisionSystem.update(*scene);
           
-    scene.followCamera(player, dt);
+    scene->followCamera(player, dt);
 
 }
 
@@ -99,7 +102,7 @@ void GameLayer::onRender()
 {
     Renderer::clear();
 
-    scene.onRender();
+    scene->onRender();
 
 }
 
