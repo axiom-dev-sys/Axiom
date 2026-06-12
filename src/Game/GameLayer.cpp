@@ -114,12 +114,13 @@ void GameLayer::onUpdate(float dt)
 
     if (sceneSwitchKeyPressed && !sceneSwitchKeyWasPressed)
     {
-        // TODO(0.4.6):
-        // Move player/test ownership fully into Gameplay scene.
-        // GameLayer should not keep raw pointers across scene switches.
 
         if (sceneManager.getActiveSceneName() == "Gameplay")
         {
+            // TODO(0.4.6):
+            // Move player/test ownership fully into Gameplay scene.
+            // GameLayer should not keep raw pointers across scene switches.
+
             scene = menuScene;
             sceneManager.setActiveScene("Menu", scene);
         }
@@ -147,7 +148,7 @@ void GameLayer::onUpdate(float dt)
 
     collisionSystem.update(*scene);
 
-    auto* testTransform = test->getComponent<TransformComponent>()
+    auto* testTransform = test->getComponent<TransformComponent>();
 
     if (testTransform)
     {

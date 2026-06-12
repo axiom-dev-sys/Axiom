@@ -40,6 +40,18 @@ namespace Axiom {
             return nullptr;
         }
 
+        template<typename T>
+        bool hasComponent() const
+        {
+            return m_Components.find(typeid(T)) != m_Components.end();
+        }
+
+        template<typename T>
+        void removeComponent()
+        {
+            m_Components.erase(typeid(T));
+        }
+
         const std::string& getName() const
         {
             return m_Name;
