@@ -17,18 +17,18 @@ namespace Axiom {
         Entity(const std::string& name = "Entity")
             : m_Name(name) {}
 
-template<typename T, typename... Args>
-T* addComponent(Args&&... args)
-{
+        template<typename T, typename... Args>
+        T* addComponent(Args&&... args)
+        {
 
-    auto component = std::make_unique<T>(std::forward<Args>(args)...);
+            auto component = std::make_unique<T>(std::forward<Args>(args)...);
 
-    T* ptr = component.get();
+            T* ptr = component.get();
 
-    m_Components[typeid(T)] = std::move(component);
+            m_Components[typeid(T)] = std::move(component);
 
-    return ptr;
-}
+            return ptr;
+        }
 
         template<typename T>
         T* getComponent() 
@@ -45,6 +45,26 @@ T* addComponent(Args&&... args)
             return m_Name;
         }
 
+        bool isActive() const
+        {
+            return m_Active;
+        }
+
+        void setActive(bool active)
+        {
+            m_Active = active;
+        }
+
+        bool isDestroyed() const
+        {
+            return m_Destroyed;
+        }
+
+        void destroy()
+        {
+            m_Destroyed = true;
+        }
+
         void onUpdate()
         {
             for (auto& [type, component] : m_Components)
@@ -52,8 +72,11 @@ T* addComponent(Args&&... args)
         }
 
     private:
-
         std::string m_Name;
+        
+        bool m_Active = true;
+        bool m_Destroyed = false;
+
         std::unordered_map<std::type_index, std::unique_ptr<Component>> m_Components;
     };
 

@@ -7,6 +7,7 @@
 #include "Axiom/Scene/Systems/PlayerInputSystem.hpp"
 #include <vector>
 #include <memory>
+#include <algorithm>
 namespace Axiom {
 
     class Scene
@@ -32,12 +33,38 @@ namespace Axiom {
         void forEach(Func func)
         {
             for (auto& entity : m_Entities)
+            {
+                if (!entity->isActive() || entity->isDestroyed())
+                continue;
+            
                 func(entity.get());
+            }
         }
 
         size_t getEntityCount() const
         {
             return m_Entities.size();
+        }
+
+        void destroyEntity(Entity* entity)
+        {
+            if (entity)
+            entity->destroy();
+        }
+
+        void cleanupDestroyedEntities()
+        {
+            m_Entities.erase(
+                std::remove_if(
+                    m_Entities.begin(),
+                    m_Entities.end(),
+                    [](const std::unique_ptr<Entity>& entity)
+                    {
+                        return entity->isDestroyed();
+                    }
+                ),
+                m_Entities.end()
+            );
         }
 
     private:
