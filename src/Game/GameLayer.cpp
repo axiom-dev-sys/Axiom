@@ -23,7 +23,13 @@ GameLayer::GameLayer()
         Paths::getAsset("test.png")
     );
 
-    test = scene.createEntity("Test");
+    gameplayScene = std::make_shared<Scene>();
+    menuScene = std::make_shared<Scene>();
+
+    scene = gameplayScene;
+    sceneManager.setActiveScene("Gameplay", scene);
+
+    test = scene->createEntity("Test");
     
     auto* testTransform = test->addComponent<TransformComponent>();    
     testTransform->position = {500.0f, 0.0f};
@@ -37,7 +43,7 @@ GameLayer::GameLayer()
 
     test->addComponent<SpriteComponent>(testTex);
 
-    player = scene.createEntity("Player");
+    player = scene->createEntity("Player");
 
     auto* playerTransform = player->addComponent<TransformComponent>();
     player->addComponent<VelocityComponent>();
@@ -58,8 +64,6 @@ GameLayer::GameLayer()
 
 void GameLayer::onUpdate(float dt)
 {
-
-    scene.onUpdate(dt);
 
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
@@ -85,13 +89,43 @@ void GameLayer::onUpdate(float dt)
         return;
     }
 
+    bool sceneSwitchKeyPressed = Input::isKeyPressed(GLFW_KEY_F1);
+
+    if (sceneSwitchKeyPressed && !sceneSwitchKeyWasPressed)
+    {
+        // TODO(0.4.6):
+        // Move player/test ownership fully into Gameplay scene.
+        // GameLayer should not keep raw pointers across scene switches.
+
+        if (sceneManager.getActiveSceneName() == "Gameplay")
+        {
+            scene = menuScene;
+            sceneManager.setActiveScene("Menu", scene);
+        }
+        else
+        {
+            scene = gameplayScene;
+            sceneManager.setActiveScene("Gameplay", scene);
+        }
+    }
+
+    sceneSwitchKeyWasPressed = sceneSwitchKeyPressed;
+
+    if (sceneManager.getActiveSceneName() == "Menu")
+    {
+        scene->onUpdate(dt);
+        return;
+    }
+
+    scene->onUpdate(dt);
+
     auto* playerTransform = player->getComponent<TransformComponent>();
 
     playerTransform->rotation += 90.0f * dt;
 
-    collisionSystem.update(scene);
+    collisionSystem.update(*scene);
           
-    scene.followCamera(player, dt);
+    scene->followCamera(player, dt);
 
 }
 
@@ -99,7 +133,7 @@ void GameLayer::onRender()
 {
     Renderer::clear();
 
-    scene.onRender();
+    scene->onRender();
 
 }
 

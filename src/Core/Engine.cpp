@@ -82,6 +82,10 @@ namespace Axiom {
                 ? "Pause"
                 : "Gameplay"
             );
+
+            ImGui::Text(
+                "Scene: %s",
+                m_GameLayer->getActiveSceneName().c_str());
             
             ImGui::Separator();
 
