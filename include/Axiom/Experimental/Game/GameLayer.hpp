@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -34,6 +35,9 @@ public:
     {
         return sceneManager.hasActiveScene();
     }
+
+    glm::vec2 getPlayerPosition() const;
+    size_t getEntityCount() const;
 
 private:
     std::shared_ptr<Scene> scene;

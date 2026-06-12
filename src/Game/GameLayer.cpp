@@ -39,7 +39,7 @@ GameLayer::GameLayer()
     auto* testCollider = test->addComponent<ColliderComponent>();
     testCollider->size = {512.0f, 512.0f};
     testCollider->offset = {0.0f, 0.0f};
-    testCollider->isTrigger = true;
+    testCollider->isTrigger = false;
 
     test->addComponent<SpriteComponent>(testTex);
 
@@ -56,11 +56,32 @@ GameLayer::GameLayer()
     auto* playerCollider = player->addComponent<ColliderComponent>();
     playerCollider->size = {128.0f, 128.0f};
     playerCollider->offset = {0.0f, 0.0f};
-    playerCollider->isTrigger = true;
+    playerCollider->isTrigger = false;
 
     player->addComponent<SpriteComponent>(playerTex);
 
 }
+
+    glm::vec2 GameLayer::getPlayerPosition() const
+    {
+        if (!player)
+        return {0.0f, 0.0f};
+
+        auto* transform = player->getComponent<TransformComponent>();
+
+        if (!transform)
+        return {0.0f, 0.0f};
+
+        return transform->position;
+    }
+
+    size_t GameLayer::getEntityCount() const
+    {
+        if (!scene)
+        return 0;
+
+        return scene->getEntityCount();
+    }
 
 void GameLayer::onUpdate(float dt)
 {
@@ -117,13 +138,30 @@ void GameLayer::onUpdate(float dt)
         return;
     }
 
-    scene->onUpdate(dt);
-
     auto* playerTransform = player->getComponent<TransformComponent>();
+    glm::vec2 oldPlayerPosition = playerTransform->position;
+
+    scene->onUpdate(dt);
 
     playerTransform->rotation += 90.0f * dt;
 
     collisionSystem.update(*scene);
+
+    auto* testTransform = test->getComponent<TransformComponent>();
+
+    if (testTransform)
+    {
+        // TODO(0.5.0):
+        // Move collision response from GameLayer into CollisionSystem.
+        
+        float dx = playerTransform->position.x - testTransform->position.x;
+        float dy = playerTransform->position.y - testTransform->position.y;
+        
+        if (std::abs(dx) < 320.0f && std::abs(dy) < 320.0f)
+        {
+            playerTransform->position = oldPlayerPosition;
+        }
+    }
           
     scene->followCamera(player, dt);
 

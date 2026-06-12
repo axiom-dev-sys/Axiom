@@ -35,6 +35,11 @@ namespace Axiom {
                 func(entity.get());
         }
 
+        size_t getEntityCount() const
+        {
+            return m_Entities.size();
+        }
+
     private:
         std::vector<std::unique_ptr<Entity>> m_Entities;
 
