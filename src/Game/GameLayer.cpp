@@ -23,8 +23,11 @@ GameLayer::GameLayer()
         Paths::getAsset("test.png")
     );
 
-    scene = std::make_shared<Scene>();
-    sceneManager.setActiveScene(scene);
+    gameplayScene = std::make_shared<Scene>();
+    menuScene = std::make_shared<Scene>();
+
+    scene = gameplayScene;
+    sceneManager.setActiveScene("Gameplay", scene);
 
     test = scene->createEntity("Test");
     
@@ -62,8 +65,6 @@ GameLayer::GameLayer()
 void GameLayer::onUpdate(float dt)
 {
 
-    scene->onUpdate(dt);
-
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
     if (pauseKeyPressed && !pauseKeyWasPressed)
@@ -87,6 +88,36 @@ void GameLayer::onUpdate(float dt)
         // TODO: Fix player movement when pausing with movement keys held
         return;
     }
+
+    bool sceneSwitchKeyPressed = Input::isKeyPressed(GLFW_KEY_F1);
+
+    if (sceneSwitchKeyPressed && !sceneSwitchKeyWasPressed)
+    {
+        // TODO(0.4.6):
+        // Move player/test ownership fully into Gameplay scene.
+        // GameLayer should not keep raw pointers across scene switches.
+
+        if (sceneManager.getActiveSceneName() == "Gameplay")
+        {
+            scene = menuScene;
+            sceneManager.setActiveScene("Menu", scene);
+        }
+        else
+        {
+            scene = gameplayScene;
+            sceneManager.setActiveScene("Gameplay", scene);
+        }
+    }
+
+    sceneSwitchKeyWasPressed = sceneSwitchKeyPressed;
+
+    if (sceneManager.getActiveSceneName() == "Menu")
+    {
+        scene->onUpdate(dt);
+        return;
+    }
+
+    scene->onUpdate(dt);
 
     auto* playerTransform = player->getComponent<TransformComponent>();
 

@@ -85,10 +85,7 @@ namespace Axiom {
 
             ImGui::Text(
                 "Scene: %s",
-                m_GameLayer->hasActiveScene()
-                ? "Loaded"
-                : "None"
-            );
+                m_GameLayer->getActiveSceneName().c_str());
             
             ImGui::Separator();
 

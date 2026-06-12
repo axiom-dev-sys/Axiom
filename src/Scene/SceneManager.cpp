@@ -4,8 +4,10 @@
 namespace Axiom {
 
     void SceneManager::setActiveScene(
+        const std::string& name,
         std::shared_ptr<Scene> scene)
     {
+        m_ActiveSceneName = name;
         m_ActiveScene = scene;
     }
 
@@ -15,6 +17,11 @@ namespace Axiom {
         return m_ActiveScene;
     }
 
+    std::string SceneManager::getActiveSceneName() const
+    {
+        return m_ActiveSceneName;
+    }
+
     bool SceneManager::hasActiveScene() const
     {
         return m_ActiveScene != nullptr;
@@ -22,6 +29,7 @@ namespace Axiom {
 
     void SceneManager::clearActiveScene()
     {
+        m_ActiveSceneName = "None";
         m_ActiveScene = nullptr;
     }
 
