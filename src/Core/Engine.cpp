@@ -11,6 +11,7 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -75,6 +76,11 @@ namespace Axiom {
             ImGui::Text("Axiom Engine 0.4.4");
 
             ImGui::Separator();
+
+            glm::vec2 playerPos = m_GameLayer->getPlayerPosition();
+
+            ImGui::Text("Player: %.1f, %.1f", playerPos.x, playerPos.y);
+            ImGui::Text("Entities: %zu", m_GameLayer->getEntityCount());
             
             ImGui::Text(
                 "State: %s",
