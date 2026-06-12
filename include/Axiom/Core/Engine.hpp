@@ -6,6 +6,8 @@
 
 namespace Axiom {
 
+	class GameLayer;
+
 	class Engine
 	{
 	public:
@@ -20,6 +22,7 @@ namespace Axiom {
 
 	private:
 		Window* m_Window;
+		GameLayer* m_GameLayer = nullptr;
 	};
 
 }

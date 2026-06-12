@@ -16,6 +16,11 @@ public:
     void onUpdate(float dt) override;
     void onRender() override;
 
+    GameState getGameState() const
+    {
+        return gameState;
+    }
+
 private:
     Scene scene;
     CollisionSystem collisionSystem;

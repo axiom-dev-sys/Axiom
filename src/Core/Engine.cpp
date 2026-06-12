@@ -8,6 +8,10 @@
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Time.hpp"
 
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+
 namespace Axiom {
 
     Engine::Engine()
@@ -18,15 +22,31 @@ namespace Axiom {
 
         Input::setWindow(m_Window->getNative());
 
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
+        ImGuiIO& io = ImGui::GetIO();
+        (void)io;
+
+        ImGui::StyleColorsDark();
+
+        ImGui_ImplGlfw_InitForOpenGL(m_Window->getNative(), true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+
         ResourceManager::init();
 
         m_Application.init();
 
-        m_LayerStack.pushLayer(new GameLayer());
+        m_GameLayer = new GameLayer();
+        m_LayerStack.pushLayer(m_GameLayer);
     }
 
     Engine::~Engine()
     {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
         delete m_Window;
     }
 
@@ -43,8 +63,34 @@ namespace Axiom {
 
             Renderer::clear();
 
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
             for (Layer* layer : m_LayerStack)
                 layer->onRender();
+
+            ImGui::Begin("Axiom Engine");
+
+            ImGui::Text("Axiom Engine 0.4.4");
+
+            ImGui::Separator();
+            
+            ImGui::Text(
+                "State: %s",
+                m_GameLayer->getGameState() == GameState::Pause
+                ? "Pause"
+                : "Gameplay"
+            );
+            
+            ImGui::Separator();
+
+            ImGui::Text("FPS: %.1f", 1.0f / dt);
+
+            ImGui::End();
+            
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             m_Window->swapBuffers();
             m_Window->pollEvents();

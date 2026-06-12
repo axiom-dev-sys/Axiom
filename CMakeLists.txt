@@ -11,6 +11,24 @@ add_subdirectory(external/glfw)
 add_library(glad external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
 
+# ImGui
+add_library(imgui
+    external/imgui/imgui.cpp
+    external/imgui/imgui_draw.cpp
+    external/imgui/imgui_tables.cpp
+    external/imgui/imgui_widgets.cpp
+    external/imgui/imgui_demo.cpp
+    external/imgui/backends/imgui_impl_glfw.cpp
+    external/imgui/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(imgui PUBLIC
+    external/imgui
+    external/imgui/backends
+)
+
+target_link_libraries(imgui PUBLIC glfw glad)
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -53,7 +71,7 @@ ${CMAKE_SOURCE_DIR}/include
 ${CMAKE_SOURCE_DIR}/src
 )
 
-target_link_libraries(Axiom glfw glad glm::glm)
+target_link_libraries(Axiom glfw glad glm::glm imgui)
 
 add_custom_command(TARGET Axiom POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
