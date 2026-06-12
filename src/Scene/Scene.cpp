@@ -9,6 +9,8 @@ namespace Axiom {
     {
         m_PlayerInputSystem.update(*this, dt);
         m_MovementSystem.update(*this, dt);
+
+        cleanupDestroyedEntities();
     }
 
     void Scene::followCamera(Entity* target, float dt)

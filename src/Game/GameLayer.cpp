@@ -147,7 +147,7 @@ void GameLayer::onUpdate(float dt)
 
     collisionSystem.update(*scene);
 
-    auto* testTransform = test->getComponent<TransformComponent>();
+    auto* testTransform = test->getComponent<TransformComponent>()
 
     if (testTransform)
     {
