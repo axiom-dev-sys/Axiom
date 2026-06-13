@@ -48,7 +48,6 @@ namespace Axiom {
     void CollisionSystem::update(Scene& scene)
     {
         std::unordered_set<std::uint64_t> currentCollisions;
-
         std::vector<Entity*> entities;
         
         scene.forEach([&](Entity* entity)
@@ -57,32 +56,27 @@ namespace Axiom {
             auto* collider = entity->getComponent<ColliderComponent>();
 
             if (transform && collider)
-            {
-                entities.push_back(entity);
-            }
+            entities.push_back(entity);
         });
 
-    for (size_t i = 0; i < entities.size(); ++i)
-    {
-        for (size_t j = i + 1; j < entities.size(); ++j)
+        for (size_t i = 0; i < entities.size(); ++i)
         {
-            Entity* a = entities[i];
-            Entity* b = entities[j];
-
-            auto* aTransform = a->getComponent<TransformComponent>();
-            auto* aCollider = a->getComponent<ColliderComponent>();
-
-            auto* bTransform = b->getComponent<TransformComponent>();
-            auto* bCollider = b->getComponent<ColliderComponent>();
-
-            if (checkAABB(aTransform, aCollider, bTransform, bCollider))
+            for (size_t j = i + 1; j < entities.size(); ++j)
             {
-                // TODO(0.5.4):
-                // Fix Collision Enter/Exit detection.
-                // Current implementation reports only Collision Stay.
+                Entity* a = entities[i];
+                Entity* b = entities[j];
+
+                auto* aTransform = a->getComponent<TransformComponent>();
+                auto* aCollider = a->getComponent<ColliderComponent>();
+
+                auto* bTransform = b->getComponent<TransformComponent>();
+                auto* bCollider = b->getComponent<ColliderComponent>();
+
+                if (!checkAABB(aTransform, aCollider, bTransform, bCollider))
+                continue;
 
                 auto key = makeCollisionKey(a, b);
-                
+
                 if (m_PreviousCollisions.find(key) == m_PreviousCollisions.end())
                 {
                     std::cout << "Collision Enter: "
@@ -91,25 +85,23 @@ namespace Axiom {
                 }
                 else
                 {
-                    std::cout << "Collision Stay: "
-                    << a->getName() << " <-> "
-                    << b->getName() << '\n';
+                    // TODO: Collision Stay works every frame while objects overlap.
+                    // Do not log it to avoid console spam.
                 }
 
                 currentCollisions.insert(key);
-
-                for (auto previousKey : m_PreviousCollisions)
-                {
-                if (currentCollisions.find(previousKey) == currentCollisions.end())
-                {
-                    std::cout << "Collision Exit\n";
-                }
-                }
-
-                m_PreviousCollisions = std::move(currentCollisions);
             }
         }
+
+        for (auto previousKey : m_PreviousCollisions)
+        {
+            if (currentCollisions.find(previousKey) == currentCollisions.end())
+            {
+                std::cout << "Collision Exit\n";
+            }
+        }
+
+        m_PreviousCollisions = std::move(currentCollisions);
     }
-}
 
 }
