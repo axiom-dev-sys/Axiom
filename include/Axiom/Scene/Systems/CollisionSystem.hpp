@@ -16,7 +16,11 @@ namespace Axiom {
     private:
         std::unordered_set<std::uint64_t> m_PreviousCollisions;
 
-        std::uint64_t makeCollisionKey(Entity* a, Entity* b) const;    
+        std::uint64_t makeCollisionKey(Entity* a, Entity* b) const;
+
+        void onCollisionEnter(Entity* a, Entity* b);
+        void onCollisionStay(Entity* a, Entity* b);
+        void onCollisionExit();
     };
 
 }

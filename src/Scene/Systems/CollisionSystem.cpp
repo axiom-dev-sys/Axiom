@@ -22,6 +22,26 @@ namespace Axiom {
         static_cast<std::uint64_t>(idB);
     }
 
+    void CollisionSystem::onCollisionEnter(Entity* a, Entity* b)
+    {
+        std::cout << "Collision Enter: "
+        << a->getName() << " <-> "
+        << b->getName() << '\n';
+    }
+
+    void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
+    {
+        // TODO(0.5.4): Add collision stay event handling
+    }
+
+    void CollisionSystem::onCollisionExit()
+    {
+        // TODO(0.5.4):
+        // Collision Enter/Exit may fire for several frames near collider edges.
+        // Add stable collision state validation later.
+        std::cout << "Collision Exit\n";
+    }
+
     static bool checkAABB(
         TransformComponent* aTransform, ColliderComponent* aCollider,
         TransformComponent* bTransform, ColliderComponent* bCollider
@@ -79,14 +99,11 @@ namespace Axiom {
 
                 if (m_PreviousCollisions.find(key) == m_PreviousCollisions.end())
                 {
-                    std::cout << "Collision Enter: "
-                    << a->getName() << " <-> "
-                    << b->getName() << '\n';
+                    onCollisionEnter(a, b);
                 }
                 else
                 {
-                    // TODO: Collision Stay works every frame while objects overlap.
-                    // Do not log it to avoid console spam.
+                    onCollisionStay(a, b);
                 }
 
                 currentCollisions.insert(key);
@@ -97,7 +114,7 @@ namespace Axiom {
         {
             if (currentCollisions.find(previousKey) == currentCollisions.end())
             {
-                std::cout << "Collision Exit\n";
+                onCollisionExit();
             }
         }
 
