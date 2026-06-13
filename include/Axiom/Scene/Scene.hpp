@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <cstdint>
 namespace Axiom {
 
     class Scene
@@ -25,7 +26,10 @@ namespace Axiom {
         {
             m_Entities.emplace_back(std::make_unique<Entity>(name));
             
-            return m_Entities.back().get();
+            Entity* entity = m_Entities.back().get();
+            entity->setID(m_NextEntityID++);
+
+            return entity;
         }
 
         Entity* findEntityByName(const std::string& name)
@@ -81,6 +85,7 @@ namespace Axiom {
         }
 
     private:
+        std::uint32_t m_NextEntityID = 1;
         std::vector<std::unique_ptr<Entity>> m_Entities;
 
         MovementSystem m_MovementSystem;

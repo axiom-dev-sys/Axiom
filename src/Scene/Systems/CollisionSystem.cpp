@@ -6,8 +6,21 @@
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 
 #include <vector>
+#include <iostream>
 
 namespace Axiom {
+
+    std::uint64_t CollisionSystem::makeCollisionKey(Entity* a, Entity* b) const
+    {
+        std::uint32_t idA = a->getID();
+        std::uint32_t idB = b->getID();
+
+        if (idA > idB)
+        std::swap(idA, idB);
+
+        return (static_cast<std::uint64_t>(idA) << 32) |
+        static_cast<std::uint64_t>(idB);
+    }
 
     static bool checkAABB(
         TransformComponent* aTransform, ColliderComponent* aCollider,
@@ -34,6 +47,8 @@ namespace Axiom {
 
     void CollisionSystem::update(Scene& scene)
     {
+        std::unordered_set<std::uint64_t> currentCollisions;
+
         std::vector<Entity*> entities;
         
         scene.forEach([&](Entity* entity)
@@ -62,14 +77,36 @@ namespace Axiom {
 
             if (checkAABB(aTransform, aCollider, bTransform, bCollider))
             {
-                if (aCollider->isTrigger || bCollider->isTrigger)
+                // TODO(0.5.4):
+                // Fix Collision Enter/Exit detection.
+                // Current implementation reports only Collision Stay.
+
+                auto key = makeCollisionKey(a, b);
+                
+                if (m_PreviousCollisions.find(key) == m_PreviousCollisions.end())
                 {
-                    // TODO: Handle trigger
+                    std::cout << "Collision Enter: "
+                    << a->getName() << " <-> "
+                    << b->getName() << '\n';
                 }
                 else
                 {
-                    // TODO: Handle collision
+                    std::cout << "Collision Stay: "
+                    << a->getName() << " <-> "
+                    << b->getName() << '\n';
                 }
+
+                currentCollisions.insert(key);
+
+                for (auto previousKey : m_PreviousCollisions)
+                {
+                if (currentCollisions.find(previousKey) == currentCollisions.end())
+                {
+                    std::cout << "Collision Exit\n";
+                }
+                }
+
+                m_PreviousCollisions = std::move(currentCollisions);
             }
         }
     }
