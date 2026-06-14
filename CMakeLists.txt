@@ -65,6 +65,7 @@ add_executable(Axiom
     src/Scene/Systems/CameraFollowSystem.cpp
     src/Scene/Systems/PlayerInputSystem.cpp
     src/Scene/Systems/CollisionSystem.cpp
+    src/Scene/Systems/TimerSystem.cpp
 )
 
 target_include_directories(Axiom PUBLIC

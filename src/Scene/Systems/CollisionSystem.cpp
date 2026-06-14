@@ -24,6 +24,8 @@ namespace Axiom {
 
     void CollisionSystem::onCollisionEnter(Entity* a, Entity* b)
     {
+        // TODO(0.6.x):
+        // Replace debug logs with actual event dispatch system.
         std::cout << "Collision Enter: "
         << a->getName() << " <-> "
         << b->getName() << '\n';
@@ -41,6 +43,8 @@ namespace Axiom {
 
     void CollisionSystem::onTriggerEnter(Entity* a, Entity* b)
     {
+        // TODO(0.6.x):
+        // Replace debug logs with actual event dispatch system.
         std::cout << "Trigger Enter: "
         << a->getName() << " <-> "
         << b->getName() << '\n';
