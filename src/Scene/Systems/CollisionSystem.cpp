@@ -31,15 +31,29 @@ namespace Axiom {
 
     void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
     {
-        // TODO(0.5.4): Add collision stay event handling
+        // TODO(0.5.5): Add collision stay event handling
     }
 
     void CollisionSystem::onCollisionExit()
     {
-        // TODO(0.5.4):
-        // Collision Enter/Exit may fire for several frames near collider edges.
-        // Add stable collision state validation later.
         std::cout << "Collision Exit\n";
+    }
+
+    void CollisionSystem::onTriggerEnter(Entity* a, Entity* b)
+    {
+        std::cout << "Trigger Enter: "
+        << a->getName() << " <-> "
+        << b->getName() << '\n';
+    }
+
+    void CollisionSystem::onTriggerStay(Entity* a, Entity* b)
+    {
+        // TODO(0.5.5): Add trigger stay event handling
+    }
+
+    void CollisionSystem::onTriggerExit()
+    {
+        std::cout << "Trigger Exit\n";
     }
 
     static bool checkAABB(
@@ -68,6 +82,7 @@ namespace Axiom {
     void CollisionSystem::update(Scene& scene)
     {
         std::unordered_set<std::uint64_t> currentCollisions;
+        std::unordered_set<std::uint64_t> currentTriggers;
         std::vector<Entity*> entities;
         
         scene.forEach([&](Entity* entity)
@@ -97,28 +112,51 @@ namespace Axiom {
 
                 auto key = makeCollisionKey(a, b);
 
-                if (m_PreviousCollisions.find(key) == m_PreviousCollisions.end())
+                bool isTrigger =
+                aCollider->isTrigger || bCollider->isTrigger;
+
+                if (isTrigger)
                 {
-                    onCollisionEnter(a, b);
+                    bool isNewTrigger =
+                    m_PreviousTriggers.find(key) == m_PreviousTriggers.end();
+                    
+                    if (isNewTrigger)
+                    onTriggerEnter(a, b);
+                else
+                onTriggerStay(a, b);
+
+                currentTriggers.insert(key);
                 }
                 else
                 {
-                    onCollisionStay(a, b);
-                }
-
+                    bool isNewCollision =
+                    m_PreviousCollisions.find(key) == m_PreviousCollisions.end();
+                    
+                    if (isNewCollision)
+                    onCollisionEnter(a, b);
+                else
+                onCollisionStay(a, b);
+                
                 currentCollisions.insert(key);
-            }
+                }
         }
 
         for (auto previousKey : m_PreviousCollisions)
         {
             if (currentCollisions.find(previousKey) == currentCollisions.end())
-            {
                 onCollisionExit();
-            }
         }
 
+            for (auto previousKey : m_PreviousTriggers)
+            {
+                if (currentTriggers.find(previousKey) == currentTriggers.end())
+                    onTriggerExit();
+            }
+
         m_PreviousCollisions = std::move(currentCollisions);
+        m_PreviousTriggers = std::move(currentTriggers);
     }
+
+}
 
 }
