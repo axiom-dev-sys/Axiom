@@ -21,8 +21,6 @@ namespace Axiom {
 
         scene.camera.position +=
         (targetPos - scene.camera.position) * 5.0f * dt;
-
-        glm::vec2 offset = {0.0f, 0.0f};
         
         scene.camera.position.x =
         glm::clamp(scene.camera.position.x,
