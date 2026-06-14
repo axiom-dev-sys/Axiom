@@ -10,6 +10,8 @@
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 #include "Axiom/Input/Input.hpp"
 #include <GLFW/glfw3.h>
+#include <cmath>
+#include <iostream>
 namespace Axiom {
 
 GameLayer::GameLayer()

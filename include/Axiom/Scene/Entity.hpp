@@ -7,12 +7,23 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <cstdint>
 
 namespace Axiom {
 
     class Entity
     {
     public:
+
+        std::uint32_t getID() const
+        {
+            return m_ID;
+        }
+
+        void setID(std::uint32_t id)
+        {
+            m_ID = id;
+        }
 
         Entity(const std::string& name = "Entity")
             : m_Name(name) {}
@@ -84,6 +95,7 @@ namespace Axiom {
         }
 
     private:
+        std::uint32_t m_ID = 0;
         std::string m_Name;
         
         bool m_Active = true;

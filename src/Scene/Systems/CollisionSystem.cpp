@@ -6,8 +6,41 @@
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 
 #include <vector>
+#include <iostream>
 
 namespace Axiom {
+
+    std::uint64_t CollisionSystem::makeCollisionKey(Entity* a, Entity* b) const
+    {
+        std::uint32_t idA = a->getID();
+        std::uint32_t idB = b->getID();
+
+        if (idA > idB)
+        std::swap(idA, idB);
+
+        return (static_cast<std::uint64_t>(idA) << 32) |
+        static_cast<std::uint64_t>(idB);
+    }
+
+    void CollisionSystem::onCollisionEnter(Entity* a, Entity* b)
+    {
+        std::cout << "Collision Enter: "
+        << a->getName() << " <-> "
+        << b->getName() << '\n';
+    }
+
+    void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
+    {
+        // TODO(0.5.4): Add collision stay event handling
+    }
+
+    void CollisionSystem::onCollisionExit()
+    {
+        // TODO(0.5.4):
+        // Collision Enter/Exit may fire for several frames near collider edges.
+        // Add stable collision state validation later.
+        std::cout << "Collision Exit\n";
+    }
 
     static bool checkAABB(
         TransformComponent* aTransform, ColliderComponent* aCollider,
@@ -34,6 +67,7 @@ namespace Axiom {
 
     void CollisionSystem::update(Scene& scene)
     {
+        std::unordered_set<std::uint64_t> currentCollisions;
         std::vector<Entity*> entities;
         
         scene.forEach([&](Entity* entity)
@@ -42,37 +76,49 @@ namespace Axiom {
             auto* collider = entity->getComponent<ColliderComponent>();
 
             if (transform && collider)
-            {
-                entities.push_back(entity);
-            }
+            entities.push_back(entity);
         });
 
-    for (size_t i = 0; i < entities.size(); ++i)
-    {
-        for (size_t j = i + 1; j < entities.size(); ++j)
+        for (size_t i = 0; i < entities.size(); ++i)
         {
-            Entity* a = entities[i];
-            Entity* b = entities[j];
-
-            auto* aTransform = a->getComponent<TransformComponent>();
-            auto* aCollider = a->getComponent<ColliderComponent>();
-
-            auto* bTransform = b->getComponent<TransformComponent>();
-            auto* bCollider = b->getComponent<ColliderComponent>();
-
-            if (checkAABB(aTransform, aCollider, bTransform, bCollider))
+            for (size_t j = i + 1; j < entities.size(); ++j)
             {
-                if (aCollider->isTrigger || bCollider->isTrigger)
+                Entity* a = entities[i];
+                Entity* b = entities[j];
+
+                auto* aTransform = a->getComponent<TransformComponent>();
+                auto* aCollider = a->getComponent<ColliderComponent>();
+
+                auto* bTransform = b->getComponent<TransformComponent>();
+                auto* bCollider = b->getComponent<ColliderComponent>();
+
+                if (!checkAABB(aTransform, aCollider, bTransform, bCollider))
+                continue;
+
+                auto key = makeCollisionKey(a, b);
+
+                if (m_PreviousCollisions.find(key) == m_PreviousCollisions.end())
                 {
-                    // TODO: Handle trigger
+                    onCollisionEnter(a, b);
                 }
                 else
                 {
-                    // TODO: Handle collision
+                    onCollisionStay(a, b);
                 }
+
+                currentCollisions.insert(key);
             }
         }
+
+        for (auto previousKey : m_PreviousCollisions)
+        {
+            if (currentCollisions.find(previousKey) == currentCollisions.end())
+            {
+                onCollisionExit();
+            }
+        }
+
+        m_PreviousCollisions = std::move(currentCollisions);
     }
-}
 
 }
