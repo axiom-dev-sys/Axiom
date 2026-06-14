@@ -5,6 +5,7 @@
 #include "Axiom/Scene/Systems/MovementSystem.hpp"
 #include "Axiom/Scene/Systems/CameraFollowSystem.hpp"
 #include "Axiom/Scene/Systems/PlayerInputSystem.hpp"
+#include "Axiom/Scene/Systems/TimerSystem.hpp"
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -92,6 +93,7 @@ namespace Axiom {
         CameraFollowSystem m_CameraFollowSystem;
         RenderSystem m_RenderSystem;
         PlayerInputSystem m_PlayerInputSystem;
+        TimerSystem m_TimerSystem;
     };
 
 }

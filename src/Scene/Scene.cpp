@@ -9,6 +9,7 @@ namespace Axiom {
     {
         m_PlayerInputSystem.update(*this, dt);
         m_MovementSystem.update(*this, dt);
+        m_TimerSystem.update(*this, dt);
 
         cleanupDestroyedEntities();
     }
