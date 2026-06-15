@@ -107,7 +107,6 @@ void GameLayer::onUpdate(float dt)
 
     if (gameState == GameState::Pause)
     {
-        // TODO(0.6.2): Fix player movement when pausing with movement keys held
         return;
     }
 
@@ -153,7 +152,7 @@ void GameLayer::onUpdate(float dt)
 
     if (testTransform)
     {
-        // TODO(0.6.x):
+        // TODO(0.6.6):
         // Move collision response from GameLayer into CollisionSystem.
         
         float dx = playerTransform->position.x - testTransform->position.x;
