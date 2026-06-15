@@ -6,15 +6,27 @@ namespace Axiom {
     enum class EventType
     {
         None = 0,
+
         WindowClose,
         WindowResize,
+
         KeyPressed,
-        KeyReleased
+        KeyReleased,
+
+        CollisionEnter,
+        CollisionStay,
+        CollisionExit,
+
+        TriggerEnter,
+        TriggerStay,
+        TriggerExit
     };
 
     class Event
     {
     public:
+        virtual ~Event() = default;
+        
         virtual EventType getEventType() const = 0;
         virtual const char* getName() const = 0;
 

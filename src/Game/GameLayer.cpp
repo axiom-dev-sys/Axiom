@@ -11,7 +11,6 @@
 #include "Axiom/Input/Input.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
-#include <iostream>
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -108,7 +107,7 @@ void GameLayer::onUpdate(float dt)
 
     if (gameState == GameState::Pause)
     {
-        // TODO: Fix player movement when pausing with movement keys held
+        // TODO(0.6.2): Fix player movement when pausing with movement keys held
         return;
     }
 
@@ -119,7 +118,7 @@ void GameLayer::onUpdate(float dt)
 
         if (sceneManager.getActiveSceneName() == "Gameplay")
         {
-            // TODO(0.4.6):
+            // TODO(0.6.x):
             // Move player/test ownership fully into Gameplay scene.
             // GameLayer should not keep raw pointers across scene switches.
 
@@ -154,7 +153,7 @@ void GameLayer::onUpdate(float dt)
 
     if (testTransform)
     {
-        // TODO(0.5.0):
+        // TODO(0.6.x):
         // Move collision response from GameLayer into CollisionSystem.
         
         float dx = playerTransform->position.x - testTransform->position.x;

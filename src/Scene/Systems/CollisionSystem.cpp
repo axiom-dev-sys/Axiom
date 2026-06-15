@@ -6,7 +6,6 @@
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 
 #include <vector>
-#include <iostream>
 
 namespace Axiom {
 
@@ -24,40 +23,40 @@ namespace Axiom {
 
     void CollisionSystem::onCollisionEnter(Entity* a, Entity* b)
     {
-        // TODO(0.6.x):
-        // Replace debug logs with actual event dispatch system.
-        std::cout << "Collision Enter: "
-        << a->getName() << " <-> "
-        << b->getName() << '\n';
+        (void)a;
+        (void)b;
+        // TODO(0.6.3): Dispatch collision enter event.
     }
 
     void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
     {
-        // TODO(0.5.5): Add collision stay event handling
+        (void)a;
+        (void)b;
+        // TODO(0.6.3): Dispatch collision stay event.
     }
 
     void CollisionSystem::onCollisionExit()
     {
-        std::cout << "Collision Exit\n";
+        // TODO(0.6.3): Dispatch collision exit event.
     }
 
     void CollisionSystem::onTriggerEnter(Entity* a, Entity* b)
     {
-        // TODO(0.6.x):
-        // Replace debug logs with actual event dispatch system.
-        std::cout << "Trigger Enter: "
-        << a->getName() << " <-> "
-        << b->getName() << '\n';
+        (void)a;
+        (void)b;
+        // TODO(0.6.3): Dispatch trigger enter event.
     }
 
     void CollisionSystem::onTriggerStay(Entity* a, Entity* b)
     {
-        // TODO(0.5.5): Add trigger stay event handling
+        (void)a;
+        (void)b;
+        // TODO(0.6.3): Dispatch trigger stay event.
     }
 
     void CollisionSystem::onTriggerExit()
     {
-        std::cout << "Trigger Exit\n";
+        // TODO(0.6.3): Dispatch trigger exit event.
     }
 
     static bool checkAABB(
