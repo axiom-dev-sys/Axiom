@@ -7,9 +7,14 @@ namespace Axiom {
     class CollisionEnterEvent : public Event
     {
     public:
-        EventType getEventType() const override
+        static EventType getStaticType()
         {
             return EventType::CollisionEnter;
+        }
+
+        EventType getEventType() const override
+        {
+            return getStaticType();
         }
 
         const char* getName() const override
@@ -21,9 +26,14 @@ namespace Axiom {
     class CollisionStayEvent : public Event
     {
     public:
-        EventType getEventType() const override
+        static EventType getStaticType()
         {
             return EventType::CollisionStay;
+        }
+
+        EventType getEventType() const override
+        {
+            return getStaticType();
         }
 
         const char* getName() const override
@@ -35,9 +45,14 @@ namespace Axiom {
     class CollisionExitEvent : public Event
     {
     public:
+        static EventType getStaticType()
+        {
+            return EventType::CollisionStay;
+        }
+        
         EventType getEventType() const override
         {
-            return EventType::CollisionExit;
+            return getStaticType();
         }
 
         const char* getName() const override

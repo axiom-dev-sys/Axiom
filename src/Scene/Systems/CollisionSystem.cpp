@@ -25,38 +25,38 @@ namespace Axiom {
     {
         (void)a;
         (void)b;
-        // TODO(0.6.3): Dispatch collision enter event.
+        // TODO(0.6.6): Dispatch collision enter event.
     }
 
     void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
     {
         (void)a;
         (void)b;
-        // TODO(0.6.3): Dispatch collision stay event.
+        // TODO(0.6.6): Dispatch collision stay event.
     }
 
     void CollisionSystem::onCollisionExit()
     {
-        // TODO(0.6.3): Dispatch collision exit event.
+        // TODO(0.6.6): Dispatch collision exit event.
     }
 
     void CollisionSystem::onTriggerEnter(Entity* a, Entity* b)
     {
         (void)a;
         (void)b;
-        // TODO(0.6.3): Dispatch trigger enter event.
+        // TODO(0.6.6): Dispatch trigger enter event.
     }
 
     void CollisionSystem::onTriggerStay(Entity* a, Entity* b)
     {
         (void)a;
         (void)b;
-        // TODO(0.6.3): Dispatch trigger stay event.
+        // TODO(0.6.6): Dispatch trigger stay event.
     }
 
     void CollisionSystem::onTriggerExit()
     {
-        // TODO(0.6.3): Dispatch trigger exit event.
+        // TODO(0.6.6): Dispatch trigger exit event.
     }
 
     static bool checkAABB(
