@@ -23,11 +23,15 @@ namespace Axiom {
 
     void CollisionSystem::onCollisionEnter(Entity* a, Entity* b)
     {
+        (void)a;
+        (void)b;
         // TODO(0.6.3): Dispatch collision enter event.
     }
 
     void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
     {
+        (void)a;
+        (void)b;
         // TODO(0.6.3): Dispatch collision stay event.
     }
 
@@ -38,11 +42,15 @@ namespace Axiom {
 
     void CollisionSystem::onTriggerEnter(Entity* a, Entity* b)
     {
+        (void)a;
+        (void)b;
         // TODO(0.6.3): Dispatch trigger enter event.
     }
 
     void CollisionSystem::onTriggerStay(Entity* a, Entity* b)
     {
+        (void)a;
+        (void)b;
         // TODO(0.6.3): Dispatch trigger stay event.
     }
 

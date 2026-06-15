@@ -107,7 +107,7 @@ void GameLayer::onUpdate(float dt)
 
     if (gameState == GameState::Pause)
     {
-        // TODO: Fix player movement when pausing with movement keys held
+        // TODO(0.6.2): Fix player movement when pausing with movement keys held
         return;
     }
 
