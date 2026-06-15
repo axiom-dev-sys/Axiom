@@ -5,6 +5,9 @@
 #include "Axiom/Scene/Components/TransformComponent.hpp"
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 
+#include "Axiom/Events/Collision/CollisionEvent.hpp"
+#include "Axiom/Events/Collision/TriggerEvent.hpp"
+
 #include <vector>
 
 namespace Axiom {
@@ -25,38 +28,42 @@ namespace Axiom {
     {
         (void)a;
         (void)b;
-        // TODO(0.6.6): Dispatch collision enter event.
+
+        CollisionEnterEvent event;
     }
 
     void CollisionSystem::onCollisionStay(Entity* a, Entity* b)
     {
         (void)a;
         (void)b;
-        // TODO(0.6.6): Dispatch collision stay event.
+
+        CollisionStayEvent event;
     }
 
     void CollisionSystem::onCollisionExit()
     {
-        // TODO(0.6.6): Dispatch collision exit event.
+        CollisionExitEvent event;
     }
 
     void CollisionSystem::onTriggerEnter(Entity* a, Entity* b)
     {
         (void)a;
         (void)b;
-        // TODO(0.6.6): Dispatch trigger enter event.
+
+        TriggerEnterEvent event;
     }
 
     void CollisionSystem::onTriggerStay(Entity* a, Entity* b)
     {
         (void)a;
         (void)b;
-        // TODO(0.6.6): Dispatch trigger stay event.
+
+        TriggerStayEvent event;
     }
 
     void CollisionSystem::onTriggerExit()
     {
-        // TODO(0.6.6): Dispatch trigger exit event.
+        TriggerExitEvent event;
     }
 
     static bool checkAABB(
