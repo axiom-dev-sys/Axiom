@@ -6,7 +6,9 @@ namespace Axiom {
     {
         Menu,
         Gameplay,
-        Pause
+        Pause,
+        GameOver,
+        Win
     };
 
 }

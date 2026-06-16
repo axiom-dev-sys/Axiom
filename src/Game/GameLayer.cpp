@@ -10,7 +10,9 @@
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 #include "Axiom/Input/Input.hpp"
 #include <GLFW/glfw3.h>
+#include <iostream>
 #include <cmath>
+
 namespace Axiom {
 
 GameLayer::GameLayer()
@@ -110,6 +112,11 @@ void GameLayer::onUpdate(float dt)
         return;
     }
 
+    if (gameState == GameState::GameOver || gameState == GameState::Win)
+    {
+        return;
+    }
+
     bool sceneSwitchKeyPressed = Input::isKeyPressed(GLFW_KEY_F1);
 
     if (sceneSwitchKeyPressed && !sceneSwitchKeyWasPressed)
@@ -137,6 +144,28 @@ void GameLayer::onUpdate(float dt)
     {
         scene->onUpdate(dt);
         return;
+    }
+
+    gameContext.dt = dt;
+
+    if (gameState == GameState::Gameplay)
+    {
+        gameContext.nightTime += dt;
+
+        powerSystem.update(gameContext);
+
+        if (gameContext.nightTime >= gameContext.nightDuration)
+        {
+            std::cout << "WIN" << std::endl;
+            gameContext.win = true;
+            gameState = GameState::Win;
+        }
+
+        if (gameContext.gameOver)
+        {
+            std::cout << "GAME OVER" << std::endl;
+            gameState = GameState::GameOver;
+        }
     }
 
     auto* playerTransform = player->getComponent<TransformComponent>();

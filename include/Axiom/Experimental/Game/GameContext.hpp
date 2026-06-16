@@ -14,6 +14,9 @@ namespace Axiom {
     {
         float dt = 0.0f;
 
+        float nightTime = 0.0f;
+        float nightDuration = 60.0f;
+
         bool cameraOn = false;
         bool doorClosed = false;
 

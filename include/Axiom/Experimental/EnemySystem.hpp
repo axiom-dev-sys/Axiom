@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Axiom/Game/GameContext.hpp"
+#include "Axiom/Experimental/Game/GameContext.hpp"
 
-using namespace Axiom;
+namespace Axiom {
 
 class EnemySystem
 {
@@ -79,3 +79,5 @@ private:
         return rand() % 100 < chance;
     }
 };
+
+}
