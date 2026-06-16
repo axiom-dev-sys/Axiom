@@ -153,6 +153,8 @@ void GameLayer::onUpdate(float dt)
         gameContext.nightTime += dt;
 
         powerSystem.update(gameContext);
+        
+        enemySystem.update(gameContext);
 
         if (gameContext.nightTime >= gameContext.nightDuration)
         {

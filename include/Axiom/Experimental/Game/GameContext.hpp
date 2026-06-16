@@ -10,6 +10,13 @@ namespace Axiom {
         Attack
     };
 
+    enum class Difficulty
+    {
+        Easy,
+        Normal,
+        Hard
+    };
+
     struct GameContext
     {
         float dt = 0.0f;
@@ -26,6 +33,8 @@ namespace Axiom {
         float power = 100.0f;
 
         EnemyState enemyState = EnemyState::Idle;
+
+        Difficulty difficulty = Difficulty::Normal;
     };
 
 }
