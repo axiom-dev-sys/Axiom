@@ -7,6 +7,7 @@
 #include "Axiom/Scene/Systems/CollisionSystem.hpp"
 #include "Axiom/Experimental/Game/GameState.hpp"
 #include "Axiom/Experimental/Game/GameContext.hpp"
+#include "Axiom/Experimental/EnemySystem.hpp"
 #include "Axiom/Experimental/PowerSystem.hpp"
 
 #include <memory>
@@ -47,6 +48,7 @@ private:
     std::shared_ptr<Scene> menuScene;
     GameContext gameContext;
     PowerSystem powerSystem;
+    EnemySystem enemySystem;
     SceneManager sceneManager;
     CollisionSystem collisionSystem;
     GameState gameState = GameState::Gameplay;
