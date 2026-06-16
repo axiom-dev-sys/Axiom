@@ -6,6 +6,8 @@
 #include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Scene/Systems/CollisionSystem.hpp"
 #include "Axiom/Experimental/Game/GameState.hpp"
+#include "Axiom/Experimental/Game/GameContext.hpp"
+#include "Axiom/Experimental/PowerSystem.hpp"
 
 #include <memory>
 #include <string>
@@ -43,6 +45,8 @@ private:
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
     std::shared_ptr<Scene> menuScene;
+    GameContext gameContext;
+    PowerSystem powerSystem;
     SceneManager sceneManager;
     CollisionSystem collisionSystem;
     GameState gameState = GameState::Gameplay;
