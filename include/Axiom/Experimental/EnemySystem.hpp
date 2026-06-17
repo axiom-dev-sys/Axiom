@@ -97,6 +97,8 @@ private:
 
         chance += aggression * 5;
 
+        chance += (ctx.night - 1) * 5;
+
         switch (ctx.difficulty)
         {
             case Difficulty::Easy:

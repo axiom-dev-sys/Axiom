@@ -161,6 +161,7 @@ void GameLayer::onUpdate(float dt)
         if (gameContext.nightTime >= gameContext.nightDuration)
         {
             std::cout << "WIN" << std::endl;
+            gameContext.night++;
             gameContext.win = true;
             gameState = GameState::Win;
         }
