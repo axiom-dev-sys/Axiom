@@ -19,6 +19,8 @@ namespace Axiom {
 
     struct GameContext
     {
+        int night = 1;
+
         float dt = 0.0f;
 
         float nightTime = 0.0f;
