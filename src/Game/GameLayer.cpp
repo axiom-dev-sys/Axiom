@@ -146,6 +146,8 @@ void GameLayer::onUpdate(float dt)
         return;
     }
 
+    handleInteractions();
+
     gameContext.dt = dt;
 
     if (gameState == GameState::Gameplay)
@@ -197,6 +199,27 @@ void GameLayer::onUpdate(float dt)
           
     scene->followCamera(player, dt);
 
+}
+
+void GameLayer::handleInteractions()
+{
+    bool cameraKeyPressed = Input::isKeyPressed(GLFW_KEY_C);
+
+    if (cameraKeyPressed && !cameraKeyWasPressed)
+    {
+        gameContext.cameraOn = !gameContext.cameraOn;
+    }
+
+    cameraKeyWasPressed = cameraKeyPressed;
+
+    bool doorKeyPressed = Input::isKeyPressed(GLFW_KEY_E);
+
+    if (doorKeyPressed && !doorKeyWasPressed)
+    {
+        gameContext.doorClosed = !gameContext.doorClosed;
+    }
+
+    doorKeyWasPressed = doorKeyPressed;
 }
 
 void GameLayer::onRender()

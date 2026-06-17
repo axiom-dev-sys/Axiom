@@ -2,8 +2,6 @@
 
 #include "Axiom/Experimental/Game/GameContext.hpp"
 
-#include <iostream>
-
 namespace Axiom {
 
 class EnemySystem
@@ -68,10 +66,6 @@ private:
         return;
 
         lastDebugState = ctx.enemyState;
-        
-        std::cout << "Enemy state changed: "
-        << static_cast<int>(ctx.enemyState)
-        << std::endl;
     }
 
     void updateWatching(GameContext& ctx)
