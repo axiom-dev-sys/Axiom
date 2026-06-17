@@ -43,6 +43,8 @@ public:
     size_t getEntityCount() const;
 
 private:
+    void handleInteractions();
+    
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
     std::shared_ptr<Scene> menuScene;
@@ -55,6 +57,8 @@ private:
 
     bool pauseKeyWasPressed = false;
     bool sceneSwitchKeyWasPressed = false;
+    bool cameraKeyWasPressed = false;
+    bool doorKeyWasPressed = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;
