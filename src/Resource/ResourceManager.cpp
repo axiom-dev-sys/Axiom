@@ -1,4 +1,5 @@
 #include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
 #include <iostream>
 
@@ -14,6 +15,21 @@ namespace Axiom {
         s_Textures.clear();
 
         s_FallbackTexture = nullptr;
+
+        AssetRegistry::registerTexture(
+            "player",
+            "player.png"
+        );
+
+        AssetRegistry::registerTexture(
+            "test",
+            "test.png"
+        );
+
+        AssetRegistry::registerTexture(
+            "fallback",
+            "fallback.png"
+        );
     }
 
     void ResourceManager::shutdown()
@@ -31,7 +47,11 @@ namespace Axiom {
         if (it != s_Textures.end())
             return it->second.get();
 
-        std::string fullPath = Paths::getAsset(name);
+        std::string file =
+            AssetRegistry::getTexturePath(name);
+
+        std::string fullPath =
+            Paths::getAsset(file);
 
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(fullPath);
 
