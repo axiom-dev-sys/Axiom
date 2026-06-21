@@ -13,6 +13,11 @@ namespace Axiom {
             Scene& scene,
             const std::string& path
         );
+
+        static void load(
+            Scene& scene,
+            const std::string& path
+        );
     };
 
 }
