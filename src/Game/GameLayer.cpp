@@ -17,9 +17,9 @@ namespace Axiom {
 GameLayer::GameLayer()
 {
 
-    playerTex = ResourceManager::getTexture("player.png");
+    playerTex = ResourceManager::getTexture("player");
 
-    testTex = ResourceManager::getTexture("test.png");
+    testTex = ResourceManager::getTexture("test");
 
     gameplayScene = std::make_shared<Scene>();
     menuScene = std::make_shared<Scene>();
