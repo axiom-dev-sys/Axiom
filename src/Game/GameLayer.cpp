@@ -1,6 +1,7 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
+#include "Axiom/Scene/SceneSerializer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp" 
 #include "Axiom/Scene/Components/VelocityComponent.hpp" 
@@ -9,7 +10,6 @@
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 #include "Axiom/Input/Input.hpp"
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <cmath>
 
 namespace Axiom {
@@ -39,7 +39,10 @@ GameLayer::GameLayer()
     testCollider->offset = {0.0f, 0.0f};
     testCollider->isTrigger = false;
 
-    test->addComponent<SpriteComponent>(testTex);
+    test->addComponent<SpriteComponent>(
+        "test",
+        ResourceManager::getTexture("test")
+    );
 
     player = scene->createEntity("Player");
 
@@ -56,7 +59,16 @@ GameLayer::GameLayer()
     playerCollider->offset = {0.0f, 0.0f};
     playerCollider->isTrigger = false;
 
-    player->addComponent<SpriteComponent>(playerTex);
+    player->addComponent<SpriteComponent>(
+        "player",
+        ResourceManager::getTexture("player")
+    );
+
+    SceneSerializer::save(
+        *scene,
+        "D:/ISO/Axiom/build/Debug/scene.txt"
+        // TODO: replace with Paths::getSave("scene.txt") in 0.8.5
+    );
 
 }
 
@@ -119,10 +131,6 @@ void GameLayer::onUpdate(float dt)
 
         if (sceneManager.getActiveSceneName() == "Gameplay")
         {
-            // TODO(0.6.x):
-            // Move player/test ownership fully into Gameplay scene.
-            // GameLayer should not keep raw pointers across scene switches.
-
             scene = menuScene;
             sceneManager.setActiveScene("Menu", scene);
         }
@@ -152,20 +160,6 @@ void GameLayer::onUpdate(float dt)
         powerSystem.update(gameContext);
         
         enemySystem.update(gameContext);
-
-        if (gameContext.nightTime >= gameContext.nightDuration)
-        {
-            std::cout << "WIN" << std::endl;
-            gameContext.night++;
-            gameContext.win = true;
-            gameState = GameState::Win;
-        }
-
-        if (gameContext.gameOver)
-        {
-            std::cout << "GAME OVER" << std::endl;
-            gameState = GameState::GameOver;
-        }
     }
 
     auto* playerTransform = player->getComponent<TransformComponent>();
@@ -180,10 +174,7 @@ void GameLayer::onUpdate(float dt)
     auto* testTransform = test->getComponent<TransformComponent>();
 
     if (testTransform)
-    {
-        // TODO(0.6.6):
-        // Move collision response from GameLayer into CollisionSystem.
-        
+    {    
         float dx = playerTransform->position.x - testTransform->position.x;
         float dy = playerTransform->position.y - testTransform->position.y;
         

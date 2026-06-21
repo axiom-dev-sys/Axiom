@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
-#include <iostream>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -50,7 +50,6 @@ namespace Axiom {
 
         void OpenGLRenderer::draw(Texture& texture, const glm::vec2& pos, const glm::vec2& scale, float rotation)
         {
-            std::cout << "DRAW CALL" << std::endl;
 
             glm::mat4 model(1.0f);
 

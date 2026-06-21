@@ -60,6 +60,7 @@ add_executable(Axiom
     src/Renderer/API/OpenGL/OpenGLRenderer.cpp
     src/stb_image.cpp
     src/Scene/Scene.cpp
+    src/Scene/SceneSerializer.cpp
     src/Scene/SceneManager.cpp
     src/Scene/Systems/RenderSystem.cpp
     src/Scene/Systems/MovementSystem.cpp
