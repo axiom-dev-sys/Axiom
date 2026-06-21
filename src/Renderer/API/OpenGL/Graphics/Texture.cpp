@@ -1,5 +1,4 @@
 ﻿#include "Axiom/Renderer/Texture.hpp"
-#include <iostream>
 #include <filesystem>
 #include "stb_image.h"
 
@@ -9,29 +8,20 @@ namespace Axiom {
     {
         valid = false;
         id = 0;
-
-        std::cout << "Texture ctor called\n";
         
         int w, h, c;
         
         stbi_set_flip_vertically_on_load(true);
         
-        std::cout << "Exists: "
-          << std::filesystem::exists(path)
-          << std::endl;
-        
           unsigned char* data = stbi_load(path.c_str(), &w, &h, &c, 0);
 
         if (!data)
         {
-            std::cout << "FAILED: " << path << std::endl;
-            std::cout << stbi_failure_reason() << std::endl;
             return;
         }
 
         glGenTextures(1, &id);
 
-        std::cout << "GL ID: " << id << std::endl;
 
         glBindTexture(GL_TEXTURE_2D, id);
 

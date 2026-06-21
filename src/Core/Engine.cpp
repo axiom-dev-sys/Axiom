@@ -1,5 +1,3 @@
-#pragma warning(disable : 26812)
-
 #include "Axiom/Core/Engine.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/Shader.hpp"
@@ -73,7 +71,7 @@ namespace Axiom {
 
             ImGui::Begin("Axiom Engine");
 
-            ImGui::Text("Axiom Engine 0.4.4");
+            ImGui::Text("Axiom Engine 0.8.4");
 
             ImGui::Separator();
 

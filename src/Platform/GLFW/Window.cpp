@@ -1,6 +1,6 @@
 #include "Axiom/Core/Window.hpp"
-#include <glad/glad.h> 
-#include <iostream>
+#include <glad/glad.h>
+#include <cstdlib>
 
 namespace Axiom {
 
@@ -8,7 +8,6 @@ namespace Axiom {
     {
         if (!glfwInit())
         {
-            std::cout << "GLFW init failed\n";
             abort();
         }
 
@@ -20,7 +19,6 @@ namespace Axiom {
 
         if (!m_Window)
         {
-            std::cout << "Window creation failed\n";
             glfwTerminate();
             abort();
         }
@@ -29,7 +27,6 @@ namespace Axiom {
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            std::cout << "Failed to init GLAD\n";
             abort();
         }
 
@@ -41,7 +38,6 @@ namespace Axiom {
             {
                 if (action == GLFW_PRESS)
                 {
-                    std::cout << "Key pressed: " << key << std::endl;
                 }
             });
     }

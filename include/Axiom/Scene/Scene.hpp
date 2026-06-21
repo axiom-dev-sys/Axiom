@@ -64,6 +64,11 @@ namespace Axiom {
             return m_Entities.size();
         }
 
+        const std::vector<std::unique_ptr<Entity>>& getEntities() const
+        {
+            return m_Entities;
+        }
+
         void destroyEntity(Entity* entity)
         {
             if (entity)

@@ -1,7 +1,6 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
-#include <iostream>
 
 namespace Axiom {
 
@@ -10,7 +9,6 @@ namespace Axiom {
 
     void ResourceManager::init()
     {
-        std::cout << "[ResourceManager] init\n";
 
         s_Textures.clear();
 
@@ -21,8 +19,6 @@ namespace Axiom {
 
     void ResourceManager::shutdown()
     {
-        std::cout << "[ResourceManager] shutdown\n";
-
         s_Textures.clear();
 
         s_FallbackTexture = nullptr;
@@ -46,18 +42,12 @@ namespace Axiom {
 
         if (!tex || tex->getID() == 0)
         {
-            std::cout << "[ResourceManager] Failed: "
-                << fullPath << std::endl;
-
             return getFallback();
         }
 
         Texture* rawPtr = tex.get();
 
         s_Textures[name] = std::move(tex);
-
-        std::cout << "[ResourceManager] Loaded: "
-            << fullPath << std::endl;
 
         return rawPtr;
     }

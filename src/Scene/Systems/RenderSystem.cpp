@@ -8,8 +8,6 @@
 
 #include "Axiom/Renderer/Renderer.hpp"
 
-#include <iostream>
-
 namespace Axiom {
 
 void RenderSystem::render(Scene& scene)
@@ -21,7 +19,6 @@ void RenderSystem::render(Scene& scene)
     
     scene.forEach([&](Entity* entity)
     {
-        std::cout << "Entity\n";
 
         auto* transform =
             entity->getComponent<TransformComponent>();
@@ -29,21 +26,11 @@ void RenderSystem::render(Scene& scene)
         auto* sprite =
             entity->getComponent<SpriteComponent>();
 
-        std::cout << "Transform: "
-              << (transform != nullptr)
-              << std::endl;
-
-        std::cout << "Sprite: "
-              << (sprite != nullptr)
-              << std::endl;
-
         if (!transform || !sprite)
             return;
 
         if (!sprite->getTexture())
             return;
-
-        std::cout << "SUBMIT\n";
 
         Renderer::submit(
             sprite->getTexture(),
