@@ -62,9 +62,29 @@ namespace Axiom {
                     << sprite->getTextureID()
                     << "\n";
             }
+
         }
-        
+
         Log::info("[SceneSerializer] Saved: " + path);
+
+    }
+    
+    void SceneSerializer::load(
+        Scene& scene,
+        const std::string& path
+    )
+    {
+        (void)scene;
+        
+        std::ifstream file(path);
+        
+        if (!file)
+        {
+            Log::error("[SceneSerializer] Failed to load: " + path);
+            return;
+        }
+
+        Log::info("[SceneSerializer] Loaded: " + path);
     }
 
 }

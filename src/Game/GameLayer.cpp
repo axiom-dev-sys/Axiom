@@ -70,6 +70,11 @@ GameLayer::GameLayer()
         Paths::getSave("scene.txt")
     );
 
+    SceneSerializer::load(
+        *scene,
+        Paths::getSave("scene.txt")
+    );
+
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
