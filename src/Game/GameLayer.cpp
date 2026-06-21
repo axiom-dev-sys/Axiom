@@ -1,5 +1,6 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Core/Paths.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/SceneSerializer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
@@ -66,8 +67,7 @@ GameLayer::GameLayer()
 
     SceneSerializer::save(
         *scene,
-        "D:/ISO/Axiom/build/Debug/scene.txt"
-        // TODO: replace with Paths::getSave("scene.txt") in 0.8.5
+        Paths::getSave("scene.txt")
     );
 
 }

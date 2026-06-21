@@ -9,11 +9,11 @@ namespace Axiom {
     {
         s_Textures.clear();
             
-        registerTexture("player", "player.png");
+        registerTexture("player", "textures/player.png");
         
-        registerTexture("test", "test.png");
+        registerTexture("test", "textures/test.png");
         
-        registerTexture("fallback", "fallback.png");
+        registerTexture("fallback", "textures/fallback.png");
     }
 
     void AssetRegistry::shutdown()

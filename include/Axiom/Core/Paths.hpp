@@ -19,5 +19,20 @@ namespace Axiom
 
             return (exeDir / "assets" / name).string();
         }
+
+        static std::string getSave(const std::string& name)
+        {
+            char buffer[MAX_PATH];
+            GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+
+            std::filesystem::path exePath(buffer);
+            std::filesystem::path exeDir = exePath.parent_path();
+
+            std::filesystem::path saveDir = exeDir / "saves";
+
+            std::filesystem::create_directories(saveDir);
+
+            return (saveDir / name).string();
+        }
     };
 }
