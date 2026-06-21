@@ -1,7 +1,6 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Core/Paths.hpp"
 #include <iostream>
-#include <filesystem>
 
 namespace Axiom {
 
@@ -15,9 +14,6 @@ namespace Axiom {
         s_Textures.clear();
 
         s_FallbackTexture = nullptr;
-
-        std::cout << std::filesystem::current_path() << std::endl;
-
     }
 
     void ResourceManager::shutdown()
@@ -29,42 +25,50 @@ namespace Axiom {
         s_FallbackTexture = nullptr;
     }
 
-    Texture* ResourceManager::loadTexture(const std::string& path)
+    Texture* ResourceManager::loadTexture(const std::string& name)
     {
-
-        auto it = s_Textures.find(path);
+        auto it = s_Textures.find(name);
         if (it != s_Textures.end())
             return it->second.get();
 
-        std::unique_ptr<Texture> tex = std::make_unique<Texture>(path);
+        std::string fullPath = Paths::getAsset(name);
+
+        std::unique_ptr<Texture> tex = std::make_unique<Texture>(fullPath);
 
         if (!tex || tex->getID() == 0)
         {
-            std::cout << "[ResourceManager] Failed: " << path << std::endl;
+            std::cout << "[ResourceManager] Failed: "
+                << fullPath << std::endl;
+
             return getFallback();
         }
 
         Texture* rawPtr = tex.get();
-        s_Textures[path] = std::move(tex);
+
+        s_Textures[name] = std::move(tex);
+
+        std::cout << "[ResourceManager] Loaded: "
+            << fullPath << std::endl;
 
         return rawPtr;
     }
 
-    Texture* ResourceManager::getTexture(const std::string& path)
+    Texture* ResourceManager::getTexture(const std::string& name)
     {
-        auto it = s_Textures.find(path);
+        auto it = s_Textures.find(name);
         if (it != s_Textures.end())
             return it->second.get();
 
-        return loadTexture(path);
+        return loadTexture(name);
     }
 
     Texture* ResourceManager::getFallback()
     {
-    if (!s_FallbackTexture)
-        s_FallbackTexture = std::make_unique<Texture>(Paths::getAsset("fallback.png"));
+        if (!s_FallbackTexture)
+            s_FallbackTexture =
+            std::make_unique<Texture>(Paths::getAsset("fallback.png"));
 
-    return s_FallbackTexture.get();
+        return s_FallbackTexture.get();
     }
 
 }

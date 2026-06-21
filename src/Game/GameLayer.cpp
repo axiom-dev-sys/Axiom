@@ -1,6 +1,5 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
-#include "Axiom/Core/Paths.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp" 
@@ -18,13 +17,9 @@ namespace Axiom {
 GameLayer::GameLayer()
 {
 
-    playerTex = ResourceManager::getTexture(
-        Paths::getAsset("player.png")
-    );
+    playerTex = ResourceManager::getTexture("player.png");
 
-    testTex = ResourceManager::getTexture(
-        Paths::getAsset("test.png")
-    );
+    testTex = ResourceManager::getTexture("test.png");
 
     gameplayScene = std::make_shared<Scene>();
     menuScene = std::make_shared<Scene>();
