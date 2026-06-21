@@ -8,6 +8,9 @@ namespace Axiom {
     class AssetRegistry
     {
     public:
+        static void init();
+        static void shutdown();
+
         static void registerTexture(
             const std::string& id,
             const std::string& filename

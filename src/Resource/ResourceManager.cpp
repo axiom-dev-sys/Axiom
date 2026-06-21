@@ -16,20 +16,7 @@ namespace Axiom {
 
         s_FallbackTexture = nullptr;
 
-        AssetRegistry::registerTexture(
-            "player",
-            "player.png"
-        );
-
-        AssetRegistry::registerTexture(
-            "test",
-            "test.png"
-        );
-
-        AssetRegistry::registerTexture(
-            "fallback",
-            "fallback.png"
-        );
+        AssetRegistry::init();
     }
 
     void ResourceManager::shutdown()
@@ -39,6 +26,8 @@ namespace Axiom {
         s_Textures.clear();
 
         s_FallbackTexture = nullptr;
+
+        AssetRegistry::shutdown();
     }
 
     Texture* ResourceManager::loadTexture(const std::string& name)
