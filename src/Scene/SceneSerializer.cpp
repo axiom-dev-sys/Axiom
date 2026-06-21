@@ -5,6 +5,7 @@
 #include "Axiom/Scene/Components/TransformComponent.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include <fstream>
+#include <string>
 
 namespace Axiom {
 
@@ -69,22 +70,57 @@ namespace Axiom {
 
     }
     
-    void SceneSerializer::load(
-        Scene& scene,
-        const std::string& path
-    )
-    {
-        (void)scene;
-        
-        std::ifstream file(path);
-        
-        if (!file)
+        void SceneSerializer::load(
+            Scene& scene,
+            const std::string& path
+        )
         {
-            Log::error("[SceneSerializer] Failed to load: " + path);
-            return;
-        }
+            (void)scene;
 
-        Log::info("[SceneSerializer] Loaded: " + path);
-    }
+            std::ifstream file(path);
+
+            if (!file)
+            {
+                Log::error("[SceneSerializer] Failed to load: " + path);
+                return;
+            }
+
+            std::string line;
+            std::string name;
+            std::string position;
+            std::string scale;
+            std::string texture;
+
+            while (std::getline(file, line))
+            {
+                if (line.rfind("Name: ", 0) == 0)
+                {
+                    name = line.substr(6);
+                    Log::info("[SceneSerializer] Found name: " + name);
+                }
+
+                if (line.rfind("Position: ", 0) == 0)
+                {
+                    position = line.substr(10);
+                    Log::info("[SceneSerializer] Found position: " + position);
+                }
+
+                if (line.rfind("Scale: ", 0) == 0)
+                {
+                    scale = line.substr(7);
+                    Log::info("[SceneSerializer] Found scale: " + scale);
+                }
+
+                if (line.rfind("Texture: ", 0) == 0)
+                {
+                    texture = line.substr(9);
+                    Log::info("[SceneSerializer] Found texture: " + texture);
+                }
+
+            }
+
+            Log::info("[SceneSerializer] Loaded: " + path);
+
+        }
 
 }
