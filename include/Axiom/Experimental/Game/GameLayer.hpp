@@ -9,6 +9,7 @@
 #include "Axiom/Experimental/Game/GameContext.hpp"
 #include "Axiom/Experimental/EnemySystem.hpp"
 #include "Axiom/Experimental/PowerSystem.hpp"
+#include "Axiom/DebugTools/DebugOverlay.hpp"
 
 #include <memory>
 #include <string>
@@ -53,12 +54,14 @@ private:
     EnemySystem enemySystem;
     SceneManager sceneManager;
     CollisionSystem collisionSystem;
+    DebugOverlay debugOverlay;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;
     bool sceneSwitchKeyWasPressed = false;
     bool cameraKeyWasPressed = false;
     bool doorKeyWasPressed = false;
+    bool f3PressedLastFrame = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;

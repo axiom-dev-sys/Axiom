@@ -100,6 +100,16 @@ GameLayer::GameLayer()
 
 void GameLayer::onUpdate(float dt)
 {
+    bool f3Pressed = Input::isKeyDown(GLFW_KEY_F3);
+
+    if (f3Pressed && !f3PressedLastFrame)
+    {
+        debugOverlay.toggle();
+    }
+
+    f3PressedLastFrame = f3Pressed;
+
+    debugOverlay.update(dt);
 
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
@@ -219,6 +229,8 @@ void GameLayer::onRender()
     Renderer::clear();
 
     scene->onRender();
+
+    debugOverlay.render();
 
 }
 

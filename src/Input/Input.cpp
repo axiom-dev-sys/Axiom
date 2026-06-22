@@ -15,4 +15,10 @@ namespace Axiom {
         return state == GLFW_PRESS || state == GLFW_REPEAT;
     }
 
+    bool Input::isKeyDown(int key)
+    {
+        auto state = glfwGetKey(s_Window, key);
+        return state == GLFW_PRESS;
+    }
+
 }
