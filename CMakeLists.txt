@@ -70,6 +70,7 @@ add_executable(Axiom
     src/Scene/Systems/TimerSystem.cpp
     src/DebugTools/DebugOverlay.cpp
     src/DebugTools/DebugRenderer.cpp
+    src/DebugTools/InspectorPanel.cpp
 )
 
 target_include_directories(Axiom PUBLIC
