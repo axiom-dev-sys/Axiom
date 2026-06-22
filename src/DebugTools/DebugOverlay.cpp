@@ -1,5 +1,7 @@
 #include "Axiom/DebugTools/DebugOverlay.hpp"
 
+#include <imgui.h>
+
 namespace Axiom {
 
     void DebugOverlay::update(float dt)
@@ -17,7 +19,12 @@ namespace Axiom {
         if (!visible)
             return;
 
-        // TODO: ImGui overlay
+        ImGui::Begin("Axiom Debug");
+
+        ImGui::Text("FPS: %.1f", fps);
+        ImGui::Text("Delta Time: %.4f", deltaTime);
+
+        ImGui::End();
     }
 
     void DebugOverlay::setVisible(bool value)
