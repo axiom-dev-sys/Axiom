@@ -120,6 +120,33 @@ void GameLayer::onUpdate(float dt)
         getPlayerPosition()
     );
 
+    debugOverlay.setCameraPosition(
+        scene->camera.position
+    );
+
+    debugOverlay.setCameraZoom(
+        scene->camera.zoom
+    );
+
+    switch (gameState)
+    {
+    case GameState::Gameplay:
+        debugOverlay.setGameState("Gameplay");
+        break;
+
+    case GameState::Pause:
+        debugOverlay.setGameState("Pause");
+        break;
+
+    case GameState::Win:
+        debugOverlay.setGameState("Win");
+        break;
+
+    case GameState::GameOver:
+        debugOverlay.setGameState("Game Over");
+        break;
+    }
+
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
     if (pauseKeyPressed && !pauseKeyWasPressed)

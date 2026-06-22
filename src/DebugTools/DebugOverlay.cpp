@@ -21,6 +21,7 @@ namespace Axiom {
 
         ImGui::Begin("Axiom Debug");
 
+        ImGui::Text("Performance");
         ImGui::Text("FPS: %.1f", fps);
         ImGui::Text("Delta Time: %.4f", deltaTime);
 
@@ -34,6 +35,26 @@ namespace Axiom {
         ImGui::Text("Player");
         ImGui::Text("X: %.1f", playerPosition.x);
         ImGui::Text("Y: %.1f", playerPosition.y);
+
+        ImGui::Separator();
+
+        ImGui::Text("State");
+        ImGui::Text("Game State: %s", gameState.c_str());
+
+        ImGui::Separator();
+
+        ImGui::Text("Camera");
+
+        ImGui::Text(
+            "Position: %.1f %.1f",
+            cameraPosition.x,
+            cameraPosition.y
+        );
+
+        ImGui::Text(
+            "Zoom: %.2f",
+            cameraZoom
+        );
 
         ImGui::End();
     }
@@ -62,6 +83,21 @@ namespace Axiom {
     void DebugOverlay::setPlayerPosition(const glm::vec2& position)
     {
         playerPosition = position;
+    }
+
+    void DebugOverlay::setGameState(const std::string& state)
+    {
+        gameState = state;
+    }
+
+    void DebugOverlay::setCameraPosition(const glm::vec2& position)
+    {
+        cameraPosition = position;
+    }
+
+    void DebugOverlay::setCameraZoom(float zoom)
+    {
+        cameraZoom = zoom;
     }
 
 }
