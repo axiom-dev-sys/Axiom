@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace Axiom {
 
@@ -12,11 +13,16 @@ namespace Axiom {
 
         void toggle();
 
+        void setSceneInfo(const std::string& sceneName, size_t entityCount);
+
     private:
         bool visible = true;
 
         float fps = 0.0f;
         float deltaTime = 0.0f;
+
+        std::string sceneName = "None";
+        size_t entityCount = 0;
     };
 
 }

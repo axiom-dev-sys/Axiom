@@ -111,6 +111,11 @@ void GameLayer::onUpdate(float dt)
 
     debugOverlay.update(dt);
 
+    debugOverlay.setSceneInfo(
+        sceneManager.getActiveSceneName(),
+        getEntityCount()
+    );
+
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
     if (pauseKeyPressed && !pauseKeyWasPressed)

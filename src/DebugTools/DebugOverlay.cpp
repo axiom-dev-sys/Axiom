@@ -24,6 +24,11 @@ namespace Axiom {
         ImGui::Text("FPS: %.1f", fps);
         ImGui::Text("Delta Time: %.4f", deltaTime);
 
+        ImGui::Separator();
+
+        ImGui::Text("Scene: %s", sceneName.c_str());
+        ImGui::Text("Entities: %zu", entityCount);
+
         ImGui::End();
     }
 
@@ -40,6 +45,12 @@ namespace Axiom {
     void DebugOverlay::toggle()
     {
         visible = !visible;
+    }
+
+    void DebugOverlay::setSceneInfo(const std::string& name, size_t count)
+    {
+        sceneName = name;
+        entityCount = count;
     }
 
 }
