@@ -59,4 +59,20 @@ namespace Axiom {
         s_Queue.clear();
     }
 
+    void Renderer::drawDebugLine(
+        const glm::vec2& start,
+        const glm::vec2& end
+    )
+    {
+        s_API->drawDebugLine(start, end);
+    }
+
+    void Renderer::drawDebugRect(const glm::vec2& position, const glm::vec2& size)
+    {
+        drawDebugLine(position, { position.x + size.x, position.y });
+        drawDebugLine({ position.x + size.x, position.y }, { position.x + size.x, position.y + size.y });
+        drawDebugLine({ position.x + size.x, position.y + size.y }, { position.x, position.y + size.y });
+        drawDebugLine({ position.x, position.y + size.y }, position);
+    }
+
 }

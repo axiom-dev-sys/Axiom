@@ -10,6 +10,7 @@
 #include "Axiom/Experimental/EnemySystem.hpp"
 #include "Axiom/Experimental/PowerSystem.hpp"
 #include "Axiom/DebugTools/DebugOverlay.hpp"
+#include "Axiom/DebugTools/DebugRenderer.hpp"
 
 #include <memory>
 #include <string>
@@ -55,6 +56,7 @@ private:
     SceneManager sceneManager;
     CollisionSystem collisionSystem;
     DebugOverlay debugOverlay;
+    DebugRenderer debugRenderer;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;
@@ -62,6 +64,7 @@ private:
     bool cameraKeyWasPressed = false;
     bool doorKeyWasPressed = false;
     bool f3PressedLastFrame = false;
+    bool f4PressedLastFrame = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;

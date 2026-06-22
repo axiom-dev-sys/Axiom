@@ -9,15 +9,14 @@ namespace Axiom {
 layout(location=0) in vec2 aPos;
 layout(location=1) in vec2 aTex;
 
+out vec2 TexCoord;
+
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
 
-out vec2 TexCoord;
-
 void main() {
     gl_Position = uProjection * uView * uModel * vec4(aPos, 0.0, 1.0);
-
     TexCoord = aTex;
 }
 )";
@@ -99,6 +98,43 @@ void main() {
     void Shader::setVec2(const char* name, float x, float y)
     {
         glUniform2f(glGetUniformLocation(program, name), x, y);
+    }
+
+    void Shader::initDebug()
+    {
+        const char* vertexSrc = R"(
+        #version 330 core
+        layout (location = 0) in vec2 aPos;
+
+        uniform mat4 uView;
+        uniform mat4 uProjection;
+
+        void main()
+        {
+            gl_Position = uProjection * uView * vec4(aPos, 0.0, 1.0);
+        }
+    )";
+
+        const char* fragmentSrc = R"(
+        #version 330 core
+        out vec4 FragColor;
+
+        void main()
+        {
+            FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    )";
+
+        GLuint vsID = compile(GL_VERTEX_SHADER, vertexSrc);
+        GLuint fsID = compile(GL_FRAGMENT_SHADER, fragmentSrc);
+
+        program = glCreateProgram();
+        glAttachShader(program, vsID);
+        glAttachShader(program, fsID);
+        glLinkProgram(program);
+
+        glDeleteShader(vsID);
+        glDeleteShader(fsID);
     }
 
 }

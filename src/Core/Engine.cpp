@@ -60,6 +60,8 @@ namespace Axiom {
             for (Layer* layer : m_LayerStack)
                 layer->onUpdate(dt);
 
+            glm::vec2 playerPos = m_GameLayer->getPlayerPosition();
+
             Renderer::clear();
 
             ImGui_ImplOpenGL3_NewFrame();
@@ -69,34 +71,6 @@ namespace Axiom {
             for (Layer* layer : m_LayerStack)
                 layer->onRender();
 
-            ImGui::Begin("Axiom Engine");
-
-            ImGui::Text("Axiom Engine 0.8.4");
-
-            ImGui::Separator();
-
-            glm::vec2 playerPos = m_GameLayer->getPlayerPosition();
-
-            ImGui::Text("Player: %.1f, %.1f", playerPos.x, playerPos.y);
-            ImGui::Text("Entities: %zu", m_GameLayer->getEntityCount());
-            
-            ImGui::Text(
-                "State: %s",
-                m_GameLayer->getGameState() == GameState::Pause
-                ? "Pause"
-                : "Gameplay"
-            );
-
-            ImGui::Text(
-                "Scene: %s",
-                m_GameLayer->getActiveSceneName().c_str());
-            
-            ImGui::Separator();
-
-            ImGui::Text("FPS: %.1f", 1.0f / dt);
-
-            ImGui::End();
-            
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
