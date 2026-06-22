@@ -15,6 +15,11 @@ namespace Axiom {
                             const glm::vec2& scale,
                             float rotation
                         ) = 0;
+
+        virtual void drawDebugLine(
+            const glm::vec2& start,
+            const glm::vec2& end
+        ) = 0;
     };
 
 }

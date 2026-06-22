@@ -109,6 +109,15 @@ void GameLayer::onUpdate(float dt)
 
     f3PressedLastFrame = f3Pressed;
 
+    bool f4Pressed = Input::isKeyDown(GLFW_KEY_F4);
+
+    if (f4Pressed && !f4PressedLastFrame)
+    {
+        debugRenderer.toggle();
+    }
+
+    f4PressedLastFrame = f4Pressed;
+
     debugOverlay.update(dt);
 
     debugOverlay.setSceneInfo(
@@ -265,6 +274,25 @@ void GameLayer::onRender()
     Renderer::clear();
 
     scene->onRender();
+
+    scene->forEach([&](Entity* entity)
+        {
+            auto* transform = entity->getComponent<TransformComponent>();
+            auto* collider = entity->getComponent<ColliderComponent>();
+
+            if (!transform || !collider)
+                return;
+
+            debugRenderer.drawRect(
+                transform->position
+                - collider->size * 0.5f
+                + collider->offset,
+                collider->size
+            );
+        });
+
+    debugRenderer.render();
+    debugRenderer.clear();
 
     debugOverlay.render();
 

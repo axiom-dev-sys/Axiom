@@ -18,6 +18,7 @@ namespace Axiom {
             };
 
             m_Shader.init();
+            debugShader.initDebug();
 
             unsigned int indices[] = {
                 0, 1, 2,
@@ -41,6 +42,33 @@ namespace Axiom {
 
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
             glEnableVertexAttribArray(1);
+
+            glGenVertexArrays(1, &debugLineVAO);
+            glGenBuffers(1, &debugLineVBO);
+
+            glBindVertexArray(debugLineVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, debugLineVBO);
+
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                sizeof(float) * 4,
+                nullptr,
+                GL_DYNAMIC_DRAW
+            );
+
+            glVertexAttribPointer(
+                0,
+                2,
+                GL_FLOAT,
+                GL_FALSE,
+                2 * sizeof(float),
+                (void*)0
+            );
+
+            glEnableVertexAttribArray(0);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
         }
 
         void OpenGLRenderer::clear() {
@@ -85,6 +113,48 @@ namespace Axiom {
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+            glBindVertexArray(0);
+
+        }
+
+        void OpenGLRenderer::drawDebugLine(
+            const glm::vec2& start,
+            const glm::vec2& end
+        )
+        {
+            float vertices[] = {
+                start.x, start.y,
+                end.x, end.y
+            };
+
+            glBindVertexArray(debugLineVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, debugLineVBO);
+
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                0,
+                sizeof(vertices),
+                vertices
+            );
+
+            glDisable(GL_DEPTH_TEST);
+
+            debugShader.use();
+            debugShader.setMat4("uView", Renderer::s_View);
+            debugShader.setMat4("uProjection", Renderer::s_Projection);
+
+            glBindVertexArray(debugLineVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, debugLineVBO);
+
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            glLineWidth(3.0f);
+            glDrawArrays(GL_LINES, 0, 2);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+
+            glEnable(GL_DEPTH_TEST);
         }
 
 }
