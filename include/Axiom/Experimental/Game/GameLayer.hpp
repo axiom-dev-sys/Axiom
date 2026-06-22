@@ -11,6 +11,7 @@
 #include "Axiom/Experimental/PowerSystem.hpp"
 #include "Axiom/DebugTools/DebugOverlay.hpp"
 #include "Axiom/DebugTools/DebugRenderer.hpp"
+#include "Axiom/DebugTools/InspectorPanel.hpp"
 
 #include <memory>
 #include <string>
@@ -57,6 +58,7 @@ private:
     CollisionSystem collisionSystem;
     DebugOverlay debugOverlay;
     DebugRenderer debugRenderer;
+    InspectorPanel inspectorPanel;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;
@@ -65,6 +67,7 @@ private:
     bool doorKeyWasPressed = false;
     bool f3PressedLastFrame = false;
     bool f4PressedLastFrame = false;
+    bool f5PressedLastFrame = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;

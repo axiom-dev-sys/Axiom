@@ -118,6 +118,15 @@ void GameLayer::onUpdate(float dt)
 
     f4PressedLastFrame = f4Pressed;
 
+    bool f5Pressed = Input::isKeyDown(GLFW_KEY_F5);
+
+    if (f5Pressed && !f5PressedLastFrame)
+    {
+        inspectorPanel.toggle();
+    }
+
+    f5PressedLastFrame = f5Pressed;
+
     debugOverlay.update(dt);
 
     debugOverlay.setSceneInfo(
@@ -135,6 +144,36 @@ void GameLayer::onUpdate(float dt)
 
     debugOverlay.setCameraZoom(
         scene->camera.zoom
+    );
+
+    inspectorPanel.setSelectedEntity(player);
+
+    inspectorPanel.setEntityName(
+        player->getName()
+    );
+
+    inspectorPanel.setEntityID(
+        player->getID()
+    );
+
+    inspectorPanel.setHasSprite(
+        player->hasComponent<SpriteComponent>()
+    );
+
+    inspectorPanel.setHasVelocity(
+        player->hasComponent<VelocityComponent>()
+    );
+
+    inspectorPanel.setHasCollider(
+        player->hasComponent<ColliderComponent>()
+    );
+
+    inspectorPanel.setHasPlayerController(
+        player->hasComponent<PlayerControllerComponent>()
+    );
+
+    inspectorPanel.setHasPlayerTag(
+        player->hasComponent<PlayerTag>()
     );
 
     switch (gameState)
@@ -295,6 +334,8 @@ void GameLayer::onRender()
     debugRenderer.clear();
 
     debugOverlay.render();
+
+    inspectorPanel.render();
 
 }
 
