@@ -29,6 +29,12 @@ namespace Axiom {
         ImGui::Text("Scene: %s", sceneName.c_str());
         ImGui::Text("Entities: %zu", entityCount);
 
+        ImGui::Separator();
+
+        ImGui::Text("Player");
+        ImGui::Text("X: %.1f", playerPosition.x);
+        ImGui::Text("Y: %.1f", playerPosition.y);
+
         ImGui::End();
     }
 
@@ -51,6 +57,11 @@ namespace Axiom {
     {
         sceneName = name;
         entityCount = count;
+    }
+
+    void DebugOverlay::setPlayerPosition(const glm::vec2& position)
+    {
+        playerPosition = position;
     }
 
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -14,6 +15,7 @@ namespace Axiom {
         void toggle();
 
         void setSceneInfo(const std::string& sceneName, size_t entityCount);
+        void setPlayerPosition(const glm::vec2& position);
 
     private:
         bool visible = true;
@@ -23,6 +25,7 @@ namespace Axiom {
 
         std::string sceneName = "None";
         size_t entityCount = 0;
+        glm::vec2 playerPosition{ 0.0f, 0.0f };
     };
 
 }
