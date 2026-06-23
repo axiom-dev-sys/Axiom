@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Axiom/Editor/EditorContext.hpp"
+
 #include <string>
 #include <vector>
 
@@ -23,6 +25,8 @@ namespace Axiom {
         bool isApplyAssetRequested() const;
         void resetApplyAssetRequest();
 
+        void setEditorContext(EditorContext* context);
+
     private:
         bool visible = true;
 
@@ -30,6 +34,8 @@ namespace Axiom {
         std::string selectedAsset;
 
         bool applyAssetRequested = false;
+
+        EditorContext* editorContext = nullptr;
     };
 
 }

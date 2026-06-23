@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Axiom/Scene/Entity.hpp"
+#include "Axiom/Editor/EditorContext.hpp"
 
 namespace Axiom {
 
@@ -14,8 +15,6 @@ namespace Axiom {
 
         void toggle();
 
-        void setSelectedEntity(Entity* entity);
-
         bool isCreateEntityRequested() const;
         void resetCreateEntityRequest();
 
@@ -28,10 +27,12 @@ namespace Axiom {
         bool isLoadSceneRequested() const;
         void resetLoadSceneRequest();
 
+        void setEditorContext(EditorContext* context);
+
     private:
         bool visible = true;
 
-        Entity* selectedEntity = nullptr;
+        EditorContext* editorContext = nullptr;
 
         bool createEntityRequested = false;
         bool destroyEntityRequested = false;

@@ -15,6 +15,7 @@
 #include "Axiom/DebugTools/HierarchyPanel.hpp"
 #include "Axiom/DebugTools/SceneEditorPanel.hpp"
 #include "Axiom/DebugTools/AssetBrowserPanel.hpp"
+#include "Axiom/Editor/EditorContext.hpp"
 
 #include <memory>
 #include <string>
@@ -65,6 +66,7 @@ private:
     HierarchyPanel hierarchyPanel;
     SceneEditorPanel sceneEditorPanel;
     AssetBrowserPanel assetBrowserPanel;
+    EditorContext editorContext;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;

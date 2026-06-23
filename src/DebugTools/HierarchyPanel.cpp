@@ -20,6 +20,9 @@ namespace Axiom {
             if (entity->isDestroyed())
                 continue;
 
+            Entity* selectedEntity =
+                editorContext ? editorContext->getSelectedEntity() : nullptr;
+
             bool selected = (entity == selectedEntity);
 
             std::string label =
@@ -27,7 +30,10 @@ namespace Axiom {
 
             if (ImGui::Selectable(label.c_str(), selected))
             {
-                selectedEntity = entity;
+                if (editorContext)
+                {
+                    editorContext->setSelectedEntity(entity);
+                }
             }
         }
 
@@ -62,14 +68,9 @@ namespace Axiom {
         entities.clear();
     }
 
-    Entity* HierarchyPanel::getSelectedEntity() const
+    void HierarchyPanel::setEditorContext(EditorContext* context)
     {
-        return selectedEntity;
-    }
-
-    void HierarchyPanel::clearSelection()
-    {
-        selectedEntity = nullptr;
+        editorContext = context;
     }
 
 }

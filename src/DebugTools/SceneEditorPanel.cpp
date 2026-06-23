@@ -12,6 +12,9 @@ namespace Axiom {
 
         ImGui::Begin("Scene Editor");
 
+        Entity* selectedEntity =
+            editorContext ? editorContext->getSelectedEntity() : nullptr;
+
         if (!selectedEntity)
         {
             ImGui::Text("No selected entity");
@@ -63,11 +66,6 @@ namespace Axiom {
         visible = !visible;
     }
 
-    void SceneEditorPanel::setSelectedEntity(Entity* entity)
-    {
-        selectedEntity = entity;
-    }
-
     bool SceneEditorPanel::isCreateEntityRequested() const
     {
         return createEntityRequested;
@@ -107,4 +105,10 @@ namespace Axiom {
     {
         loadSceneRequested = false;
     }
+
+    void SceneEditorPanel::setEditorContext(EditorContext* context)
+    {
+        editorContext = context;
+    }
+
 }
