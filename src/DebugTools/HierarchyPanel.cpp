@@ -17,6 +17,9 @@ namespace Axiom {
             if (!entity)
                 continue;
 
+            if (entity->isDestroyed())
+                continue;
+
             bool selected = (entity == selectedEntity);
 
             std::string label =
@@ -62,6 +65,11 @@ namespace Axiom {
     Entity* HierarchyPanel::getSelectedEntity() const
     {
         return selectedEntity;
+    }
+
+    void HierarchyPanel::clearSelection()
+    {
+        selectedEntity = nullptr;
     }
 
 }

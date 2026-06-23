@@ -65,16 +65,6 @@ GameLayer::GameLayer()
         ResourceManager::getTexture("player")
     );
 
-    SceneSerializer::save(
-        *scene,
-        Paths::getSave("scene.txt")
-    );
-
-    SceneSerializer::load(
-        *scene,
-        Paths::getSave("scene.txt")
-    );
-
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -135,6 +125,15 @@ void GameLayer::onUpdate(float dt)
     }
 
     f6PressedLastFrame = f6Pressed;
+
+    bool f7Pressed = Input::isKeyDown(GLFW_KEY_F7);
+
+    if (f7Pressed && !f7PressedLastFrame)
+    {
+        sceneEditorPanel.toggle();
+    }
+
+    f7PressedLastFrame = f7Pressed;
 
     debugOverlay.update(dt);
 
@@ -364,6 +363,60 @@ void GameLayer::onRender()
     }
 
     inspectorPanel.setSelectedEntity(selectedEntity);
+    sceneEditorPanel.setSelectedEntity(selectedEntity);
+
+    if (sceneEditorPanel.isCreateEntityRequested())
+    {
+        Entity* entity = scene->createEntity("New Entity");
+
+        auto* transform =
+            entity->addComponent<TransformComponent>();
+
+        transform->position = { 0.0f, 0.0f };
+        transform->scale = { 128.0f, 128.0f };
+
+        entity->addComponent<SpriteComponent>(
+            "test",
+            ResourceManager::getTexture("test")
+        );
+
+        sceneEditorPanel.resetCreateEntityRequest();
+    }
+
+    if (sceneEditorPanel.isDestroyEntityRequested())
+    {
+        Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
+
+        if (selectedEntity)
+        {
+            selectedEntity->destroy();
+            hierarchyPanel.clearSelection();
+        }
+
+        sceneEditorPanel.resetDestroyEntityRequest();
+    }
+
+    if (sceneEditorPanel.isSaveSceneRequested())
+    {
+        SceneSerializer::save(
+            *scene,
+            Paths::getSave("scene.txt")
+        );
+
+        sceneEditorPanel.resetSaveSceneRequest();
+    }
+
+    if (sceneEditorPanel.isLoadSceneRequested())
+    {
+        SceneSerializer::load(
+            *scene,
+            Paths::getSave("scene.txt")
+        );
+
+        sceneEditorPanel.resetLoadSceneRequest();
+    }
+
+    sceneEditorPanel.render();
 
 }
 

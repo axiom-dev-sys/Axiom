@@ -21,6 +21,8 @@ namespace Axiom {
 
         Entity* getSelectedEntity() const;
 
+        void clearSelection();
+
     private:
         bool visible = true;
 
