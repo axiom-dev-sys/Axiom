@@ -75,6 +75,7 @@ add_executable(Axiom
     src/DebugTools/SceneEditorPanel.cpp
     src/DebugTools/AssetBrowserPanel.cpp
     src/Editor/EditorContext.cpp
+    src/Editor/EditorUI.cpp
 )
 
 target_include_directories(Axiom PUBLIC
