@@ -16,6 +16,7 @@
 #include "Axiom/DebugTools/SceneEditorPanel.hpp"
 #include "Axiom/DebugTools/AssetBrowserPanel.hpp"
 #include "Axiom/Editor/EditorContext.hpp"
+#include "Axiom/Editor/EditorUI.hpp"
 
 #include <memory>
 #include <string>
@@ -67,6 +68,7 @@ private:
     SceneEditorPanel sceneEditorPanel;
     AssetBrowserPanel assetBrowserPanel;
     EditorContext editorContext;
+    EditorUI editorUI;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;

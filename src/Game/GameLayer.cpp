@@ -154,23 +154,26 @@ void GameLayer::onUpdate(float dt)
 
     debugOverlay.update(dt);
 
-    debugRenderer.clear();
+    if (editorUI.isDebugRendererVisible())
+    {
+        debugRenderer.clear();
 
-    scene->forEach([&](Entity* entity)
-        {
-            auto* transform = entity->getComponent<TransformComponent>();
-            auto* collider = entity->getComponent<ColliderComponent>();
+        scene->forEach([&](Entity* entity)
+            {
+                auto* transform = entity->getComponent<TransformComponent>();
+                auto* collider = entity->getComponent<ColliderComponent>();
 
-            if (!transform || !collider)
-                return;
+                if (!transform || !collider)
+                    return;
 
-            debugRenderer.drawRect(
-                transform->position
-                - collider->size * 0.5f
-                + collider->offset,
-                collider->size
-            );
-        });
+                debugRenderer.drawRect(
+                    transform->position
+                    - collider->size * 0.5f
+                    + collider->offset,
+                    collider->size
+                );
+            });
+    }
 
     hierarchyPanel.clear();
 
@@ -256,24 +259,36 @@ void GameLayer::onUpdate(float dt)
         assetBrowserPanel.resetApplyAssetRequest();
     }
 
-    if (sceneEditorPanel.isSaveSceneRequested())
+    if (editorUI.isSaveSceneRequested())
     {
         SceneSerializer::save(
             *scene,
             Paths::getSave("scene.txt")
         );
 
-        sceneEditorPanel.resetSaveSceneRequest();
+        editorUI.resetSaveSceneRequest();
     }
 
-    if (sceneEditorPanel.isLoadSceneRequested())
+    if (editorUI.isLoadSceneRequested())
     {
         SceneSerializer::load(
             *scene,
             Paths::getSave("scene.txt")
         );
 
-        sceneEditorPanel.resetLoadSceneRequest();
+        editorUI.resetLoadSceneRequest();
+    }
+
+    if (editorUI.isPlayRequested())
+    {
+        gameState = GameState::Gameplay;
+        editorUI.resetPlayRequest();
+    }
+
+    if (editorUI.isPauseRequested())
+    {
+        gameState = GameState::Pause;
+        editorUI.resetPauseRequest();
     }
 
     debugOverlay.setSceneInfo(
@@ -459,12 +474,25 @@ void GameLayer::onRender()
 
     scene->onRender();
 
-    debugRenderer.render();
-    debugOverlay.render();
-    inspectorPanel.render();
-    hierarchyPanel.render();
-    sceneEditorPanel.render();
-    assetBrowserPanel.render();
+    editorUI.render();
+
+    if (editorUI.isDebugOverlayVisible())
+        debugOverlay.render();
+
+    if (editorUI.isDebugRendererVisible())
+        debugRenderer.render();
+
+    if (editorUI.isInspectorVisible())
+        inspectorPanel.render();
+
+    if (editorUI.isHierarchyVisible())
+        hierarchyPanel.render();
+
+    if (editorUI.isSceneEditorVisible())
+        sceneEditorPanel.render();
+
+    if (editorUI.isAssetBrowserVisible())
+        assetBrowserPanel.render();
 }
 
 }
