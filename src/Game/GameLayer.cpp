@@ -135,7 +135,137 @@ void GameLayer::onUpdate(float dt)
 
     f7PressedLastFrame = f7Pressed;
 
+    bool f8Pressed = Input::isKeyDown(GLFW_KEY_F8);
+
+    if (f8Pressed && !f8PressedLastFrame)
+    {
+        assetBrowserPanel.toggle();
+    }
+
+    f8PressedLastFrame = f8Pressed;
+
     debugOverlay.update(dt);
+
+    debugRenderer.clear();
+
+    scene->forEach([&](Entity* entity)
+        {
+            auto* transform = entity->getComponent<TransformComponent>();
+            auto* collider = entity->getComponent<ColliderComponent>();
+
+            if (!transform || !collider)
+                return;
+
+            debugRenderer.drawRect(
+                transform->position
+                - collider->size * 0.5f
+                + collider->offset,
+                collider->size
+            );
+        });
+
+    hierarchyPanel.clear();
+
+    scene->forEach([&](Entity* entity)
+        {
+            hierarchyPanel.addEntity(entity);
+        });
+
+    Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
+
+    if (!selectedEntity)
+    {
+        selectedEntity = player;
+    }
+
+    inspectorPanel.setSelectedEntity(selectedEntity);
+    sceneEditorPanel.setSelectedEntity(selectedEntity);
+
+    assetBrowserPanel.clear();
+
+    assetBrowserPanel.addAsset("player");
+    assetBrowserPanel.addAsset("test");
+    assetBrowserPanel.addAsset("office");
+    assetBrowserPanel.addAsset("fallback");
+
+    if (sceneEditorPanel.isCreateEntityRequested())
+    {
+        Entity* entity = scene->createEntity("New Entity");
+
+        auto* transform =
+            entity->addComponent<TransformComponent>();
+
+        transform->position = { 0.0f, 0.0f };
+        transform->scale = { 128.0f, 128.0f };
+
+        entity->addComponent<SpriteComponent>(
+            "test",
+            ResourceManager::getTexture("test")
+        );
+
+        sceneEditorPanel.resetCreateEntityRequest();
+    }
+
+    if (sceneEditorPanel.isDestroyEntityRequested())
+    {
+        Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
+
+        if (selectedEntity)
+        {
+            selectedEntity->destroy();
+            hierarchyPanel.clearSelection();
+            inspectorPanel.setSelectedEntity(player);
+            sceneEditorPanel.setSelectedEntity(player);
+        }
+
+        sceneEditorPanel.resetDestroyEntityRequest();
+    }
+
+    if (assetBrowserPanel.isApplyAssetRequested())
+    {
+        Entity* selectedEntity =
+            hierarchyPanel.getSelectedEntity();
+
+        if (selectedEntity && !selectedEntity->isDestroyed())
+        {
+            auto* sprite =
+                selectedEntity->getComponent<SpriteComponent>();
+
+            if (sprite)
+            {
+                const std::string& asset =
+                    assetBrowserPanel.getSelectedAsset();
+
+                sprite->setTexture(
+                    asset,
+                    ResourceManager::getTexture(asset)
+                );
+            }
+        }
+
+        assetBrowserPanel.resetApplyAssetRequest();
+
+    }
+
+    if (sceneEditorPanel.isSaveSceneRequested())
+    {
+        SceneSerializer::save(
+            *scene,
+            Paths::getSave("scene.txt")
+        );
+
+        sceneEditorPanel.resetSaveSceneRequest();
+    }
+
+    if (sceneEditorPanel.isLoadSceneRequested())
+    {
+        SceneSerializer::load(
+            *scene,
+            Paths::getSave("scene.txt")
+        );
+
+        sceneEditorPanel.resetLoadSceneRequest();
+    }
 
     debugOverlay.setSceneInfo(
         sceneManager.getActiveSceneName(),
@@ -324,100 +454,12 @@ void GameLayer::onRender()
 
     scene->onRender();
 
-    scene->forEach([&](Entity* entity)
-        {
-            auto* transform = entity->getComponent<TransformComponent>();
-            auto* collider = entity->getComponent<ColliderComponent>();
-
-            if (!transform || !collider)
-                return;
-
-            debugRenderer.drawRect(
-                transform->position
-                - collider->size * 0.5f
-                + collider->offset,
-                collider->size
-            );
-        });
-
     debugRenderer.render();
-    debugRenderer.clear();
-
     debugOverlay.render();
-
     inspectorPanel.render();
-
     hierarchyPanel.render();
-    hierarchyPanel.clear();
-
-    scene->forEach([&](Entity* entity)
-        {
-            hierarchyPanel.addEntity(entity);
-        });
-
-    Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
-
-    if (!selectedEntity)
-    {
-        selectedEntity = player;
-    }
-
-    inspectorPanel.setSelectedEntity(selectedEntity);
-    sceneEditorPanel.setSelectedEntity(selectedEntity);
-
-    if (sceneEditorPanel.isCreateEntityRequested())
-    {
-        Entity* entity = scene->createEntity("New Entity");
-
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-
-        sceneEditorPanel.resetCreateEntityRequest();
-    }
-
-    if (sceneEditorPanel.isDestroyEntityRequested())
-    {
-        Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
-
-        if (selectedEntity)
-        {
-            selectedEntity->destroy();
-            hierarchyPanel.clearSelection();
-        }
-
-        sceneEditorPanel.resetDestroyEntityRequest();
-    }
-
-    if (sceneEditorPanel.isSaveSceneRequested())
-    {
-        SceneSerializer::save(
-            *scene,
-            Paths::getSave("scene.txt")
-        );
-
-        sceneEditorPanel.resetSaveSceneRequest();
-    }
-
-    if (sceneEditorPanel.isLoadSceneRequested())
-    {
-        SceneSerializer::load(
-            *scene,
-            Paths::getSave("scene.txt")
-        );
-
-        sceneEditorPanel.resetLoadSceneRequest();
-    }
-
     sceneEditorPanel.render();
-
+    assetBrowserPanel.render();
 }
 
 }

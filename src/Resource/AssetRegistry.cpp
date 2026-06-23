@@ -12,6 +12,8 @@ namespace Axiom {
         registerTexture("player", "textures/player.png");
         
         registerTexture("test", "textures/test.png");
+
+        registerTexture("office", "textures/office.png");
         
         registerTexture("fallback", "textures/fallback.png");
     }
