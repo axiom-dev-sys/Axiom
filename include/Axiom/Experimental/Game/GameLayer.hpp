@@ -14,6 +14,7 @@
 #include "Axiom/DebugTools/InspectorPanel.hpp"
 #include "Axiom/DebugTools/HierarchyPanel.hpp"
 #include "Axiom/DebugTools/SceneEditorPanel.hpp"
+#include "Axiom/DebugTools/AssetBrowserPanel.hpp"
 
 #include <memory>
 #include <string>
@@ -63,6 +64,7 @@ private:
     InspectorPanel inspectorPanel;
     HierarchyPanel hierarchyPanel;
     SceneEditorPanel sceneEditorPanel;
+    AssetBrowserPanel assetBrowserPanel;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;
@@ -74,6 +76,7 @@ private:
     bool f5PressedLastFrame = false;
     bool f6PressedLastFrame = false;
     bool f7PressedLastFrame = false;
+    bool f8PressedLastFrame = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;

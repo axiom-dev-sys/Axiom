@@ -65,7 +65,7 @@ namespace Axiom {
     {
         if (!s_FallbackTexture)
             s_FallbackTexture =
-            std::make_unique<Texture>(Paths::getAsset("fallback.png"));
+            std::make_unique<Texture>(Paths::getAsset("textures/fallback.png"));
 
         return s_FallbackTexture.get();
     }

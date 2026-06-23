@@ -23,6 +23,12 @@ namespace Axiom {
             return m_TextureID;
         }
 
+        void setTexture(const std::string& textureID, Texture* texture)
+        {
+            m_TextureID = textureID;
+            m_Texture = texture;
+        }
+
     private:
         std::string m_TextureID;
         Texture* m_Texture = nullptr;
