@@ -127,6 +127,15 @@ void GameLayer::onUpdate(float dt)
 
     f5PressedLastFrame = f5Pressed;
 
+    bool f6Pressed = Input::isKeyDown(GLFW_KEY_F6);
+
+    if (f6Pressed && !f6PressedLastFrame)
+    {
+        hierarchyPanel.toggle();
+    }
+
+    f6PressedLastFrame = f6Pressed;
+
     debugOverlay.update(dt);
 
     debugOverlay.setSceneInfo(
@@ -145,8 +154,6 @@ void GameLayer::onUpdate(float dt)
     debugOverlay.setCameraZoom(
         scene->camera.zoom
     );
-
-    inspectorPanel.setSelectedEntity(player);
 
     inspectorPanel.setEntityName(
         player->getName()
@@ -174,6 +181,10 @@ void GameLayer::onUpdate(float dt)
 
     inspectorPanel.setHasPlayerTag(
         player->hasComponent<PlayerTag>()
+    );
+
+    inspectorPanel.setSelectedEntity(
+        hierarchyPanel.getSelectedEntity()
     );
 
     switch (gameState)
@@ -336,6 +347,23 @@ void GameLayer::onRender()
     debugOverlay.render();
 
     inspectorPanel.render();
+
+    hierarchyPanel.render();
+    hierarchyPanel.clear();
+
+    scene->forEach([&](Entity* entity)
+        {
+            hierarchyPanel.addEntity(entity);
+        });
+
+    Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
+
+    if (!selectedEntity)
+    {
+        selectedEntity = player;
+    }
+
+    inspectorPanel.setSelectedEntity(selectedEntity);
 
 }
 
