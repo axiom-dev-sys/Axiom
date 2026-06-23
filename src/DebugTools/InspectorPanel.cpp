@@ -12,8 +12,6 @@ namespace Axiom {
 
         ImGui::Begin("Inspector");
 
-        ImGui::Text("Inspector Panel");
-
         if (!selectedEntity)
         {
             ImGui::Text("No selected entity");
