@@ -144,6 +144,14 @@ void GameLayer::onUpdate(float dt)
 
     f8PressedLastFrame = f8Pressed;
 
+    hierarchyPanel.setEditorContext(&editorContext);
+
+    inspectorPanel.setEditorContext(&editorContext);
+
+    sceneEditorPanel.setEditorContext(&editorContext);
+
+    assetBrowserPanel.setEditorContext(&editorContext);
+
     debugOverlay.update(dt);
 
     debugRenderer.clear();
@@ -171,15 +179,20 @@ void GameLayer::onUpdate(float dt)
             hierarchyPanel.addEntity(entity);
         });
 
-    Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
+    Entity* selectedEntity = editorContext.getSelectedEntity();
+
+    if (selectedEntity && selectedEntity->isDestroyed())
+    {
+        editorContext.clearSelection();
+
+        selectedEntity = nullptr;
+    }
 
     if (!selectedEntity)
     {
         selectedEntity = player;
+        editorContext.setSelectedEntity(player);
     }
-
-    inspectorPanel.setSelectedEntity(selectedEntity);
-    sceneEditorPanel.setSelectedEntity(selectedEntity);
 
     assetBrowserPanel.clear();
 
@@ -208,14 +221,12 @@ void GameLayer::onUpdate(float dt)
 
     if (sceneEditorPanel.isDestroyEntityRequested())
     {
-        Entity* selectedEntity = hierarchyPanel.getSelectedEntity();
+        Entity* selectedEntity = editorContext.getSelectedEntity();
 
-        if (selectedEntity)
+        if (selectedEntity && !selectedEntity->isDestroyed())
         {
             selectedEntity->destroy();
-            hierarchyPanel.clearSelection();
-            inspectorPanel.setSelectedEntity(player);
-            sceneEditorPanel.setSelectedEntity(player);
+            editorContext.clearSelection();
         }
 
         sceneEditorPanel.resetDestroyEntityRequest();
@@ -223,8 +234,7 @@ void GameLayer::onUpdate(float dt)
 
     if (assetBrowserPanel.isApplyAssetRequested())
     {
-        Entity* selectedEntity =
-            hierarchyPanel.getSelectedEntity();
+        Entity* selectedEntity = editorContext.getSelectedEntity();
 
         if (selectedEntity && !selectedEntity->isDestroyed())
         {
@@ -244,7 +254,6 @@ void GameLayer::onUpdate(float dt)
         }
 
         assetBrowserPanel.resetApplyAssetRequest();
-
     }
 
     if (sceneEditorPanel.isSaveSceneRequested())
@@ -310,10 +319,6 @@ void GameLayer::onUpdate(float dt)
 
     inspectorPanel.setHasPlayerTag(
         player->hasComponent<PlayerTag>()
-    );
-
-    inspectorPanel.setSelectedEntity(
-        hierarchyPanel.getSelectedEntity()
     );
 
     switch (gameState)

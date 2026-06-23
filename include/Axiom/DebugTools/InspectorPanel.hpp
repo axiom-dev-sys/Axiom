@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Axiom/Scene/Entity.hpp"
+#include "Axiom/Editor/EditorContext.hpp"
 
 #include <string>
 #include <cstdint>
@@ -18,8 +19,6 @@ namespace Axiom {
 
         void toggle();
 
-        void setSelectedEntity(Entity* entity);
-
         void setEntityName(const std::string& name)
         {
             entityName = name;
@@ -36,6 +35,8 @@ namespace Axiom {
         void setHasPlayerController(bool value);
         void setHasPlayerTag(bool value);
 
+        void setEditorContext(EditorContext* context);
+
     private:
         bool visible = true;
 
@@ -48,7 +49,7 @@ namespace Axiom {
         bool hasPlayerController = false;
         bool hasPlayerTag = false;
 
-        Entity* selectedEntity = nullptr;
+        EditorContext* editorContext = nullptr;
     };
 
 }

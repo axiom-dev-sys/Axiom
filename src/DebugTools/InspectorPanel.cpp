@@ -12,6 +12,9 @@ namespace Axiom {
 
         ImGui::Begin("Inspector");
 
+        Entity* selectedEntity =
+            editorContext ? editorContext->getSelectedEntity() : nullptr;
+
         if (!selectedEntity)
         {
             ImGui::Text("No selected entity");
@@ -114,11 +117,6 @@ namespace Axiom {
         visible = !visible;
     }
 
-    void InspectorPanel::setSelectedEntity(Entity* entity)
-    {
-        selectedEntity = entity;
-    }
-
     void InspectorPanel::setHasSprite(bool value)
     {
         hasSprite = value;
@@ -142,6 +140,11 @@ namespace Axiom {
     void InspectorPanel::setHasPlayerTag(bool value)
     {
         hasPlayerTag = value;
+    }
+
+    void InspectorPanel::setEditorContext(EditorContext* context)
+    {
+        editorContext = context;
     }
 
 }

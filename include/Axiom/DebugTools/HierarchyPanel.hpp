@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Axiom/Scene/Entity.hpp"
+#include "Axiom/Editor/EditorContext.hpp"
 
 #include <vector>
 
@@ -19,16 +20,14 @@ namespace Axiom {
         void addEntity(Entity* entity);
         void clear();
 
-        Entity* getSelectedEntity() const;
-
-        void clearSelection();
+        void setEditorContext(EditorContext* context);
 
     private:
         bool visible = true;
 
         std::vector<Entity*> entities;
 
-        Entity* selectedEntity = nullptr;
+        EditorContext* editorContext = nullptr;
     };
 
 }

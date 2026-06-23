@@ -90,4 +90,9 @@ namespace Axiom {
         applyAssetRequested = false;
     }
 
+    void AssetBrowserPanel::setEditorContext(EditorContext* context)
+    {
+        editorContext = context;
+    }
+
 }
