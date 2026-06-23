@@ -12,6 +12,7 @@
 #include "Axiom/DebugTools/DebugOverlay.hpp"
 #include "Axiom/DebugTools/DebugRenderer.hpp"
 #include "Axiom/DebugTools/InspectorPanel.hpp"
+#include "Axiom/DebugTools/HierarchyPanel.hpp"
 
 #include <memory>
 #include <string>
@@ -59,6 +60,7 @@ private:
     DebugOverlay debugOverlay;
     DebugRenderer debugRenderer;
     InspectorPanel inspectorPanel;
+    HierarchyPanel hierarchyPanel;
     GameState gameState = GameState::Gameplay;
 
     bool pauseKeyWasPressed = false;
@@ -68,6 +70,7 @@ private:
     bool f3PressedLastFrame = false;
     bool f4PressedLastFrame = false;
     bool f5PressedLastFrame = false;
+    bool f6PressedLastFrame = false;
 
     Entity* player = nullptr;
     Entity* test = nullptr;
