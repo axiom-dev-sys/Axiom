@@ -60,6 +60,11 @@ namespace Axiom {
             for (Layer* layer : m_LayerStack)
                 layer->onUpdate(dt);
 
+            if (m_GameLayer->isExitRequested())
+            {
+                m_Window->close();
+            }
+
             glm::vec2 playerPos = m_GameLayer->getPlayerPosition();
 
             Renderer::clear();

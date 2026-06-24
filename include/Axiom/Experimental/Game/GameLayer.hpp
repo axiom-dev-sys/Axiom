@@ -15,6 +15,8 @@
 #include "Axiom/DebugTools/HierarchyPanel.hpp"
 #include "Axiom/DebugTools/SceneEditorPanel.hpp"
 #include "Axiom/DebugTools/AssetBrowserPanel.hpp"
+#include "Axiom/DebugTools/ConsolePanel.hpp"
+#include "Axiom/DebugTools/StatisticsPanel.hpp"
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/EditorUI.hpp"
 
@@ -31,6 +33,7 @@ public:
 
     void onUpdate(float dt) override;
     void onRender() override;
+    bool isExitRequested() const;
 
     GameState getGameState() const
     {
@@ -67,6 +70,8 @@ private:
     HierarchyPanel hierarchyPanel;
     SceneEditorPanel sceneEditorPanel;
     AssetBrowserPanel assetBrowserPanel;
+    ConsolePanel consolePanel;
+    StatisticsPanel statisticsPanel;
     EditorContext editorContext;
     EditorUI editorUI;
     GameState gameState = GameState::Gameplay;

@@ -6,6 +6,7 @@ namespace Axiom {
 
     void EditorUI::render()
     {
+
         if (ImGui::BeginMainMenuBar())
         {
             if (ImGui::BeginMenu("File"))
@@ -38,6 +39,8 @@ namespace Axiom {
                 ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
                 ImGui::MenuItem("Scene Editor", nullptr, &showSceneEditor);
                 ImGui::MenuItem("Asset Browser", nullptr, &showAssetBrowser);
+                ImGui::MenuItem("Console", nullptr, &showConsole);
+                ImGui::MenuItem("Statistics", nullptr, &showStatistics);
 
                 ImGui::EndMenu();
             }
@@ -48,6 +51,8 @@ namespace Axiom {
                 {
                     showAboutWindow = true;
                 }
+
+                ImGui::EndMenu();
             }
 
             ImGui::Separator();
@@ -55,11 +60,17 @@ namespace Axiom {
             if (ImGui::Button("Play"))
                 playRequested = true;
 
+            ImGui::SameLine();
+
             if (ImGui::Button("Pause"))
                 pauseRequested = true;
 
+            ImGui::SameLine();
+
             if (ImGui::Button("Save"))
                 saveSceneRequested = true;
+
+            ImGui::SameLine();
 
             if (ImGui::Button("Load"))
                 loadSceneRequested = true;
@@ -78,7 +89,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 0.9.8");
+                ImGui::Text("Version: 0.9.9");
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -89,6 +100,34 @@ namespace Axiom {
 
                 ImGui::End();
             }
+
+            ImGui::SetNextWindowPos(
+                ImVec2(0, 690),
+                ImGuiCond_Always
+            );
+
+            ImGui::SetNextWindowSize(
+                ImVec2(1280, 30),
+                ImGuiCond_Always
+            );
+
+            ImGui::Begin(
+                "Status Bar",
+                nullptr,
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoCollapse
+            );
+
+            ImGui::Text(
+                "Scene: %s | State: %s | Entities: %d | FPS: %.1f | Axiom 0.9.9",
+                sceneName.c_str(),
+                gameState.c_str(),
+                entityCount,
+                fps
+            );
+
+            ImGui::End();
     }
 
     bool EditorUI::isDebugOverlayVisible() const
@@ -169,6 +208,29 @@ namespace Axiom {
     void EditorUI::resetPauseRequest()
     {
         pauseRequested = false;
+    }
+
+    void EditorUI::setStatusInfo(
+        const std::string& scene,
+        const std::string& state,
+        int entities,
+        float fpsValue
+    )
+    {
+        sceneName = scene;
+        gameState = state;
+        entityCount = entities;
+        fps = fpsValue;
+    }
+
+    bool EditorUI::isConsoleVisible() const
+    {
+        return showConsole;
+    }
+
+    bool EditorUI::isStatisticsVisible() const
+    {
+        return showStatistics;
     }
 
 }

@@ -65,6 +65,10 @@ GameLayer::GameLayer()
         ResourceManager::getTexture("player")
     );
 
+    consolePanel.addLog("[INFO] Axiom editor started");
+    consolePanel.addLog("[INFO] Gameplay scene loaded");
+    consolePanel.addLog("[INFO] ResourceManager initialized");
+
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -86,6 +90,11 @@ GameLayer::GameLayer()
         return 0;
 
         return scene->getEntityCount();
+    }
+
+    bool GameLayer::isExitRequested() const
+    {
+        return editorUI.isExitRequested();
     }
 
 void GameLayer::onUpdate(float dt)
@@ -153,6 +162,16 @@ void GameLayer::onUpdate(float dt)
     assetBrowserPanel.setEditorContext(&editorContext);
 
     debugOverlay.update(dt);
+
+    statisticsPanel.setStats(
+        dt > 0.0f ? 1.0f / dt : 0.0f,
+        dt,
+        sceneManager.getActiveSceneName(),
+        static_cast<int>(getEntityCount()),
+        scene->camera.position,
+        scene->camera.zoom,
+        getPlayerPosition()
+    );
 
     if (editorUI.isDebugRendererVisible())
     {
@@ -259,24 +278,32 @@ void GameLayer::onUpdate(float dt)
         assetBrowserPanel.resetApplyAssetRequest();
     }
 
-    if (editorUI.isSaveSceneRequested())
+    if (sceneEditorPanel.isSaveSceneRequested() ||
+        editorUI.isSaveSceneRequested())
     {
         SceneSerializer::save(
             *scene,
             Paths::getSave("scene.txt")
         );
 
+        sceneEditorPanel.resetSaveSceneRequest();
         editorUI.resetSaveSceneRequest();
-    }
 
-    if (editorUI.isLoadSceneRequested())
+        consolePanel.addLog("[INFO] Scene saved");
+    }
+    
+    if (sceneEditorPanel.isLoadSceneRequested() ||
+        editorUI.isLoadSceneRequested())
     {
         SceneSerializer::load(
             *scene,
             Paths::getSave("scene.txt")
         );
 
+        sceneEditorPanel.resetLoadSceneRequest();
         editorUI.resetLoadSceneRequest();
+
+        consolePanel.addLog("[INFO] Scene loaded");
     }
 
     if (editorUI.isPlayRequested())
@@ -336,24 +363,33 @@ void GameLayer::onUpdate(float dt)
         player->hasComponent<PlayerTag>()
     );
 
+    std::string stateText = "Unknown";
+
     switch (gameState)
     {
     case GameState::Gameplay:
-        debugOverlay.setGameState("Gameplay");
+        stateText = "Gameplay";
         break;
 
     case GameState::Pause:
-        debugOverlay.setGameState("Pause");
+        stateText = "Pause";
         break;
 
     case GameState::Win:
-        debugOverlay.setGameState("Win");
+        stateText = "Win";
         break;
 
     case GameState::GameOver:
-        debugOverlay.setGameState("Game Over");
+        stateText = "Game Over";
         break;
     }
+
+    editorUI.setStatusInfo(
+        sceneManager.getActiveSceneName(),
+        stateText,
+        static_cast<int>(getEntityCount()),
+        dt > 0.0f ? 1.0f / dt : 0.0f
+    );
 
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
@@ -493,6 +529,12 @@ void GameLayer::onRender()
 
     if (editorUI.isAssetBrowserVisible())
         assetBrowserPanel.render();
+
+    if (editorUI.isConsoleVisible())
+        consolePanel.render();
+
+    if (editorUI.isStatisticsVisible())
+        statisticsPanel.render();
 }
 
 }
