@@ -21,10 +21,9 @@ namespace Axiom {
 
         if (!m_Window)
         {
-            Log::error("Failed to create GLFW");
-            std::exit(EXIT_FAILURE);
-
+            Log::error("Failed to create GLFW window");
             glfwTerminate();
+            std::exit(EXIT_FAILURE);
         }
 
         glfwMakeContextCurrent(m_Window);
@@ -32,23 +31,21 @@ namespace Axiom {
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
             Log::error("Failed to load GLAD");
+            glfwTerminate();
             std::exit(EXIT_FAILURE);
         }
 
         glViewport(0, 0, width, height);
-        
-        glfwSetKeyCallback(m_Window,
-            [](GLFWwindow* window, int key, int scancode, int action, int mods)
-            {
-                if (action == GLFW_PRESS)
-                {
-                }
-            });
     }
 
     Window::~Window()
     {
-        glfwDestroyWindow(m_Window);
+        if (m_Window)
+        {
+            glfwDestroyWindow(m_Window);
+            m_Window = nullptr;
+        }
+
         glfwTerminate();
     }
 

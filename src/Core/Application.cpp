@@ -4,31 +4,34 @@ namespace Axiom {
 
     Application::Application() {}
 
-    Application::~Application() {}
-
-    void Application::init() {
-    
+    Application::~Application() 
+    {
+        shutdown();
     }
 
-    void Application::shutdown() {
-        for (auto layer : m_Layers)
-            delete layer;
+    void Application::init() 
+    {
 
-        m_Layers.clear();
     }
 
-    void Application::update(float dt) {
-        for (auto layer : m_Layers)
-            layer->onUpdate(dt);
+    void Application::shutdown() 
+    {
+
     }
 
-    void Application::render() {
-        for (auto layer : m_Layers)
-            layer->onRender();
+    void Application::update(float dt) 
+    {
+        m_LayerStack.onUpdate(dt);
     }
 
-    void Application::pushLayer(Layer* layer) {
-        m_Layers.push_back(layer);
+    void Application::render() 
+    {
+        m_LayerStack.onRender();
+    }
+
+    void Application::pushLayer(Layer* layer) 
+    {
+        m_LayerStack.pushLayer(layer);
     }
 
 }

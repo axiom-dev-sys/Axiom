@@ -523,8 +523,6 @@ void GameLayer::handleInteractions()
 
 void GameLayer::onRender()
 {
-    Renderer::clear();
-
     scene->onRender();
 
     editorUI.render();

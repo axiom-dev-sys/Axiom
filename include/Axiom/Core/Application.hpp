@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-#include "Layer.hpp"
+#include "Axiom/Core/LayerStack.hpp"
 
 namespace Axiom {
 
@@ -19,7 +18,7 @@ namespace Axiom {
         void pushLayer(Layer* layer);
 
     private:
-        std::vector<Layer*> m_Layers;
+        LayerStack m_LayerStack;
     };
 
 }
