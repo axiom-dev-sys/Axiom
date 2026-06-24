@@ -12,6 +12,7 @@ namespace Axiom {
 		~Window();
 
 		bool shouldClose() const;
+		void close();
 		void pollEvents();
 		void swapBuffers();
 

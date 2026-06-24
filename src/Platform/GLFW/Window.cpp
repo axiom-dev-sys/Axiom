@@ -53,6 +53,11 @@ namespace Axiom {
         return glfwWindowShouldClose(m_Window);
     }
 
+    void Window::close()
+    {
+        glfwSetWindowShouldClose(m_Window, GLFW_TRUE);
+    }
+
     void Window::pollEvents()
     {
         glfwPollEvents();

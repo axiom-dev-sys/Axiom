@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Axiom {
 
     class EditorUI
@@ -23,6 +25,15 @@ namespace Axiom {
         bool isPauseRequested() const;
         void resetPlayRequest();
         void resetPauseRequest();
+        bool isConsoleVisible() const;
+        bool isStatisticsVisible() const;
+
+        void setStatusInfo(
+            const std::string& scene,
+            const std::string& state,
+            int entities,
+            float fpsValue
+        );
 
     private:
         bool showDemo = false;
@@ -39,6 +50,14 @@ namespace Axiom {
         bool showAboutWindow = false;
         bool playRequested = false;
         bool pauseRequested = false;
+
+        std::string sceneName = "None";
+        std::string gameState = "Unknown";
+        int entityCount = 0;
+        float fps = 0.0f;
+
+        bool showConsole = true;
+        bool showStatistics = true;
     };
 
 }
