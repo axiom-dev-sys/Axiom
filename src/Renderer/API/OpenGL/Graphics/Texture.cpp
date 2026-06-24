@@ -1,5 +1,5 @@
 ﻿#include "Axiom/Renderer/Texture.hpp"
-#include <filesystem>
+#include "Axiom/Core/Log.hpp"
 #include "stb_image.h"
 
 namespace Axiom {
@@ -13,10 +13,11 @@ namespace Axiom {
         
         stbi_set_flip_vertically_on_load(true);
         
-          unsigned char* data = stbi_load(path.c_str(), &w, &h, &c, 0);
+        unsigned char* data = stbi_load(path.c_str(), &w, &h, &c, 0);
 
         if (!data)
         {
+            Log::error("Failed to load texture: " + path);
             return;
         }
 

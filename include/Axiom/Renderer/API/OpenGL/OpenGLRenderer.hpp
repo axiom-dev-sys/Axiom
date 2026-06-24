@@ -10,7 +10,7 @@ namespace Axiom {
         void init() override;
         void clear() override;
         void draw(Texture& texture, const glm::vec2& pos, const glm::vec2& scale, float rotation) override;
-        void drawDebugLine(const glm::vec2& start, const glm::vec2& end);
+        void drawDebugLine(const glm::vec2& start, const glm::vec2& end) override;
 
     private:
         unsigned int VAO = 0;

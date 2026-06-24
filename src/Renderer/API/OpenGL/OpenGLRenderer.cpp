@@ -72,7 +72,7 @@ namespace Axiom {
         }
 
         void OpenGLRenderer::clear() {
-            glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
@@ -127,16 +127,6 @@ namespace Axiom {
                 end.x, end.y
             };
 
-            glBindVertexArray(debugLineVAO);
-            glBindBuffer(GL_ARRAY_BUFFER, debugLineVBO);
-
-            glBufferSubData(
-                GL_ARRAY_BUFFER,
-                0,
-                sizeof(vertices),
-                vertices
-            );
-
             glDisable(GL_DEPTH_TEST);
 
             debugShader.use();
@@ -146,7 +136,12 @@ namespace Axiom {
             glBindVertexArray(debugLineVAO);
             glBindBuffer(GL_ARRAY_BUFFER, debugLineVBO);
 
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+            glBufferSubData(
+                GL_ARRAY_BUFFER, 
+                0, 
+                sizeof(vertices), 
+                vertices
+            );
 
             glLineWidth(3.0f);
             glDrawArrays(GL_LINES, 0, 2);

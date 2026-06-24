@@ -1,7 +1,6 @@
 ﻿#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Renderer/API/OpenGL/OpenGLRenderer.hpp"
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace Axiom {
 
