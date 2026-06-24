@@ -21,6 +21,17 @@ namespace Axiom {
         }
     }
 
+    LayerStack::~LayerStack()
+    {
+        for (Layer* layer : m_Layers)
+        {
+            layer->onDetach();
+            delete layer;
+        }
+
+        m_Layers.clear();
+    }
+
     void LayerStack::onUpdate(float dt)
     {
         for (Layer* layer : m_Layers)

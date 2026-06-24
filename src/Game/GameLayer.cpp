@@ -99,6 +99,9 @@ GameLayer::GameLayer()
 
 void GameLayer::onUpdate(float dt)
 {
+    if (!scene)
+        return;
+
     bool f3Pressed = Input::isKeyDown(GLFW_KEY_F3);
 
     if (f3Pressed && !f3PressedLastFrame)
@@ -300,6 +303,14 @@ void GameLayer::onUpdate(float dt)
             Paths::getSave("scene.txt")
         );
 
+        player = scene->findEntityByName("Player");
+        test = scene->findEntityByName("Test");
+
+        editorContext.clearSelection();
+
+        if (player)
+            editorContext.setSelectedEntity(player);
+
         sceneEditorPanel.resetLoadSceneRequest();
         editorUI.resetLoadSceneRequest();
 
@@ -456,6 +467,12 @@ void GameLayer::onUpdate(float dt)
         
         enemySystem.update(gameContext);
     }
+
+    if (!player || player->isDestroyed())
+        return;
+
+    if (!test || test->isDestroyed())
+        return;
 
     auto* playerTransform = player->getComponent<TransformComponent>();
     glm::vec2 oldPlayerPosition = playerTransform->position;

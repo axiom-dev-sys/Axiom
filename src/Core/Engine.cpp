@@ -65,8 +65,6 @@ namespace Axiom {
                 m_Window->close();
             }
 
-            glm::vec2 playerPos = m_GameLayer->getPlayerPosition();
-
             Renderer::clear();
 
             ImGui_ImplOpenGL3_NewFrame();
@@ -82,7 +80,5 @@ namespace Axiom {
             m_Window->swapBuffers();
             m_Window->pollEvents();
         }
-
-        glfwTerminate();
     }
 }

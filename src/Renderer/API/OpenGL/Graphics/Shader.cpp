@@ -1,6 +1,7 @@
 #include "Axiom/Renderer/Shader.hpp"
-#include <iostream>
+#include "Axiom/Core/Log.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include <string>
 
 namespace Axiom {
 
@@ -46,7 +47,8 @@ void main() {
         {
             char log[512];
             glGetShaderInfoLog(s, 512, nullptr, log);
-            std::cout << "Shader compile error:\n" << log << std::endl;
+
+            Log::error(std::string("Shader compile error:\n").append(log));
         }
 
         return s;
@@ -70,8 +72,8 @@ void main() {
         {
             char log[512];
             glGetProgramInfoLog(program, 512, nullptr, log);
-            std::cout << "Program link error:\n"
-            << log << std::endl;
+
+            Log::error(std::string("Program link error:\n").append(log));
         }
 
         glDeleteShader(vsID);
