@@ -17,7 +17,6 @@ add_library(imgui
     external/imgui/imgui_draw.cpp
     external/imgui/imgui_tables.cpp
     external/imgui/imgui_widgets.cpp
-    external/imgui/imgui_demo.cpp
     external/imgui/backends/imgui_impl_glfw.cpp
     external/imgui/backends/imgui_impl_opengl3.cpp
 )
@@ -50,8 +49,6 @@ add_executable(Axiom
     src/Game/GameLayer.cpp
     src/Platform/GLFW/Window.cpp
     src/Input/Input.cpp
-    src/Camera/Camera.cpp
-    src/Camera/Camera2D.cpp
     src/Renderer/API/OpenGL/Graphics/Texture.cpp
     src/Renderer/API/OpenGL/Graphics/Shader.cpp
     src/Renderer/Renderer.cpp

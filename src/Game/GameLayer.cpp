@@ -53,7 +53,7 @@ GameLayer::GameLayer()
     player->addComponent<PlayerTag>();
     playerTransform->position = {0.0f, 0.0f};
     playerTransform->scale = {128.0f, 128.0f};
-    playerTransform->rotation = 45.0f;
+    playerTransform->rotation = 0.0f;
 
     auto* playerCollider = player->addComponent<ColliderComponent>();
     playerCollider->size = {128.0f, 128.0f};
@@ -475,11 +475,13 @@ void GameLayer::onUpdate(float dt)
         return;
 
     auto* playerTransform = player->getComponent<TransformComponent>();
+
+    if (!playerTransform)
+        return;
+
     glm::vec2 oldPlayerPosition = playerTransform->position;
 
     scene->onUpdate(dt);
-
-    playerTransform->rotation += 90.0f * dt;
 
     collisionSystem.update(*scene);
 
