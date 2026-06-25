@@ -1,4 +1,4 @@
-#include "Axiom/DebugTools/StatisticsPanel.hpp"
+#include "Axiom/Editor/Panels/StatisticsPanel.hpp"
 
 #include <imgui.h>
 

@@ -1,4 +1,4 @@
-#include "Axiom/DebugTools/SceneEditorPanel.hpp"
+#include "Axiom/Editor/Panels/SceneEditorPanel.hpp"
 #include "Axiom/Scene/Entity.hpp"
 
 #include <imgui.h>

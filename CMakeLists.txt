@@ -67,12 +67,12 @@ add_executable(Axiom
     src/Scene/Systems/TimerSystem.cpp
     src/DebugTools/DebugOverlay.cpp
     src/DebugTools/DebugRenderer.cpp
-    src/DebugTools/InspectorPanel.cpp
-    src/DebugTools/HierarchyPanel.cpp
-    src/DebugTools/SceneEditorPanel.cpp
-    src/DebugTools/AssetBrowserPanel.cpp
-    src/DebugTools/ConsolePanel.cpp
-    src/DebugTools/StatisticsPanel.cpp
+    src/Editor/Panels/InspectorPanel.cpp
+    src/Editor/Panels/HierarchyPanel.cpp
+    src/Editor/Panels/SceneEditorPanel.cpp
+    src/Editor/Panels/AssetBrowserPanel.cpp
+    src/Editor/Panels/ConsolePanel.cpp
+    src/Editor/Panels/StatisticsPanel.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
 )

@@ -1,4 +1,4 @@
-#include "Axiom/DebugTools/AssetBrowserPanel.hpp"
+#include "Axiom/Editor/Panels/AssetBrowserPanel.hpp"
 
 #include <imgui.h>
 

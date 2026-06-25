@@ -1,4 +1,4 @@
-#include "Axiom/DebugTools/ConsolePanel.hpp"
+#include "Axiom/Editor/Panels/ConsolePanel.hpp"
 
 #include <imgui.h>
 
