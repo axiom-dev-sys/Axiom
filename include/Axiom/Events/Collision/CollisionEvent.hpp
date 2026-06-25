@@ -47,7 +47,7 @@ namespace Axiom {
     public:
         static EventType getStaticType()
         {
-            return EventType::CollisionStay;
+            return EventType::CollisionExit;
         }
         
         EventType getEventType() const override

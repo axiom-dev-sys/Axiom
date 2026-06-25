@@ -6,6 +6,11 @@ namespace Axiom {
     class KeyPressedEvent : public Event
     {
     public:
+        static EventType getStaticType()
+        {
+            return EventType::KeyPressed;
+        }
+
         KeyPressedEvent(int keycode)
             : m_KeyCode(keycode) {
         }
