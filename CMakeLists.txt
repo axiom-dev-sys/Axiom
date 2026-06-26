@@ -39,6 +39,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glm)
 
 add_executable(Axiom
+    Axiom.rc
     src/main.cpp
     src/Core/Application.cpp
     src/Core/Engine.cpp

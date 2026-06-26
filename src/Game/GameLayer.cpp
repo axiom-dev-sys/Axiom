@@ -463,9 +463,27 @@ void GameLayer::onUpdate(float dt)
     {
         gameContext.nightTime += dt;
 
-        powerSystem.update(gameContext);
-        
-        enemySystem.update(gameContext);
+        if (gameContext.nightTime >= gameContext.nightDuration)
+        {
+            gameContext.win = true;
+        }
+            powerSystem.update(gameContext);
+
+            enemySystem.update(gameContext);
+    }
+
+    if (gameContext.win)
+    {
+        gameState = GameState::Win;
+        consolePanel.addLog("[INFO] YOU WIN");
+        return;
+    }
+
+    if (gameContext.gameOver)
+    {
+        gameState = GameState::GameOver;
+        consolePanel.addLog("[INFO] GAME OVER");
+        return;
     }
 
     if (!player || player->isDestroyed())

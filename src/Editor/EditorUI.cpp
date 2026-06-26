@@ -89,7 +89,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 1.0");
+                ImGui::Text("Version: 1.0.0");
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -120,7 +120,7 @@ namespace Axiom {
             );
 
             ImGui::Text(
-                "Scene: %s | State: %s | Entities: %d | FPS: %.1f | Axiom 1.0",
+                "Scene: %s | State: %s | Entities: %d | FPS: %.1f | Axiom 1.0.0",
                 sceneName.c_str(),
                 gameState.c_str(),
                 entityCount,
