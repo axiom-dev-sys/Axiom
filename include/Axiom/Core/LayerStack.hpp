@@ -9,6 +9,7 @@ namespace Axiom {
     public:
         void pushLayer(Layer* layer);
         void popLayer(Layer* layer);
+        ~LayerStack();
         void onUpdate(float dt);
         void onRender();
 

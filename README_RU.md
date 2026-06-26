@@ -1,6 +1,6 @@
 # Axiom Engine
 
-[Русская версия](README_RU.md)
+[English version](README.md)
 
 Axiom Engine is a lightweight 2D game engine written in C++17 using OpenGL.
 

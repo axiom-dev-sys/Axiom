@@ -53,7 +53,7 @@ GameLayer::GameLayer()
     player->addComponent<PlayerTag>();
     playerTransform->position = {0.0f, 0.0f};
     playerTransform->scale = {128.0f, 128.0f};
-    playerTransform->rotation = 45.0f;
+    playerTransform->rotation = 0.0f;
 
     auto* playerCollider = player->addComponent<ColliderComponent>();
     playerCollider->size = {128.0f, 128.0f};
@@ -99,6 +99,9 @@ GameLayer::GameLayer()
 
 void GameLayer::onUpdate(float dt)
 {
+    if (!scene)
+        return;
+
     bool f3Pressed = Input::isKeyDown(GLFW_KEY_F3);
 
     if (f3Pressed && !f3PressedLastFrame)
@@ -300,6 +303,14 @@ void GameLayer::onUpdate(float dt)
             Paths::getSave("scene.txt")
         );
 
+        player = scene->findEntityByName("Player");
+        test = scene->findEntityByName("Test");
+
+        editorContext.clearSelection();
+
+        if (player)
+            editorContext.setSelectedEntity(player);
+
         sceneEditorPanel.resetLoadSceneRequest();
         editorUI.resetLoadSceneRequest();
 
@@ -452,17 +463,43 @@ void GameLayer::onUpdate(float dt)
     {
         gameContext.nightTime += dt;
 
-        powerSystem.update(gameContext);
-        
-        enemySystem.update(gameContext);
+        if (gameContext.nightTime >= gameContext.nightDuration)
+        {
+            gameContext.win = true;
+        }
+            powerSystem.update(gameContext);
+
+            enemySystem.update(gameContext);
     }
 
+    if (gameContext.win)
+    {
+        gameState = GameState::Win;
+        consolePanel.addLog("[INFO] YOU WIN");
+        return;
+    }
+
+    if (gameContext.gameOver)
+    {
+        gameState = GameState::GameOver;
+        consolePanel.addLog("[INFO] GAME OVER");
+        return;
+    }
+
+    if (!player || player->isDestroyed())
+        return;
+
+    if (!test || test->isDestroyed())
+        return;
+
     auto* playerTransform = player->getComponent<TransformComponent>();
+
+    if (!playerTransform)
+        return;
+
     glm::vec2 oldPlayerPosition = playerTransform->position;
 
     scene->onUpdate(dt);
-
-    playerTransform->rotation += 90.0f * dt;
 
     collisionSystem.update(*scene);
 
@@ -506,8 +543,6 @@ void GameLayer::handleInteractions()
 
 void GameLayer::onRender()
 {
-    Renderer::clear();
-
     scene->onRender();
 
     editorUI.render();

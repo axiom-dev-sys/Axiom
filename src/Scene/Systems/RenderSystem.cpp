@@ -11,12 +11,7 @@
 namespace Axiom {
 
 void RenderSystem::render(Scene& scene)
-{
-
-    int count = 0;
-
-    count++;
-    
+{    
     scene.forEach([&](Entity* entity)
     {
 

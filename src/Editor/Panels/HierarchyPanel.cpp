@@ -1,4 +1,4 @@
-#include "Axiom/DebugTools/HierarchyPanel.hpp"
+#include "Axiom/Editor/Panels/HierarchyPanel.hpp"
 
 #include <imgui.h>
 #include <string>

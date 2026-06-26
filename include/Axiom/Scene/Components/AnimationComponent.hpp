@@ -46,9 +46,6 @@ namespace Axiom {
         float m_Timer = 0.0f;
         float m_Speed;
         int m_CurrentFrame = 0;
-        Axiom::AnimationComponent* animation = nullptr;
-        std::vector<Axiom::Texture*> idleFrames;
-        std::vector<Axiom::Texture*> runFrames;
     };
 
 }

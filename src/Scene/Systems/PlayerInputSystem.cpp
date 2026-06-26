@@ -15,7 +15,8 @@ namespace Axiom {
     {
         scene.forEach([&](Entity* entity)
         {
-            
+                (void)dt;
+
             auto* controller =
             entity->getComponent<PlayerControllerComponent>();
             

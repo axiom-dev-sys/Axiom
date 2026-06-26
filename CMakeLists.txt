@@ -17,7 +17,6 @@ add_library(imgui
     external/imgui/imgui_draw.cpp
     external/imgui/imgui_tables.cpp
     external/imgui/imgui_widgets.cpp
-    external/imgui/imgui_demo.cpp
     external/imgui/backends/imgui_impl_glfw.cpp
     external/imgui/backends/imgui_impl_opengl3.cpp
 )
@@ -40,6 +39,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glm)
 
 add_executable(Axiom
+    Axiom.rc
     src/main.cpp
     src/Core/Application.cpp
     src/Core/Engine.cpp
@@ -50,8 +50,6 @@ add_executable(Axiom
     src/Game/GameLayer.cpp
     src/Platform/GLFW/Window.cpp
     src/Input/Input.cpp
-    src/Camera/Camera.cpp
-    src/Camera/Camera2D.cpp
     src/Renderer/API/OpenGL/Graphics/Texture.cpp
     src/Renderer/API/OpenGL/Graphics/Shader.cpp
     src/Renderer/Renderer.cpp
@@ -70,12 +68,12 @@ add_executable(Axiom
     src/Scene/Systems/TimerSystem.cpp
     src/DebugTools/DebugOverlay.cpp
     src/DebugTools/DebugRenderer.cpp
-    src/DebugTools/InspectorPanel.cpp
-    src/DebugTools/HierarchyPanel.cpp
-    src/DebugTools/SceneEditorPanel.cpp
-    src/DebugTools/AssetBrowserPanel.cpp
-    src/DebugTools/ConsolePanel.cpp
-    src/DebugTools/StatisticsPanel.cpp
+    src/Editor/Panels/InspectorPanel.cpp
+    src/Editor/Panels/HierarchyPanel.cpp
+    src/Editor/Panels/SceneEditorPanel.cpp
+    src/Editor/Panels/AssetBrowserPanel.cpp
+    src/Editor/Panels/ConsolePanel.cpp
+    src/Editor/Panels/StatisticsPanel.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
 )

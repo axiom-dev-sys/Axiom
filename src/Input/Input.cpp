@@ -11,12 +11,18 @@ namespace Axiom {
 
     bool Input::isKeyPressed(int key)
     {
+        if (!s_Window)
+            return false;
+
         auto state = glfwGetKey(s_Window, key);
         return state == GLFW_PRESS || state == GLFW_REPEAT;
     }
 
     bool Input::isKeyDown(int key)
     {
+        if (!s_Window)
+            return false;
+
         auto state = glfwGetKey(s_Window, key);
         return state == GLFW_PRESS;
     }

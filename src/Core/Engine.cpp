@@ -1,6 +1,5 @@
 #include "Axiom/Core/Engine.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
-#include "Axiom/Renderer/Shader.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Input/Input.hpp"
@@ -9,7 +8,6 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -37,7 +35,7 @@ namespace Axiom {
         m_Application.init();
 
         m_GameLayer = new GameLayer();
-        m_LayerStack.pushLayer(m_GameLayer);
+        m_Application.pushLayer(m_GameLayer);
     }
 
     Engine::~Engine()
@@ -57,15 +55,12 @@ namespace Axiom {
 
             float dt = Time::getDeltaTime();
 
-            for (Layer* layer : m_LayerStack)
-                layer->onUpdate(dt);
+            m_Application.update(dt);
 
             if (m_GameLayer->isExitRequested())
             {
                 m_Window->close();
             }
-
-            glm::vec2 playerPos = m_GameLayer->getPlayerPosition();
 
             Renderer::clear();
 
@@ -73,8 +68,7 @@ namespace Axiom {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            for (Layer* layer : m_LayerStack)
-                layer->onRender();
+            m_Application.render();
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -82,7 +76,5 @@ namespace Axiom {
             m_Window->swapBuffers();
             m_Window->pollEvents();
         }
-
-        glfwTerminate();
     }
 }

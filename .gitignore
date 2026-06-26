@@ -3,9 +3,9 @@
 /out/
 Debug/
 Release/
-
-# Source file
-src/stb_image.cpp
+/bin/
+*.aps
+*.suo
 
 # Visual Studio
 .vs/

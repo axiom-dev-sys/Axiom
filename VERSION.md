@@ -6,112 +6,166 @@ This file tracks the development progress of the Axiom Engine.
 
 ## v0.1 — Core Prototype
 
-**Foundation stage of the engine.**
+### Added
 
-* GLFW window creation
-* OpenGL context initialization
-* Basic game loop
-* Screen clearing (render loop baseline)
-* Time / delta time system
-* Basic logging system
+- GLFW window
+- OpenGL initialization
+- Basic render loop
+- Delta Time system
+- Logging system
+- Engine/Application foundation
 
-**Goal:** Engine starts and runs a window successfully.
+### Goal
+
+The engine can create a window, initialize OpenGL and execute the main loop.
 
 ---
 
-## v0.2 — Stabilization Update
-
-**Date: 01.05.2026**
+## v0.2 — Engine Stabilization
 
 ### Added
 
-* 2D matrix camera system
-* `RenderComponent` for scene object rendering
-* Basic 2D coordinate system
-* Initial component integration into Scene
+- 2D Camera
+- Initial rendering components
+- Basic scene architecture
+- Component integration
 
 ### Changed
 
-* Scene architecture partially redesigned
-* Render pipeline simplified and stabilized
-* Unified rendering call structure
-* Component interaction structure simplified for core stability
+- Scene architecture redesigned
+- Rendering pipeline stabilized
+- Core engine structure simplified
 
-### Removed / Temporarily Disabled
+### Removed
 
-* Logging system temporarily removed for rewrite
-* Unused and conflicting code parts removed
-* Simplified subsystems for engine stabilization
+- Temporary logging rewrite
+- Unused experimental code
 
 ### Fixed
 
-* Linker error: `Scene::onRender`
-* Incorrect non-static shader method calls
-* Basic renderer initialization issues
+- Scene rendering issues
+- Shader initialization
+- Linker errors
 
-### Known Limitations
+### Goal
 
-* Camera supports only 2D
-* No lighting system
-* Component system is still in early formation
-
-**Goal:** Stable engine core ready for Scene + Component expansion.
+Prepare a stable engine core for further ECS and gameplay development.
 
 ---
 
-## v0.3 — Scene & Components (Planned)
+## v0.3 — ECS & Scene System
 
-* Entity system
-* TransformComponent
-* SpriteComponent
-* Scene update/render loop
-* Multiple entities rendering
+### Added
 
----
-
-## v0.4 — Rendering Pipeline (Planned)
-
-* Batch rendering
-* Render queue
-* Texture management
-* Shader system improvements
-* Camera matrix integration refinement
+- Entity System
+- Component System
+- TransformComponent
+- SpriteComponent
+- VelocityComponent
+- Scene update/render loop
+- Camera follow system
 
 ---
 
-## v0.5 — Resource System (Planned)
+## v0.4 — Gameplay Foundation
 
-* ResourceManager upgrade
-* Texture caching
-* Shader loading system
-* Asset organization
+### Added
 
----
-
-## v0.6 — Editor Foundations (Planned)
-
-* Scene hierarchy
-* Inspector
-* Debug overlay
-* Gizmos
+- Collision System
+- Game States
+- Pause System
+- Scene Switching
+- Camera improvements
 
 ---
 
-## v0.7 — Gameplay Framework (Planned)
+## v0.5 — Resource & Serialization
 
-* Scripting system
-* Prefabs
-* Events system
-* Scene serialization
+### Added
+
+- Scene Manager
+- Resource Manager
+- Asset Registry
+- Scene Serialization (Save)
+- Trigger / Collision Events
 
 ---
 
-## v1.0 — First Stable Release (Planned)
+## v0.6 — Events & Cleanup
 
-* Full scene system
-* Complete rendering pipeline
-* Resource system
-* Basic editor
-* Gameplay-ready framework
+### Added
 
-**Goal:** First production-ready version of Axiom Engine.
+- Event System
+- Timer System
+- Collision Events
+- Trigger Events
+- Architecture cleanup
+
+---
+
+## v0.7 — Gameplay Framework
+
+### Added
+
+- Enemy System
+- Power System
+- Game Context
+- Gameplay systems foundation
+
+---
+
+## v0.8 — Asset Pipeline
+
+### Added
+
+- Asset organization
+- Paths system
+- Executable asset loading
+- Serializer improvements
+
+---
+
+## v0.9 — Editor & Debug Tools
+
+### Added
+
+- Debug Overlay
+- Debug Renderer
+- Hierarchy
+- Inspector
+- Scene Editor
+- Asset Browser
+- Console
+- Statistics Panel
+- Editor UI
+
+---
+
+## v1.0 — First Stable Release
+
+**Date:** 2026-06-26
+
+### Includes
+
+- OpenGL Renderer
+- ECS Architecture
+- Scene System
+- Resource Manager
+- Asset Registry
+- Scene Serialization
+- Editor UI
+- Editor Panels
+- Debug Tools
+- Collision System
+- Input System
+- Camera System
+- Timer System
+- Gameplay Framework
+
+### Goal
+
+First stable public release of the Axiom Engine.
+
+Provides a complete foundation for 2D game development, including rendering,
+ECS, scene management, resource management, serialization,
+debugging tools, and an integrated editor.

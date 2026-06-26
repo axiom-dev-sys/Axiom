@@ -2,6 +2,8 @@
 
 #include "Axiom/Experimental/Game/GameContext.hpp"
 
+#include <cstdlib>
+
 namespace Axiom {
 
 class EnemySystem

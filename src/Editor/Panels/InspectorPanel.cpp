@@ -1,4 +1,4 @@
-#include "Axiom/DebugTools/InspectorPanel.hpp"
+#include "Axiom/Editor/Panels/InspectorPanel.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp"
 
 #include <imgui.h>

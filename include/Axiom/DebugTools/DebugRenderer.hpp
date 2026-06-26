@@ -31,16 +31,11 @@ namespace Axiom {
         void drawRect(const glm::vec2& position, const glm::vec2& size);
         void clear();
 
-        void drawDebugLine(const glm::vec2& start, const glm::vec2& end);
-
     private:
         bool visible = true;
 
         std::vector<DebugLine> lines;
         std::vector<DebugRect> rects;
-
-        unsigned int debugLineVAO = 0;
-        unsigned int debugLineVBO = 0;
     };
 
 }

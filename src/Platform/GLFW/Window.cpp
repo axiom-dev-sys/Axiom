@@ -1,6 +1,7 @@
 #include "Axiom/Core/Window.hpp"
 #include <glad/glad.h>
 #include <cstdlib>
+#include "Axiom/Core/Log.hpp"
 
 namespace Axiom {
 
@@ -8,7 +9,8 @@ namespace Axiom {
     {
         if (!glfwInit())
         {
-            abort();
+            Log::error("Failed to initialize GLFW");
+            std::exit(EXIT_FAILURE);
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -19,32 +21,31 @@ namespace Axiom {
 
         if (!m_Window)
         {
+            Log::error("Failed to create GLFW window");
             glfwTerminate();
-            abort();
+            std::exit(EXIT_FAILURE);
         }
 
         glfwMakeContextCurrent(m_Window);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            abort();
+            Log::error("Failed to load GLAD");
+            glfwTerminate();
+            std::exit(EXIT_FAILURE);
         }
 
         glViewport(0, 0, width, height);
-
-
-        glfwSetKeyCallback(m_Window,
-            [](GLFWwindow* window, int key, int scancode, int action, int mods)
-            {
-                if (action == GLFW_PRESS)
-                {
-                }
-            });
     }
 
     Window::~Window()
     {
-        glfwDestroyWindow(m_Window);
+        if (m_Window)
+        {
+            glfwDestroyWindow(m_Window);
+            m_Window = nullptr;
+        }
+
         glfwTerminate();
     }
 

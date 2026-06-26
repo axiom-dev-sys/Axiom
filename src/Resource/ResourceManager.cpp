@@ -1,6 +1,7 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
+#include "Axiom/Core/Log.hpp"
 
 namespace Axiom {
 
@@ -42,6 +43,7 @@ namespace Axiom {
 
         if (!tex || tex->getID() == 0)
         {
+            Log::warn("Using fallback texture for: " + name);
             return getFallback();
         }
 
