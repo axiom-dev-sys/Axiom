@@ -10,12 +10,15 @@
 #include "Axiom/Scene/Components/PlayerTag.hpp"
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 #include "Axiom/Input/Input.hpp"
+#include "Axiom/Core/Application.hpp"
+#include "Axiom/Core/EngineMode.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
 
 namespace Axiom {
 
-GameLayer::GameLayer()
+GameLayer::GameLayer(Application* application)
+    : m_Application(application)
 {
 
     playerTex = ResourceManager::getTexture("player");
@@ -24,6 +27,9 @@ GameLayer::GameLayer()
 
     gameplayScene = std::make_shared<Scene>();
     menuScene = std::make_shared<Scene>();
+
+    editorScene = gameplayScene;
+    runtimeScene = nullptr;
 
     scene = gameplayScene;
     sceneManager.setActiveScene("Gameplay", scene);
@@ -303,13 +309,7 @@ void GameLayer::onUpdate(float dt)
             Paths::getSave("scene.txt")
         );
 
-        player = scene->findEntityByName("Player");
-        test = scene->findEntityByName("Test");
-
-        editorContext.clearSelection();
-
-        if (player)
-            editorContext.setSelectedEntity(player);
+        refreshSceneReferences();
 
         sceneEditorPanel.resetLoadSceneRequest();
         editorUI.resetLoadSceneRequest();
@@ -319,14 +319,41 @@ void GameLayer::onUpdate(float dt)
 
     if (editorUI.isPlayRequested())
     {
+        if (m_Application->getMode() == EngineMode::Edit)
+        {
+            runtimeScene = editorScene->clone();
+            scene = runtimeScene;
+
+            sceneManager.setActiveScene("Gameplay", scene);
+            refreshSceneReferences();
+        }
+
+        m_Application->setMode(EngineMode::Play);
         gameState = GameState::Gameplay;
+        
         editorUI.resetPlayRequest();
     }
 
     if (editorUI.isPauseRequested())
     {
+        m_Application->setMode(EngineMode::Pause);
         gameState = GameState::Pause;
         editorUI.resetPauseRequest();
+    }
+
+    if (editorUI.isStopRequested())
+    {
+        m_Application->setMode(EngineMode::Edit);
+
+        runtimeScene = nullptr;
+        scene = editorScene;
+
+        sceneManager.setActiveScene("Gameplay", scene);
+        refreshSceneReferences();
+
+        gameState = GameState::Gameplay;
+
+        editorUI.resetStopRequest();
     }
 
     debugOverlay.setSceneInfo(
@@ -376,24 +403,37 @@ void GameLayer::onUpdate(float dt)
 
     std::string stateText = "Unknown";
 
-    switch (gameState)
+    if (m_Application->getMode() == EngineMode::Edit)
     {
-    case GameState::Gameplay:
-        stateText = "Gameplay";
-        break;
-
-    case GameState::Pause:
-        stateText = "Pause";
-        break;
-
-    case GameState::Win:
-        stateText = "Win";
-        break;
-
-    case GameState::GameOver:
-        stateText = "Game Over";
-        break;
+        stateText = "Edit";
     }
+    else if (m_Application->getMode() == EngineMode::Pause)
+    {
+        stateText = "Pause";
+    }
+    else
+    {
+        switch (gameState)
+        {
+        case GameState::Gameplay:
+            stateText = "Gameplay";
+            break;
+
+        case GameState::Pause:
+            stateText = "Pause";
+            break;
+
+        case GameState::Win:
+            stateText = "Win";
+            break;
+
+        case GameState::GameOver:
+            stateText = "Game Over";
+            break;
+        }
+    }
+
+    debugOverlay.setGameState(stateText);
 
     editorUI.setStatusInfo(
         sceneManager.getActiveSceneName(),
@@ -401,6 +441,11 @@ void GameLayer::onUpdate(float dt)
         static_cast<int>(getEntityCount()),
         dt > 0.0f ? 1.0f / dt : 0.0f
     );
+
+    if (!m_Application->isPlaying())
+    {
+        return;
+    }
 
     bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
 
@@ -539,6 +584,26 @@ void GameLayer::handleInteractions()
     }
 
     doorKeyWasPressed = doorKeyPressed;
+}
+
+void GameLayer::refreshSceneReferences()
+{
+    if (!scene)
+    {
+        player = nullptr;
+        test = nullptr;
+        return;
+    }
+
+    player = scene->findEntityByName("Player");
+    test = scene->findEntityByName("Test");
+
+    editorContext.clearSelection();
+
+    if (player)
+    {
+        editorContext.setSelectedEntity(player);
+    }
 }
 
 void GameLayer::onRender()

@@ -26,10 +26,12 @@
 
 namespace Axiom {
 
+    class Application;
+
 class GameLayer : public Axiom::Layer
 {
 public:
-    GameLayer();
+    GameLayer(Application* application);
 
     void onUpdate(float dt) override;
     void onRender() override;
@@ -54,7 +56,10 @@ public:
     size_t getEntityCount() const;
 
 private:
+    Application* m_Application = nullptr;
+
     void handleInteractions();
+    void refreshSceneReferences();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -75,6 +80,9 @@ private:
     EditorContext editorContext;
     EditorUI editorUI;
     GameState gameState = GameState::Gameplay;
+
+    std::shared_ptr<Scene> editorScene;
+    std::shared_ptr<Scene> runtimeScene;
 
     bool pauseKeyWasPressed = false;
     bool sceneSwitchKeyWasPressed = false;

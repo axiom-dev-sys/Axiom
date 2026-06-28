@@ -35,6 +35,9 @@ namespace Axiom {
             float fpsValue
         );
 
+        bool isStopRequested() const;
+        void resetStopRequest();
+
     private:
         bool showDemo = false;
 
@@ -50,6 +53,7 @@ namespace Axiom {
         bool showAboutWindow = false;
         bool playRequested = false;
         bool pauseRequested = false;
+        bool stopRequested = false;
 
         std::string sceneName = "None";
         std::string gameState = "Unknown";

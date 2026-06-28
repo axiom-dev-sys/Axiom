@@ -34,4 +34,19 @@ namespace Axiom {
         m_LayerStack.pushLayer(layer);
     }
 
+    void Application::setMode(EngineMode mode)
+    {
+        m_Mode = mode;
+    }
+
+    EngineMode Application::getMode() const
+    {
+        return m_Mode;
+    }
+
+    bool Application::isPlaying() const
+    {
+        return m_Mode == EngineMode::Play;
+    }
+
 }
