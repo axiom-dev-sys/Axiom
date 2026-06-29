@@ -244,7 +244,8 @@ void GameLayer::handleRuntimeControls()
 {
     if (editorUI.isPlayRequested())
     {
-        if (m_Application->getMode() == EngineMode::Edit)
+        if (m_Application->getMode() == EngineMode::Edit ||
+            m_Application->getMode() == EngineMode::Stop)
         {            
             startRuntime();
         }
@@ -268,9 +269,12 @@ void GameLayer::handleRuntimeControls()
 
         stopRuntime();
 
+        m_Application->setMode(EngineMode::Edit);
+
         gameState = GameState::Gameplay;
 
         editorUI.resetStopRequest();
+        return;
     }
 }
 
@@ -482,6 +486,10 @@ void GameLayer::updateEditorStatus(float dt)
     {
         stateText = "Edit";
     }
+    else if (m_Application->getMode() == EngineMode::Stop)
+    {
+        stateText = "Stop";
+    }
     else if (m_Application->getMode() == EngineMode::Pause)
     {
         stateText = "Pause";
@@ -656,16 +664,25 @@ void GameLayer::enterEditor()
 
 void GameLayer::enterRuntime()
 {
+    if (!runtimeScene)
+        return;
+
     setActiveScene("Gameplay", runtimeScene);
 }
 
 void GameLayer::enterMenu()
 {
+    if (!m_Application->isPlaying())
+        return;
+
     setActiveScene("Menu", menuScene);
 }
 
 void GameLayer::onRender()
 {
+    if (!scene)
+        return;
+
     scene->onRender();
 
     editorUI.render();

@@ -6,7 +6,8 @@ namespace Axiom {
     {
         Edit,
         Play,
-        Pause
+        Pause,
+        Stop
     };
 
 }

@@ -14,7 +14,7 @@ namespace Axiom {
 
     void RuntimeSession::stop()
     {
-        m_Mode = EngineMode::Edit;
+        m_Mode = EngineMode::Stop;
     }
 
     EngineMode RuntimeSession::getMode() const
