@@ -2,16 +2,23 @@
 
 [English version](README.md)
 
-Axiom Engine is a lightweight 2D game engine written in C++17 using OpenGL.
+Axiom Engine — собственный игровой движок на C++17 с использованием OpenGL.
 
-The project is focused on 2D game development and learning the architecture of modern game engines.  
-Its core systems include ECS, scene management, resource management, scene serialization, debugging tools, and an integrated editor.
+Проект ориентирован на разработку 2D-игр и изучение архитектуры современных игровых движков.
 
-## Editor
+Основой движка являются:
+- ECS (Entity Component System)
+- система сцен
+- менеджер ресурсов
+- сериализация сцен
+- инструменты отладки
+- встроенный редактор
+
+## Редактор
 
 ![Axiom Editor](docs/images/axiom-editor.png)
 
-## Features
+## Возможности
 
 - Rendering
   - OpenGL Renderer
@@ -26,6 +33,7 @@ Its core systems include ECS, scene management, resource management, scene seria
   - Collision System
   - Timer System
   - Input System
+  - Runtime System
 
 - Debug
   - Debug Overlay
@@ -40,7 +48,7 @@ Its core systems include ECS, scene management, resource management, scene seria
   - Console Panel
   - Statistics Panel
 
-## Technologies
+## Технологии
 
 - C++17
 - OpenGL
@@ -51,7 +59,7 @@ Its core systems include ECS, scene management, resource management, scene seria
 - stb_image
 - CMake
 
-## Project Goal
+## Цель проекта
 
 The main goal of Axiom Engine is not only to create a game engine, but also to understand how a game engine works internally.
 
@@ -63,11 +71,11 @@ The project is built around three directions:
 
 Axiom is being developed as a foundation for future original games with unique mechanics and presentation.
 
-## Build and Run
+## Сборка и запуск
 
 ### CMake
 
-Clone the repository:
+Клонируйте репозиторий:
 
 ```bash
 git clone https://github.com/axiom-dev-sys/Axiom.git
@@ -80,14 +88,14 @@ cmake --build . --config Release
 
 ### Visual Studio
 
-Open the project in Visual Studio 2022
-Select the Debug or Release configuration
-Build and run the project
+- Откройте проект в Visual Studio 2022.
+- Выберите конфигурацию **Debug** или **Release**.
+- Соберите и запустите проект.
 
-## Current Status
+## Текущее состояние
 
-Axiom Engine 1.0.0 is the first stable public release.
+Axiom Engine 1.1.х представляет архитектуру Runtime, отделяющую режим редактирования от режима выполнения игры.
 
-The engine provides a solid 2D foundation including rendering, ECS, scene management, resource management, serialization, debugging tools, and an integrated editor.
+Теперь движок предоставляет надёжную основу для разработки 2D-игр, включая рендеринг, ECS, управление Runtime, систему сцен, управление ресурсами, сериализацию, инструменты отладки и встроенный редактор.
 
-Future versions will continue expanding the engine with new editor features, gameplay systems, rendering improvements, and additional tools.
+Будущие версии продолжат развивать движок, добавляя новые возможности редактора, игровые системы, улучшения рендеринга и дополнительные инструменты.

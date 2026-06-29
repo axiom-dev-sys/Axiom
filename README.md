@@ -26,6 +26,7 @@ Its core systems include ECS, scene management, resource management, scene seria
   - Collision System
   - Timer System
   - Input System
+  - Runtime System
 
 - Debug
   - Debug Overlay
@@ -86,8 +87,8 @@ Build and run the project
 
 ## Current Status
 
-Axiom Engine 1.0.0 is the first stable public release.
+Axiom Engine 1.1.х introduces the Runtime architecture, extending the first stable release with a dedicated runtime workflow for gameplay execution inside the editor.
 
-The engine provides a solid 2D foundation including rendering, ECS, scene management, resource management, serialization, debugging tools, and an integrated editor.
+The engine now provides a solid 2D foundation including rendering, ECS, runtime management, scene management, resource management, serialization, debugging tools, and an integrated editor.
 
 Future versions will continue expanding the engine with new editor features, gameplay systems, rendering improvements, and additional tools.

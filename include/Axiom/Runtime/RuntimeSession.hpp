@@ -15,6 +15,7 @@ namespace Axiom {
         bool isPlaying() const;
         bool isPaused() const;
         bool isEditing() const;
+        bool isStopped() const;
 
     private:
         EngineMode m_Mode = EngineMode::Edit;

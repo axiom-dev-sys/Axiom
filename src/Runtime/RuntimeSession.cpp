@@ -37,4 +37,9 @@ namespace Axiom {
         return m_Mode == EngineMode::Edit;
     }
 
+    bool RuntimeSession::isStopped() const
+    {
+        return m_Mode == EngineMode::Stop;
+    }
+
 }
