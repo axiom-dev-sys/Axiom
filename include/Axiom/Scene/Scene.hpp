@@ -90,6 +90,8 @@ namespace Axiom {
             );
         }
 
+        std::shared_ptr<Scene> clone() const;
+
     private:
         std::uint32_t m_NextEntityID = 1;
         std::vector<std::unique_ptr<Entity>> m_Entities;

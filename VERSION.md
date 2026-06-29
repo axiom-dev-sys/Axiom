@@ -169,3 +169,33 @@ First stable public release of the Axiom Engine.
 Provides a complete foundation for 2D game development, including rendering,
 ECS, scene management, resource management, serialization,
 debugging tools, and an integrated editor.
+
+## v1.1 — Runtime Architecture
+
+### Added
+
+- Runtime Session
+- Runtime World
+- Runtime State
+- Runtime scene lifecycle
+- Runtime scene transitions
+
+### Changed
+
+- Runtime controls refactored
+- GameLayer architecture improved
+- Scene switching unified
+- Runtime workflow stabilized
+
+### Fixed
+
+- Runtime state transitions
+- Play / Pause / Stop behavior
+- Runtime scene restoration
+- Runtime switching stability
+
+### Goal
+
+Establish a robust runtime architecture for gameplay simulation inside the editor.
+
+Prepare the engine for future gameplay systems and editor/runtime separation.

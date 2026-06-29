@@ -23,7 +23,7 @@ namespace Axiom {
         }
 
         file << "Axiom Scene\n";
-        file << "Version: 1.0.0\n";
+        file << "Version: 1.1.5\n";
         file << "Entities: "
             << scene.getEntityCount()
             << "\n";

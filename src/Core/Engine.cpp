@@ -34,7 +34,7 @@ namespace Axiom {
 
         m_Application.init();
 
-        m_GameLayer = new GameLayer();
+        m_GameLayer = new GameLayer(&m_Application);
         m_Application.pushLayer(m_GameLayer);
     }
 

@@ -67,6 +67,11 @@ namespace Axiom {
 
             ImGui::SameLine();
 
+            if (ImGui::Button("Stop"))
+                stopRequested = true;
+
+            ImGui::SameLine();
+
             if (ImGui::Button("Save"))
                 saveSceneRequested = true;
 
@@ -89,7 +94,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 1.0.0");
+                ImGui::Text("Version: 1.1.5");
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -231,6 +236,16 @@ namespace Axiom {
     bool EditorUI::isStatisticsVisible() const
     {
         return showStatistics;
+    }
+
+    bool EditorUI::isStopRequested() const
+    {
+        return stopRequested;
+    }
+
+    void EditorUI::resetStopRequest()
+    {
+        stopRequested = false;
     }
 
 }
