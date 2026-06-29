@@ -61,11 +61,17 @@ private:
     void handleInteractions();
     void refreshSceneReferences();
     void handleRuntimeControls();
+    void startRuntime();
+    void stopRuntime();
     void handleSceneSerialization();
     void handleEditorTools();
     void updateInspectorInfo();
     void updateEditorStatus(float dt);
     void updateGameplay(float dt);
+    void setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene);
+    void enterEditor();
+    void enterRuntime();
+    void enterMenu();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;

@@ -245,12 +245,8 @@ void GameLayer::handleRuntimeControls()
     if (editorUI.isPlayRequested())
     {
         if (m_Application->getMode() == EngineMode::Edit)
-        {
-            runtimeScene = editorScene->clone();
-            scene = runtimeScene;
-
-            sceneManager.setActiveScene("Gameplay", scene);
-            refreshSceneReferences();
+        {            
+            startRuntime();
         }
 
         m_Application->play();
@@ -270,16 +266,26 @@ void GameLayer::handleRuntimeControls()
     {
         m_Application->stop();
 
-        runtimeScene = nullptr;
-        scene = editorScene;
-
-        sceneManager.setActiveScene("Gameplay", scene);
-        refreshSceneReferences();
+        stopRuntime();
 
         gameState = GameState::Gameplay;
 
         editorUI.resetStopRequest();
     }
+}
+
+void GameLayer::startRuntime()
+{
+    runtimeScene = editorScene->clone();
+
+    enterRuntime();
+}
+
+void GameLayer::stopRuntime()
+{
+    runtimeScene = nullptr;
+
+    enterEditor();
 }
 
 void GameLayer::handleSceneSerialization()
@@ -554,13 +560,11 @@ void GameLayer::updateGameplay(float dt)
 
         if (sceneManager.getActiveSceneName() == "Gameplay")
         {
-            scene = menuScene;
-            sceneManager.setActiveScene("Menu", scene);
+            enterMenu();
         }
         else
         {
-            scene = gameplayScene;
-            sceneManager.setActiveScene("Gameplay", scene);
+            enterRuntime();
         }
     }
 
@@ -634,6 +638,30 @@ void GameLayer::updateGameplay(float dt)
     }
 
     scene->followCamera(player, dt);
+}
+
+void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene)
+{
+    scene = newScene;
+
+    sceneManager.setActiveScene(name, scene);
+
+    refreshSceneReferences();
+}
+
+void GameLayer::enterEditor()
+{
+    setActiveScene("Gameplay", editorScene);
+}
+
+void GameLayer::enterRuntime()
+{
+    setActiveScene("Gameplay", runtimeScene);
+}
+
+void GameLayer::enterMenu()
+{
+    setActiveScene("Menu", menuScene);
 }
 
 void GameLayer::onRender()
