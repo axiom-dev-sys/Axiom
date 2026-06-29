@@ -2,6 +2,7 @@
 
 #include "Axiom/Core/LayerStack.hpp"
 #include "Axiom/Core/EngineMode.hpp"
+#include "Axiom/Runtime/RuntimeSession.hpp"
 
 namespace Axiom {
 
@@ -22,9 +23,15 @@ namespace Axiom {
         EngineMode getMode() const;
         bool isPlaying() const;
 
+        RuntimeSession& getRuntimeSession();
+
+        void play();
+        void pause();
+        void stop();
+
     private:
         LayerStack m_LayerStack;
-        EngineMode m_Mode = EngineMode::Edit;
+        RuntimeSession m_RuntimeSession;
     };
 
 }

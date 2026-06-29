@@ -76,6 +76,7 @@ add_executable(Axiom
     src/Editor/Panels/StatisticsPanel.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
+    src/Runtime/RuntimeSession.cpp
 )
 
 target_include_directories(Axiom PUBLIC
