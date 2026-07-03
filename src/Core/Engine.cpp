@@ -4,12 +4,11 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Time.hpp"
-#include "Axiom/Core/Paths.hpp"
+#include "Axiom/Editor/EditorFontManager.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <misc/freetype/imgui_freetype.h>
 
 namespace Axiom {
 
@@ -24,17 +23,7 @@ namespace Axiom {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
-        ImGuiIO& io = ImGui::GetIO();
-
-        io.Fonts->SetFontLoader(ImGuiFreeType::GetFontLoader());
-        io.Fonts->FontLoaderFlags = ImGuiFreeTypeLoaderFlags_ForceAutoHint;
-
-        io.Fonts->AddFontFromFileTTF(
-            Paths::getAsset("fonts/Roboto-Medium.ttf").c_str(),
-            18.0f,
-            nullptr,
-            io.Fonts->GetGlyphRangesCyrillic()
-        );
+        EditorFontManager::loadDefaultFont();
 
         ImGui::StyleColorsDark();
 
