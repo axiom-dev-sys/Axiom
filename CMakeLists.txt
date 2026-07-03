@@ -7,6 +7,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
 # GLFW
 add_subdirectory(external/glfw)
 
+# FreeType
+add_subdirectory(external/freetype)
+
 # GLAD
 add_library(glad external/glad/src/glad.c)
 target_include_directories(glad PUBLIC external/glad/include)
@@ -19,14 +22,16 @@ add_library(imgui
     external/imgui/imgui_widgets.cpp
     external/imgui/backends/imgui_impl_glfw.cpp
     external/imgui/backends/imgui_impl_opengl3.cpp
+    external/imgui/misc/freetype/imgui_freetype.cpp
 )
 
 target_include_directories(imgui PUBLIC
     external/imgui
     external/imgui/backends
+    external/imgui/misc/freetype
 )
 
-target_link_libraries(imgui PUBLIC glfw glad)
+target_link_libraries(imgui PUBLIC glfw glad freetype)
 
 include(FetchContent)
 
