@@ -375,8 +375,37 @@ void GameLayer::handleEditorTools()
             "test",
             ResourceManager::getTexture("test")
         );
+        
+        editorContext.setSelectedEntity(entity);
 
         sceneEditorPanel.resetCreateEntityRequest();
+    }
+
+    hierarchyPanel.clear();
+
+    scene->forEach([&](Entity* entity)
+        {
+            hierarchyPanel.addEntity(entity);
+        });
+
+    if (hierarchyPanel.isCreateEntityRequested())
+    {
+        Entity* entity = scene->createEntity("New Entity");
+
+        auto* transform =
+            entity->addComponent<TransformComponent>();
+
+        transform->position = { 0.0f, 0.0f };
+        transform->scale = { 128.0f, 128.0f };
+
+        entity->addComponent<SpriteComponent>(
+            "test",
+            ResourceManager::getTexture("test")
+        );
+
+        editorContext.setSelectedEntity(entity);
+
+        hierarchyPanel.resetCreateEntityRequest();
     }
 
     if (sceneEditorPanel.isDestroyEntityRequested())
@@ -390,6 +419,35 @@ void GameLayer::handleEditorTools()
         }
 
         sceneEditorPanel.resetDestroyEntityRequest();
+    }
+
+    if (Entity* source = hierarchyPanel.getDuplicateEntity())
+    {
+        if (!source->isDestroyed())
+        {
+            Entity* copy = scene->createEntity(source->getName() + " Copy");
+
+            if (auto* sourceTransform = source->getComponent<TransformComponent>())
+            {
+                auto* transform = copy->addComponent<TransformComponent>();
+                *transform = *sourceTransform;
+
+                transform->position.x += 32.0f;
+                transform->position.y += 32.0f;
+            }
+
+            if (auto* sourceSprite = source->getComponent<SpriteComponent>())
+            {
+                copy->addComponent<SpriteComponent>(
+                    sourceSprite->getTextureID(),
+                    sourceSprite->getTexture()
+                );
+            }
+
+            editorContext.setSelectedEntity(copy);
+        }
+
+        hierarchyPanel.resetDuplicateEntityRequest();
     }
 
     if (assetBrowserPanel.isApplyAssetRequested())
