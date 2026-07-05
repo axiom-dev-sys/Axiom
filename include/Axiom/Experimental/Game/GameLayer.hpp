@@ -23,6 +23,8 @@
 #include <memory>
 #include <string>
 #include <glm/glm.hpp>
+#include <vector>
+#include <utility>
 
 namespace Axiom {
 
@@ -95,6 +97,8 @@ private:
 
     std::shared_ptr<Scene> editorScene;
     std::shared_ptr<Scene> runtimeScene;
+
+    std::vector<std::pair<std::string, std::shared_ptr<Scene>>> editorScenes;
 
     bool pauseKeyWasPressed = false;
     bool sceneSwitchKeyWasPressed = false;

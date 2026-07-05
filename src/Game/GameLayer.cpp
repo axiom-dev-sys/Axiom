@@ -14,6 +14,8 @@
 #include "Axiom/Core/EngineMode.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <string>
+#include <algorithm>
 
 namespace Axiom {
 
@@ -75,6 +77,8 @@ GameLayer::GameLayer(Application* application)
     consolePanel.addLog("[INFO] Gameplay scene loaded");
     consolePanel.addLog("[INFO] ResourceManager initialized");
 
+    editorScenes.push_back({ "Gameplay", gameplayScene });
+
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -101,6 +105,19 @@ GameLayer::GameLayer(Application* application)
     bool GameLayer::isExitRequested() const
     {
         return editorUI.isExitRequested();
+    }
+
+    static std::string makeSceneSaveFileName(const std::string& sceneName)
+    {
+        std::string fileName = sceneName;
+
+        for (char& c : fileName)
+        {
+            if (c == ' ')
+                c = '_';
+        }
+
+        return fileName + ".scene";
     }
 
 void GameLayer::onUpdate(float dt)
@@ -299,7 +316,11 @@ void GameLayer::handleSceneSerialization()
     {
         SceneSerializer::save(
             *scene,
-            Paths::getSave("scene.txt")
+            Paths::getSave(
+                makeSceneSaveFileName(
+                    sceneManager.getActiveSceneName()
+                )
+            )
         );
 
         sceneEditorPanel.resetSaveSceneRequest();
@@ -313,7 +334,11 @@ void GameLayer::handleSceneSerialization()
     {
         SceneSerializer::load(
             *scene,
-            Paths::getSave("scene.txt")
+            Paths::getSave(
+                makeSceneSaveFileName(
+                    sceneManager.getActiveSceneName()
+                )
+            )
         );
 
         refreshSceneReferences();
@@ -331,6 +356,29 @@ void GameLayer::handleEditorTools()
     inspectorPanel.setEditorContext(&editorContext);
     sceneEditorPanel.setEditorContext(&editorContext);
     assetBrowserPanel.setEditorContext(&editorContext);
+
+    sceneEditorPanel.setSceneInfo(
+        sceneManager.getActiveSceneName(),
+        static_cast<int>(scene->getEntityCount())
+    );
+
+    sceneEditorPanel.clearSceneNames();
+
+    for (const auto& sceneInfo : editorScenes)
+    {
+        sceneEditorPanel.addSceneName(sceneInfo.first);
+    }
+
+    if (sceneEditorPanel.isRenameSceneRequested())
+    {
+        sceneManager.renameActiveScene(
+            sceneEditorPanel.getRequestedSceneName()
+        );
+
+        sceneEditorPanel.resetRenameSceneRequest();
+    }
+
+    sceneEditorPanel.setSceneMode("Edit");
 
     hierarchyPanel.clear();
 
@@ -360,6 +408,68 @@ void GameLayer::handleEditorTools()
     assetBrowserPanel.addAsset("test");
     assetBrowserPanel.addAsset("office");
     assetBrowserPanel.addAsset("fallback");
+
+    if (sceneEditorPanel.isNewSceneRequested())
+    {
+        auto newScene = std::make_shared<Scene>();
+
+        std::string name =
+            "New Scene " + std::to_string(editorScenes.size() + 1);
+
+        editorScenes.push_back({ name, newScene });
+
+        setActiveScene(name, newScene);
+
+        editorContext.clearSelection();
+
+        sceneEditorPanel.resetNewSceneRequest();
+    }
+
+    if (sceneEditorPanel.isSwitchSceneRequested())
+    {
+        const std::string& name =
+            sceneEditorPanel.getRequestedSceneSwitchName();
+
+        for (const auto& sceneInfo : editorScenes)
+        {
+            if (sceneInfo.first == name)
+            {
+                setActiveScene(sceneInfo.first, sceneInfo.second);
+                break;
+            }
+        }
+
+        sceneEditorPanel.resetSwitchSceneRequest();
+    }
+
+    if (sceneEditorPanel.isDeleteSceneRequested())
+    {
+        if (editorScenes.size() > 1)
+        {
+            const std::string activeName =
+                sceneManager.getActiveSceneName();
+
+            editorScenes.erase(
+                std::remove_if(
+                    editorScenes.begin(),
+                    editorScenes.end(),
+                    [&](const auto& sceneInfo)
+                    {
+                        return sceneInfo.first == activeName;
+                    }
+                ),
+                editorScenes.end()
+            );
+
+            const auto& nextScene = editorScenes.front();
+
+            setActiveScene(nextScene.first, nextScene.second);
+
+            editorContext.clearSelection();
+        }
+
+        sceneEditorPanel.resetDeleteSceneRequest();
+    }
 
     if (sceneEditorPanel.isCreateEntityRequested())
     {
