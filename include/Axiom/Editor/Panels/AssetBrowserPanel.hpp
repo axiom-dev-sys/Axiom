@@ -27,11 +27,17 @@ namespace Axiom {
 
         void setEditorContext(EditorContext* context);
 
+        std::string getAssetType(const std::string& name) const;
+
+        bool isAssetLoaded(const std::string& name) const;
+
     private:
         bool visible = true;
 
         std::vector<std::string> assets;
         std::string selectedAsset;
+
+        char searchBuffer[128] = {};
 
         bool applyAssetRequested = false;
 
