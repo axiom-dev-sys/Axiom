@@ -62,6 +62,8 @@ namespace Axiom {
 
         bool showConsole = true;
         bool showStatistics = true;
+
+        bool showStatusBar = true;
     };
 
 }

@@ -41,6 +41,7 @@ namespace Axiom {
                 ImGui::MenuItem("Asset Browser", nullptr, &showAssetBrowser);
                 ImGui::MenuItem("Console", nullptr, &showConsole);
                 ImGui::MenuItem("Statistics", nullptr, &showStatistics);
+                ImGui::MenuItem("Status Bar", nullptr, &showStatusBar);
 
                 ImGui::EndMenu();
             }
@@ -94,7 +95,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 1.1.5");
+                ImGui::Text("Version: 1.2.7");
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -106,33 +107,72 @@ namespace Axiom {
                 ImGui::End();
             }
 
-            ImGui::SetNextWindowPos(
-                ImVec2(0, 690),
-                ImGuiCond_Always
-            );
+            if (showStatusBar)
+            {
+                ImGui::SetNextWindowPos(
+                    ImVec2(0, 690),
+                    ImGuiCond_Always
+                );
 
-            ImGui::SetNextWindowSize(
-                ImVec2(1280, 30),
-                ImGuiCond_Always
-            );
+                ImGui::SetNextWindowSize(
+                    ImVec2(1280, 30),
+                    ImGuiCond_Always
+                );
 
-            ImGui::Begin(
-                "Status Bar",
-                nullptr,
-                ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoMove |
-                ImGuiWindowFlags_NoCollapse
-            );
+                ImGui::SetNextWindowBgAlpha(1.0f);
 
-            ImGui::Text(
-                "Scene: %s | State: %s | Entities: %d | FPS: %.1f | Axiom 1.0.0",
-                sceneName.c_str(),
-                gameState.c_str(),
-                entityCount,
-                fps
-            );
+                ImGui::Begin(
+                    "Status Bar",
+                    nullptr,
+                    ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoMove |
+                    ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_NoScrollbar |
+                    ImGuiWindowFlags_NoScrollWithMouse
+                );
 
-            ImGui::End();
+                ImGui::Text("Axiom 1.2.7");
+
+                ImGui::SameLine(180);
+                ImGui::Text("Scene: %s", sceneName.c_str());
+
+                ImGui::SameLine(420);
+
+                if (gameState == "Play")
+                {
+                    ImGui::TextColored(
+                        ImVec4(0.2f, 1.0f, 0.2f, 1.0f),
+                        "Mode: Play"
+                    );
+                }
+                else if (gameState == "Pause")
+                {
+                    ImGui::TextColored(
+                        ImVec4(1.0f, 1.0f, 0.2f, 1.0f),
+                        "Mode: Pause"
+                    );
+                }
+                else if (gameState == "Edit")
+                {
+                    ImGui::TextColored(
+                        ImVec4(0.4f, 0.8f, 1.0f, 1.0f),
+                        "Mode: Edit"
+                    );
+                }
+                else
+                {
+                    ImGui::Text("Mode: %s", gameState.c_str());
+                }
+
+                ImGui::SameLine(620);
+                ImGui::Text("Entities: %d", entityCount);
+
+                ImGui::SameLine(840);
+                ImGui::Text("FPS: %.1f", fps);
+
+                ImGui::End();
+            }
     }
 
     bool EditorUI::isDebugOverlayVisible() const
