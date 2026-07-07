@@ -16,6 +16,8 @@ namespace Axiom {
         static Texture* loadTexture(const std::string& path);
         static Texture* getTexture(const std::string& path);
 
+        static int getLoadedTextureCount();
+
     private:
         static std::unordered_map<std::string, std::unique_ptr<Texture>> s_Textures;
         static std::unique_ptr<Texture> s_FallbackTexture;

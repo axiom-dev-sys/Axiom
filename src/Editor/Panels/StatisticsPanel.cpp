@@ -11,24 +11,59 @@ namespace Axiom {
 
         ImGui::Begin("Statistics");
 
-        ImGui::Text("Performance");
-        ImGui::Separator();
-        ImGui::Text("FPS: %.1f", fps);
-        ImGui::Text("Delta Time: %.4f", deltaTime);
+        if (ImGui::CollapsingHeader("Engine", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Version: %s", "1.2.6");
+            ImGui::Text("Renderer: OpenGL");
+            ImGui::Text("Mode: Edit");
+        }
 
-        ImGui::Separator();
-        ImGui::Text("Scene");
-        ImGui::Text("Name: %s", sceneName.c_str());
-        ImGui::Text("Entities: %d", entityCount);
+        if (ImGui::CollapsingHeader("Runtime", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Mode: %s", runtimeMode.c_str());
+        }
 
-        ImGui::Separator();
-        ImGui::Text("Camera");
-        ImGui::Text("Position: %.1f, %.1f", cameraPosition.x, cameraPosition.y);
-        ImGui::Text("Zoom: %.2f", cameraZoom);
+        if (ImGui::CollapsingHeader("Window", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Resolution: %d x %d", windowWidth, windowHeight);
+        }
 
-        ImGui::Separator();
-        ImGui::Text("Player");
-        ImGui::Text("Position: %.1f, %.1f", playerPosition.x, playerPosition.y);
+        if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("FPS: %.1f", fps);
+            ImGui::Text("Delta Time: %.4f", deltaTime);
+        }
+
+        if (ImGui::CollapsingHeader("Scene", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Name: %s", sceneName.c_str());
+            ImGui::Text("Entities: %d", entityCount);
+        }
+
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Position: %.1f, %.1f", cameraPosition.x, cameraPosition.y);
+            ImGui::Text("Zoom: %.2f", cameraZoom);
+        }
+
+        if (ImGui::CollapsingHeader("Player", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Position: %.1f, %.1f", playerPosition.x, playerPosition.y);
+        }
+
+        if (ImGui::CollapsingHeader("Components", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Sprite: %d", spriteCount);
+            ImGui::Text("Collider: %d", colliderCount);
+            ImGui::Text("Velocity: %d", velocityCount);
+            ImGui::Text("PlayerController: %d", playerControllerCount);
+        }
+
+        if (ImGui::CollapsingHeader("Resources", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Registered Textures: %d", registeredTextureCount);
+            ImGui::Text("Loaded Textures: %d", loadedTextureCount);
+        }
 
         ImGui::End();
     }
@@ -40,7 +75,16 @@ namespace Axiom {
         int entities,
         const glm::vec2& camPos,
         float camZoom,
-        const glm::vec2& playerPos
+        const glm::vec2& playerPos,
+        int sprites,
+        int colliders,
+        int velocities,
+        int controllers,
+        int registeredTextures,
+        int loadedTextures,
+        const std::string& mode,
+        int width,
+        int height
     )
     {
         fps = fpsValue;
@@ -50,6 +94,15 @@ namespace Axiom {
         cameraPosition = camPos;
         cameraZoom = camZoom;
         playerPosition = playerPos;
+        spriteCount = sprites;
+        colliderCount = colliders;
+        velocityCount = velocities;
+        playerControllerCount = controllers;
+        registeredTextureCount = registeredTextures;
+        loadedTextureCount = loadedTextures;
+        runtimeMode = mode;
+        windowWidth = width;
+        windowHeight = height;
     }
 
     void StatisticsPanel::setVisible(bool value)

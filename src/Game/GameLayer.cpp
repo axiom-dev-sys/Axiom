@@ -1,5 +1,6 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/SceneSerializer.hpp"
@@ -621,6 +622,28 @@ void GameLayer::updateInspectorInfo()
 
 void GameLayer::updateEditorStatus(float dt)
 {
+    int spriteCount = 0;
+    int colliderCount = 0;
+    int velocityCount = 0;
+    int playerControllerCount = 0;
+    int registeredTextureCount = 0;
+    int loadedTextureCount = 0;
+
+    scene->forEach([&](Entity* entity)
+        {
+            if (entity->hasComponent<SpriteComponent>())
+                spriteCount++;
+
+            if (entity->hasComponent<ColliderComponent>())
+                colliderCount++;
+
+            if (entity->hasComponent<VelocityComponent>())
+                velocityCount++;
+
+            if (entity->hasComponent<PlayerControllerComponent>())
+                playerControllerCount++;
+        });
+
     statisticsPanel.setStats(
         dt > 0.0f ? 1.0f / dt : 0.0f,
         dt,
@@ -628,7 +651,16 @@ void GameLayer::updateEditorStatus(float dt)
         static_cast<int>(getEntityCount()),
         scene->camera.position,
         scene->camera.zoom,
-        getPlayerPosition()
+        getPlayerPosition(),
+        spriteCount,
+        colliderCount,
+        velocityCount,
+        playerControllerCount,
+        AssetRegistry::getRegisteredTextureCount(),
+        ResourceManager::getLoadedTextureCount(),
+        "Edit",
+        1280,
+        720
     );
 
     debugOverlay.setSceneInfo(

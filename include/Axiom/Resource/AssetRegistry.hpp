@@ -20,6 +20,8 @@ namespace Axiom {
             const std::string& id
         );
 
+        static int getRegisteredTextureCount();
+
     private:
         static std::unordered_map<std::string, std::string> s_Textures;
     };

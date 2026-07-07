@@ -63,6 +63,11 @@ namespace Axiom {
         return loadTexture(name);
     }
 
+    int ResourceManager::getLoadedTextureCount()
+    {
+        return static_cast<int>(s_Textures.size());
+    }
+
     Texture* ResourceManager::getFallback()
     {
         if (!s_FallbackTexture)
