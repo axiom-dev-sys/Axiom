@@ -13,9 +13,8 @@ namespace Axiom {
 
         if (ImGui::CollapsingHeader("Engine", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Text("Version: %s", "1.2.6");
+            ImGui::Text("Version: %s", "1.2.9");
             ImGui::Text("Renderer: OpenGL");
-            ImGui::Text("Mode: Edit");
         }
 
         if (ImGui::CollapsingHeader("Runtime", ImGuiTreeNodeFlags_DefaultOpen))

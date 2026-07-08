@@ -9,6 +9,14 @@ Its core systems include ECS, scene management, resource management, scene seria
 
 ## Editor
 
+## Editor
+
+The first generation of the Axiom Editor.
+
+It provides integrated tools for scene editing, entity inspection,
+asset management, debugging, and runtime control, forming the foundation
+for 2D game development with Axiom.
+
 ![Axiom Editor](docs/images/axiom-editor.png)
 
 ## Features
@@ -40,6 +48,8 @@ Its core systems include ECS, scene management, resource management, scene seria
   - Asset Browser Panel
   - Console Panel
   - Statistics Panel
+  - Status Bar
+  - Preferences Panel
 
 ## Technologies
 
@@ -87,8 +97,8 @@ Build and run the project
 
 ## Current Status
 
-Axiom Engine 1.1.х introduces the Runtime architecture, extending the first stable release with a dedicated runtime workflow for gameplay execution inside the editor.
+Axiom Engine 1.2.x completes the first generation of the integrated editor, extending the Runtime architecture with a complete editor workflow for scene editing, debugging, resource management, and runtime control.
 
-The engine now provides a solid 2D foundation including rendering, ECS, runtime management, scene management, resource management, serialization, debugging tools, and an integrated editor.
+The engine now provides a solid 2D foundation including rendering, ECS, runtime management, scene management, resource management, serialization, debugging tools, and the first-generation integrated editor.
 
-Future versions will continue expanding the engine with new editor features, gameplay systems, rendering improvements, and additional tools.
+Future versions will continue expanding the engine with gameplay systems, rendering improvements, editor enhancements, and additional development tools.

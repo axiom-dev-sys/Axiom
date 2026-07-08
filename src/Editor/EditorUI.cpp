@@ -96,7 +96,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 1.2.7");
+                ImGui::Text("Version: 1.2.9");
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -133,7 +133,7 @@ namespace Axiom {
                     ImGuiWindowFlags_NoScrollWithMouse
                 );
 
-                ImGui::Text("Axiom 1.2.7");
+                ImGui::Text("Axiom 1.2.9");
 
                 ImGui::SameLine(180);
                 ImGui::Text("Scene: %s", sceneName.c_str());

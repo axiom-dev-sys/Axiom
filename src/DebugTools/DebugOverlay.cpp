@@ -23,7 +23,7 @@ namespace Axiom {
 
         if (ImGui::CollapsingHeader("Editor", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Text("Version: 1.2.7");
+            ImGui::Text("Version: 1.2.9");
             ImGui::Text("Renderer: OpenGL");
         }
 

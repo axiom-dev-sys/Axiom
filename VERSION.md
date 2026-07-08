@@ -194,8 +194,41 @@ debugging tools, and an integrated editor.
 - Runtime scene restoration
 - Runtime switching stability
 
+---
+
+## v1.2 — Editor Generation I
+
+### Added
+
+- FreeType integration
+- Hierarchy improvements
+- Inspector improvements
+- Scene Editor improvements
+- Asset Browser improvements
+- Console Panel
+- Statistics Panel
+- Status Bar
+- Preferences Panel
+
+### Changed
+
+- Editor interface redesigned
+- Scene management workflow improved
+- Runtime information unified
+- Editor panels polished
+
+### Fixed
+
+- Status synchronization between editor panels
+- Scene Editor runtime state
+- Statistics runtime information
+- Status Bar improvements
+- Various editor bugs and UI issues
+
 ### Goal
 
-Establish a robust runtime architecture for gameplay simulation inside the editor.
+Complete the first generation of the Axiom Editor.
 
-Prepare the engine for future gameplay systems and editor/runtime separation.
+Provide a stable, integrated editor for scene management, debugging,
+resource browsing and runtime control before moving to the next stage
+of engine development.

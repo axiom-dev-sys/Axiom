@@ -379,8 +379,6 @@ void GameLayer::handleEditorTools()
         sceneEditorPanel.resetRenameSceneRequest();
     }
 
-    sceneEditorPanel.setSceneMode("Edit");
-
     hierarchyPanel.clear();
 
     scene->forEach([&](Entity* entity)
@@ -644,25 +642,6 @@ void GameLayer::updateEditorStatus(float dt)
                 playerControllerCount++;
         });
 
-    statisticsPanel.setStats(
-        dt > 0.0f ? 1.0f / dt : 0.0f,
-        dt,
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(getEntityCount()),
-        scene->camera.position,
-        scene->camera.zoom,
-        getPlayerPosition(),
-        spriteCount,
-        colliderCount,
-        velocityCount,
-        playerControllerCount,
-        AssetRegistry::getRegisteredTextureCount(),
-        ResourceManager::getLoadedTextureCount(),
-        "Edit",
-        1280,
-        720
-    );
-
     debugOverlay.setSceneInfo(
         sceneManager.getActiveSceneName(),
         getEntityCount()
@@ -716,6 +695,25 @@ void GameLayer::updateEditorStatus(float dt)
         }
     }
 
+    statisticsPanel.setStats(
+        dt > 0.0f ? 1.0f / dt : 0.0f,
+        dt,
+        sceneManager.getActiveSceneName(),
+        static_cast<int>(getEntityCount()),
+        scene->camera.position,
+        scene->camera.zoom,
+        getPlayerPosition(),
+        spriteCount,
+        colliderCount,
+        velocityCount,
+        playerControllerCount,
+        AssetRegistry::getRegisteredTextureCount(),
+        ResourceManager::getLoadedTextureCount(),
+        stateText,
+        1280,
+        720
+    );
+
     debugOverlay.setGameState(stateText);
 
     editorUI.setStatusInfo(
@@ -724,6 +722,8 @@ void GameLayer::updateEditorStatus(float dt)
         static_cast<int>(getEntityCount()),
         dt > 0.0f ? 1.0f / dt : 0.0f
     );
+
+    sceneEditorPanel.setSceneMode(stateText);
 }
 
 void GameLayer::updateGameplay(float dt)
