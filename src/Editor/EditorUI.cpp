@@ -42,6 +42,7 @@ namespace Axiom {
                 ImGui::MenuItem("Console", nullptr, &showConsole);
                 ImGui::MenuItem("Statistics", nullptr, &showStatistics);
                 ImGui::MenuItem("Status Bar", nullptr, &showStatusBar);
+                ImGui::MenuItem("Preferences", nullptr, &showPreferences);
 
                 ImGui::EndMenu();
             }
@@ -286,6 +287,11 @@ namespace Axiom {
     void EditorUI::resetStopRequest()
     {
         stopRequested = false;
+    }
+
+    bool EditorUI::isPreferencesVisible() const
+    {
+        return showPreferences;
     }
 
 }

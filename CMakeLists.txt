@@ -79,6 +79,7 @@ add_executable(Axiom
     src/Editor/Panels/AssetBrowserPanel.cpp
     src/Editor/Panels/ConsolePanel.cpp
     src/Editor/Panels/StatisticsPanel.cpp
+    src/Editor/Panels/PreferencesPanel.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
     src/Editor/EditorFontManager.cpp

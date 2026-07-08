@@ -19,6 +19,7 @@
 #include "Axiom/Editor/Panels/StatisticsPanel.hpp"
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/EditorUI.hpp"
+#include "Axiom/Editor/Panels/PreferencesPanel.hpp"
 
 #include <memory>
 #include <string>
@@ -93,6 +94,7 @@ private:
     StatisticsPanel statisticsPanel;
     EditorContext editorContext;
     EditorUI editorUI;
+    PreferencesPanel preferencesPanel;
     GameState gameState = GameState::Gameplay;
 
     std::shared_ptr<Scene> editorScene;

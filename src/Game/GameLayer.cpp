@@ -910,6 +910,13 @@ void GameLayer::onRender()
 
     if (editorUI.isStatisticsVisible())
         statisticsPanel.render();
+
+    preferencesPanel.setVisible(editorUI.isPreferencesVisible());
+
+    if (editorUI.isPreferencesVisible()) 
+    {
+        preferencesPanel.render();
+    }
 }
 
 }
