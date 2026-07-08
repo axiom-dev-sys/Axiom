@@ -23,7 +23,7 @@ namespace Axiom {
         }
 
         file << "Axiom Scene\n";
-        file << "Version: 1.1.5\n";
+        file << "Version: 1.2.9\n";
         file << "Entities: "
             << scene.getEntityCount()
             << "\n";
@@ -73,7 +73,6 @@ namespace Axiom {
         void SceneSerializer::load(
             Scene& scene,
             const std::string& path
-            // TODO: Reconstruct scene entities from serialized data.
         )
         {
             (void)scene;

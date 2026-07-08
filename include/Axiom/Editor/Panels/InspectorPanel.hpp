@@ -49,6 +49,9 @@ namespace Axiom {
         bool hasPlayerController = false;
         bool hasPlayerTag = false;
 
+        char nameBuffer[256] = {};
+        bool editingName = false;
+
         EditorContext* editorContext = nullptr;
     };
 

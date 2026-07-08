@@ -38,6 +38,8 @@ namespace Axiom {
         bool isStopRequested() const;
         void resetStopRequest();
 
+        bool isPreferencesVisible() const;
+
     private:
         bool showDemo = false;
 
@@ -62,6 +64,10 @@ namespace Axiom {
 
         bool showConsole = true;
         bool showStatistics = true;
+
+        bool showStatusBar = true;
+
+        bool showPreferences = false;
     };
 
 }

@@ -4,6 +4,7 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Time.hpp"
+#include "Axiom/Editor/EditorFontManager.hpp"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -22,8 +23,7 @@ namespace Axiom {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
-        ImGuiIO& io = ImGui::GetIO();
-        (void)io;
+        EditorFontManager::loadDefaultFont();
 
         ImGui::StyleColorsDark();
 

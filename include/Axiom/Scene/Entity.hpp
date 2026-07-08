@@ -68,6 +68,11 @@ namespace Axiom {
             return m_Name;
         }
 
+        void setName(const std::string& name)
+        {
+            m_Name = name;
+        }
+
         bool isActive() const
         {
             return m_Active;

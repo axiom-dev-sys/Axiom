@@ -11,18 +11,58 @@ namespace Axiom {
 
         ImGui::Begin("Asset Browser");
 
-        for (const auto& asset : assets)
-        {
-            if (ImGui::Selectable(asset.c_str(), asset == selectedAsset))
-            {
-                selectedAsset = asset;
-            }
-        }
+        ImGui::Text("Assets");
+        ImGui::Text("Count: %d", static_cast<int>(assets.size()));
 
         ImGui::Separator();
 
         ImGui::Text(
             "Selected: %s",
+            selectedAsset.empty() ? "None" : selectedAsset.c_str()
+        );
+
+        ImGui::Separator();
+
+        ImGui::InputText(
+            "Search",
+            searchBuffer,
+            sizeof(searchBuffer)
+        );
+
+        ImGui::Separator();
+
+        if (ImGui::CollapsingHeader("Textures", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            for (const auto& asset : assets)
+            {
+                if (searchBuffer[0] != '\0')
+                {
+                    if (asset.find(searchBuffer) == std::string::npos)
+                        continue;
+                }
+
+                if (ImGui::Selectable(asset.c_str(), asset == selectedAsset))
+                {
+                    selectedAsset = asset;
+                }
+            }
+        }
+
+        if (ImGui::CollapsingHeader("Fonts"))
+        {
+            ImGui::TextDisabled("No fonts registered");
+        }
+
+        if (ImGui::CollapsingHeader("Audio"))
+        {
+            ImGui::TextDisabled("No audio assets");
+        }
+
+        ImGui::Separator();
+
+        ImGui::Text("Selected Asset");
+        ImGui::Text(
+            "Name: %s",
             selectedAsset.empty() ? "None" : selectedAsset.c_str()
         );
 
@@ -36,8 +76,15 @@ namespace Axiom {
         else
         {
             ImGui::Text("Name: %s", selectedAsset.c_str());
-            ImGui::Text("Type: Texture");
+            ImGui::Text("Type: %s", getAssetType(selectedAsset).c_str());
         }
+
+        ImGui::Text(
+            "Loaded: %s",
+            isAssetLoaded(selectedAsset)
+            ? "Yes"
+            : "No"
+        );
 
         if (!selectedAsset.empty())
         {
@@ -93,6 +140,16 @@ namespace Axiom {
     void AssetBrowserPanel::setEditorContext(EditorContext* context)
     {
         editorContext = context;
+    }
+
+    std::string AssetBrowserPanel::getAssetType(const std::string& name) const
+    {
+        return "Texture";
+    }
+
+    bool AssetBrowserPanel::isAssetLoaded(const std::string& name) const
+    {
+        return !name.empty();
     }
 
 }

@@ -20,6 +20,8 @@ namespace Axiom {
 
         void clearActiveScene();
 
+        void renameActiveScene(const std::string& name);
+
     private:
         std::shared_ptr<Scene> m_ActiveScene;
         std::string m_ActiveSceneName = "None";

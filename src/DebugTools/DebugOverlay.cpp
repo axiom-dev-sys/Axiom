@@ -21,40 +21,39 @@ namespace Axiom {
 
         ImGui::Begin("Axiom Debug");
 
-        ImGui::Text("Performance");
-        ImGui::Text("FPS: %.1f", fps);
-        ImGui::Text("Delta Time: %.4f", deltaTime);
+        if (ImGui::CollapsingHeader("Editor", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Version: 1.2.9");
+            ImGui::Text("Renderer: OpenGL");
+        }
 
-        ImGui::Separator();
+        if (ImGui::CollapsingHeader("Performance", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("FPS: %.1f", fps);
+            ImGui::Text("Delta Time: %.4f", deltaTime);
+        }
 
-        ImGui::Text("Scene: %s", sceneName.c_str());
-        ImGui::Text("Entities: %zu", entityCount);
+        if (ImGui::CollapsingHeader("Scene", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Name: %s", sceneName.c_str());
+            ImGui::Text("Entities: %zu", entityCount);
+        }
 
-        ImGui::Separator();
+        if (ImGui::CollapsingHeader("Runtime", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Mode: %s", gameState.c_str());
+        }
 
-        ImGui::Text("Player");
-        ImGui::Text("X: %.1f", playerPosition.x);
-        ImGui::Text("Y: %.1f", playerPosition.y);
+        if (ImGui::CollapsingHeader("Player", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Position: %.1f, %.1f", playerPosition.x, playerPosition.y);
+        }
 
-        ImGui::Separator();
-
-        ImGui::Text("State");
-        ImGui::Text("Game State: %s", gameState.c_str());
-
-        ImGui::Separator();
-
-        ImGui::Text("Camera");
-
-        ImGui::Text(
-            "Position: %.1f %.1f",
-            cameraPosition.x,
-            cameraPosition.y
-        );
-
-        ImGui::Text(
-            "Zoom: %.2f",
-            cameraZoom
-        );
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::Text("Position: %.1f, %.1f", cameraPosition.x, cameraPosition.y);
+            ImGui::Text("Zoom: %.2f", cameraZoom);
+        }
 
         ImGui::End();
     }

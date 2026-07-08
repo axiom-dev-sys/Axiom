@@ -20,6 +20,15 @@ namespace Axiom {
     private:
         bool visible = true;
         std::vector<std::string> logs;
+
+        bool autoScroll = true;
+        bool scrollToBottom = false;
+
+        bool showInfo = true;
+        bool showWarning = true;
+        bool showError = true;
+
+        char searchBuffer[128] = {};
     };
 
 }

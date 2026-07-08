@@ -1,5 +1,6 @@
 #include "Axiom/Experimental/Game/GameLayer.hpp"
 #include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
 #include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/SceneSerializer.hpp"
@@ -14,6 +15,8 @@
 #include "Axiom/Core/EngineMode.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <string>
+#include <algorithm>
 
 namespace Axiom {
 
@@ -75,6 +78,8 @@ GameLayer::GameLayer(Application* application)
     consolePanel.addLog("[INFO] Gameplay scene loaded");
     consolePanel.addLog("[INFO] ResourceManager initialized");
 
+    editorScenes.push_back({ "Gameplay", gameplayScene });
+
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -101,6 +106,19 @@ GameLayer::GameLayer(Application* application)
     bool GameLayer::isExitRequested() const
     {
         return editorUI.isExitRequested();
+    }
+
+    static std::string makeSceneSaveFileName(const std::string& sceneName)
+    {
+        std::string fileName = sceneName;
+
+        for (char& c : fileName)
+        {
+            if (c == ' ')
+                c = '_';
+        }
+
+        return fileName + ".scene";
     }
 
 void GameLayer::onUpdate(float dt)
@@ -299,7 +317,11 @@ void GameLayer::handleSceneSerialization()
     {
         SceneSerializer::save(
             *scene,
-            Paths::getSave("scene.txt")
+            Paths::getSave(
+                makeSceneSaveFileName(
+                    sceneManager.getActiveSceneName()
+                )
+            )
         );
 
         sceneEditorPanel.resetSaveSceneRequest();
@@ -313,7 +335,11 @@ void GameLayer::handleSceneSerialization()
     {
         SceneSerializer::load(
             *scene,
-            Paths::getSave("scene.txt")
+            Paths::getSave(
+                makeSceneSaveFileName(
+                    sceneManager.getActiveSceneName()
+                )
+            )
         );
 
         refreshSceneReferences();
@@ -331,6 +357,27 @@ void GameLayer::handleEditorTools()
     inspectorPanel.setEditorContext(&editorContext);
     sceneEditorPanel.setEditorContext(&editorContext);
     assetBrowserPanel.setEditorContext(&editorContext);
+
+    sceneEditorPanel.setSceneInfo(
+        sceneManager.getActiveSceneName(),
+        static_cast<int>(scene->getEntityCount())
+    );
+
+    sceneEditorPanel.clearSceneNames();
+
+    for (const auto& sceneInfo : editorScenes)
+    {
+        sceneEditorPanel.addSceneName(sceneInfo.first);
+    }
+
+    if (sceneEditorPanel.isRenameSceneRequested())
+    {
+        sceneManager.renameActiveScene(
+            sceneEditorPanel.getRequestedSceneName()
+        );
+
+        sceneEditorPanel.resetRenameSceneRequest();
+    }
 
     hierarchyPanel.clear();
 
@@ -361,6 +408,68 @@ void GameLayer::handleEditorTools()
     assetBrowserPanel.addAsset("office");
     assetBrowserPanel.addAsset("fallback");
 
+    if (sceneEditorPanel.isNewSceneRequested())
+    {
+        auto newScene = std::make_shared<Scene>();
+
+        std::string name =
+            "New Scene " + std::to_string(editorScenes.size() + 1);
+
+        editorScenes.push_back({ name, newScene });
+
+        setActiveScene(name, newScene);
+
+        editorContext.clearSelection();
+
+        sceneEditorPanel.resetNewSceneRequest();
+    }
+
+    if (sceneEditorPanel.isSwitchSceneRequested())
+    {
+        const std::string& name =
+            sceneEditorPanel.getRequestedSceneSwitchName();
+
+        for (const auto& sceneInfo : editorScenes)
+        {
+            if (sceneInfo.first == name)
+            {
+                setActiveScene(sceneInfo.first, sceneInfo.second);
+                break;
+            }
+        }
+
+        sceneEditorPanel.resetSwitchSceneRequest();
+    }
+
+    if (sceneEditorPanel.isDeleteSceneRequested())
+    {
+        if (editorScenes.size() > 1)
+        {
+            const std::string activeName =
+                sceneManager.getActiveSceneName();
+
+            editorScenes.erase(
+                std::remove_if(
+                    editorScenes.begin(),
+                    editorScenes.end(),
+                    [&](const auto& sceneInfo)
+                    {
+                        return sceneInfo.first == activeName;
+                    }
+                ),
+                editorScenes.end()
+            );
+
+            const auto& nextScene = editorScenes.front();
+
+            setActiveScene(nextScene.first, nextScene.second);
+
+            editorContext.clearSelection();
+        }
+
+        sceneEditorPanel.resetDeleteSceneRequest();
+    }
+
     if (sceneEditorPanel.isCreateEntityRequested())
     {
         Entity* entity = scene->createEntity("New Entity");
@@ -375,8 +484,37 @@ void GameLayer::handleEditorTools()
             "test",
             ResourceManager::getTexture("test")
         );
+        
+        editorContext.setSelectedEntity(entity);
 
         sceneEditorPanel.resetCreateEntityRequest();
+    }
+
+    hierarchyPanel.clear();
+
+    scene->forEach([&](Entity* entity)
+        {
+            hierarchyPanel.addEntity(entity);
+        });
+
+    if (hierarchyPanel.isCreateEntityRequested())
+    {
+        Entity* entity = scene->createEntity("New Entity");
+
+        auto* transform =
+            entity->addComponent<TransformComponent>();
+
+        transform->position = { 0.0f, 0.0f };
+        transform->scale = { 128.0f, 128.0f };
+
+        entity->addComponent<SpriteComponent>(
+            "test",
+            ResourceManager::getTexture("test")
+        );
+
+        editorContext.setSelectedEntity(entity);
+
+        hierarchyPanel.resetCreateEntityRequest();
     }
 
     if (sceneEditorPanel.isDestroyEntityRequested())
@@ -390,6 +528,35 @@ void GameLayer::handleEditorTools()
         }
 
         sceneEditorPanel.resetDestroyEntityRequest();
+    }
+
+    if (Entity* source = hierarchyPanel.getDuplicateEntity())
+    {
+        if (!source->isDestroyed())
+        {
+            Entity* copy = scene->createEntity(source->getName() + " Copy");
+
+            if (auto* sourceTransform = source->getComponent<TransformComponent>())
+            {
+                auto* transform = copy->addComponent<TransformComponent>();
+                *transform = *sourceTransform;
+
+                transform->position.x += 32.0f;
+                transform->position.y += 32.0f;
+            }
+
+            if (auto* sourceSprite = source->getComponent<SpriteComponent>())
+            {
+                copy->addComponent<SpriteComponent>(
+                    sourceSprite->getTextureID(),
+                    sourceSprite->getTexture()
+                );
+            }
+
+            editorContext.setSelectedEntity(copy);
+        }
+
+        hierarchyPanel.resetDuplicateEntityRequest();
     }
 
     if (assetBrowserPanel.isApplyAssetRequested())
@@ -453,15 +620,27 @@ void GameLayer::updateInspectorInfo()
 
 void GameLayer::updateEditorStatus(float dt)
 {
-    statisticsPanel.setStats(
-        dt > 0.0f ? 1.0f / dt : 0.0f,
-        dt,
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(getEntityCount()),
-        scene->camera.position,
-        scene->camera.zoom,
-        getPlayerPosition()
-    );
+    int spriteCount = 0;
+    int colliderCount = 0;
+    int velocityCount = 0;
+    int playerControllerCount = 0;
+    int registeredTextureCount = 0;
+    int loadedTextureCount = 0;
+
+    scene->forEach([&](Entity* entity)
+        {
+            if (entity->hasComponent<SpriteComponent>())
+                spriteCount++;
+
+            if (entity->hasComponent<ColliderComponent>())
+                colliderCount++;
+
+            if (entity->hasComponent<VelocityComponent>())
+                velocityCount++;
+
+            if (entity->hasComponent<PlayerControllerComponent>())
+                playerControllerCount++;
+        });
 
     debugOverlay.setSceneInfo(
         sceneManager.getActiveSceneName(),
@@ -516,6 +695,25 @@ void GameLayer::updateEditorStatus(float dt)
         }
     }
 
+    statisticsPanel.setStats(
+        dt > 0.0f ? 1.0f / dt : 0.0f,
+        dt,
+        sceneManager.getActiveSceneName(),
+        static_cast<int>(getEntityCount()),
+        scene->camera.position,
+        scene->camera.zoom,
+        getPlayerPosition(),
+        spriteCount,
+        colliderCount,
+        velocityCount,
+        playerControllerCount,
+        AssetRegistry::getRegisteredTextureCount(),
+        ResourceManager::getLoadedTextureCount(),
+        stateText,
+        1280,
+        720
+    );
+
     debugOverlay.setGameState(stateText);
 
     editorUI.setStatusInfo(
@@ -524,6 +722,8 @@ void GameLayer::updateEditorStatus(float dt)
         static_cast<int>(getEntityCount()),
         dt > 0.0f ? 1.0f / dt : 0.0f
     );
+
+    sceneEditorPanel.setSceneMode(stateText);
 }
 
 void GameLayer::updateGameplay(float dt)
@@ -710,6 +910,13 @@ void GameLayer::onRender()
 
     if (editorUI.isStatisticsVisible())
         statisticsPanel.render();
+
+    preferencesPanel.setVisible(editorUI.isPreferencesVisible());
+
+    if (editorUI.isPreferencesVisible()) 
+    {
+        preferencesPanel.render();
+    }
 }
 
 }

@@ -47,4 +47,9 @@ namespace Axiom {
         return it->second;
     }
 
+    int AssetRegistry::getRegisteredTextureCount()
+    {
+        return static_cast<int>(s_Textures.size());
+    }
+
 }

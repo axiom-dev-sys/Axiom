@@ -33,4 +33,12 @@ namespace Axiom {
         m_ActiveScene = nullptr;
     }
 
+    void SceneManager::renameActiveScene(const std::string& name)
+    {
+        if (name.empty())
+            return;
+
+        m_ActiveSceneName = name;
+    }
+
 }
