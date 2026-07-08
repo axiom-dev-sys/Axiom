@@ -9,8 +9,6 @@ Its core systems include ECS, scene management, resource management, scene seria
 
 ## Editor
 
-## Editor
-
 The first generation of the Axiom Editor.
 
 It provides integrated tools for scene editing, entity inspection,
