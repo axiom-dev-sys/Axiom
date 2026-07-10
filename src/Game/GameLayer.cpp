@@ -883,9 +883,19 @@ void GameLayer::onRender()
     if (!scene)
         return;
 
+    viewportPanel.beginRender();
+
     scene->onRender();
 
+    viewportPanel.endRender();
+
     editorUI.render();
+
+    if (editorUI.isViewportVisible())
+        viewportPanel.render();
+
+    if (editorUI.isViewportVisible())
+        viewportPanel.render();
 
     if (editorUI.isDebugOverlayVisible())
         debugOverlay.render();

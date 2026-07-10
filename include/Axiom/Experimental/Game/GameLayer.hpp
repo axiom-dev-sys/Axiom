@@ -20,6 +20,7 @@
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/EditorUI.hpp"
 #include "Axiom/Editor/Panels/PreferencesPanel.hpp"
+#include "Axiom/Editor/Viewport/ViewportPanel.hpp"
 
 #include <memory>
 #include <string>
@@ -94,6 +95,7 @@ private:
     StatisticsPanel statisticsPanel;
     EditorContext editorContext;
     EditorUI editorUI;
+    ViewportPanel viewportPanel;
     PreferencesPanel preferencesPanel;
     GameState gameState = GameState::Gameplay;
 

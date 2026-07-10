@@ -40,6 +40,8 @@ namespace Axiom {
 
         bool isPreferencesVisible() const;
 
+        bool isViewportVisible() const;
+
     private:
         bool showDemo = false;
 
@@ -68,6 +70,8 @@ namespace Axiom {
         bool showStatusBar = true;
 
         bool showPreferences = false;
+
+        bool showViewport = true;
     };
 
 }

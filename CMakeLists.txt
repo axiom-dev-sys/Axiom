@@ -80,6 +80,8 @@ add_executable(Axiom
     src/Editor/Panels/ConsolePanel.cpp
     src/Editor/Panels/StatisticsPanel.cpp
     src/Editor/Panels/PreferencesPanel.cpp
+    src/Editor/Viewport/ViewportPanel.cpp
+    src/Editor/Viewport/Framebuffer.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
     src/Editor/EditorFontManager.cpp
