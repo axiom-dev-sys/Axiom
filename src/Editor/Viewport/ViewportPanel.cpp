@@ -19,6 +19,8 @@ namespace Axiom {
             ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse);
 
+        m_LeftMouseClicked = false;
+
         m_Focused = ImGui::IsWindowFocused();
         m_Hovered = ImGui::IsWindowHovered();
 
@@ -67,6 +69,13 @@ namespace Axiom {
 
             m_Size = availableSize;
 
+            m_BoundsMin = ImGui::GetCursorScreenPos();
+
+            m_BoundsMax = ImVec2(
+                m_BoundsMin.x + m_Size.x,
+                m_BoundsMin.y + m_Size.y
+            );
+
             ImGui::Image(
                 (ImTextureID)(std::intptr_t)
                     m_Framebuffer->getColorAttachmentID(),
@@ -74,7 +83,10 @@ namespace Axiom {
                 ImVec2(0.0f, 1.0f),
                 ImVec2(1.0f, 0.0f)
         );
-
+            
+            m_LeftMouseClicked =
+                m_Hovered &&
+                ImGui::IsMouseClicked(ImGuiMouseButton_Left);
         }
         
         ImGui::End();
@@ -132,6 +144,21 @@ namespace Axiom {
 
         m_ResetCameraRequested = false;
         return true;
+    }
+
+    bool ViewportPanel::isLeftMouseClicked() const
+    {
+        return m_LeftMouseClicked;
+    }
+
+    const ImVec2& ViewportPanel::getBoundsMin() const
+    {
+        return m_BoundsMin;
+    }
+
+    const ImVec2& ViewportPanel::getBoundsMax() const
+    {
+        return m_BoundsMax;
     }
 
 }

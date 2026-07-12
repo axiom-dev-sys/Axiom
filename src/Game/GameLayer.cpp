@@ -347,13 +347,17 @@ void GameLayer::handleRuntimeControls()
 
     if (editorUI.isStopRequested())
     {
-        m_Application->stop();
+        if (m_Application->getMode() == EngineMode::Play ||
+            m_Application->getMode() == EngineMode::Pause)
+        {
+            m_Application->stop();
 
-        stopRuntime();
+            stopRuntime();
 
-        m_Application->setMode(EngineMode::Edit);
+            m_Application->setMode(EngineMode::Edit);
 
-        gameState = GameState::Gameplay;
+            gameState = GameState::Gameplay;
+        }
 
         editorUI.resetStopRequest();
         return;
@@ -457,12 +461,6 @@ void GameLayer::handleEditorTools()
         editorContext.clearSelection();
 
         selectedEntity = nullptr;
-    }
-
-    if (!selectedEntity)
-    {
-        selectedEntity = player;
-        editorContext.setSelectedEntity(player);
     }
 
     assetBrowserPanel.clear();
@@ -646,39 +644,62 @@ void GameLayer::handleEditorTools()
 
         assetBrowserPanel.resetApplyAssetRequest();
     }
+
+    scene->cleanupDestroyedEntities();
+
+    player = scene->findEntityByName("Player");
+    test = scene->findEntityByName("Test");
 }
 
 void GameLayer::updateInspectorInfo()
 {
-    if (!player)
+    Entity* selectedEntity =
+        editorContext.getSelectedEntity();
+
+    if (!scene ||
+        !selectedEntity ||
+        !scene->containsEntity(selectedEntity))
+    {
+        editorContext.clearSelection();
+
+        inspectorPanel.setHasSprite(false);
+        inspectorPanel.setHasVelocity(false);
+        inspectorPanel.setHasCollider(false);
+        inspectorPanel.setHasPlayerController(false);
+        inspectorPanel.setHasPlayerTag(false);
+
         return;
+    }
 
-    inspectorPanel.setEntityName(
-        player->getName()
-    );
-
-    inspectorPanel.setEntityID(
-        player->getID()
-    );
+    if (!selectedEntity ||
+        selectedEntity->isDestroyed())
+    {
+        inspectorPanel.setHasSprite(false);
+        inspectorPanel.setHasVelocity(false);
+        inspectorPanel.setHasCollider(false);
+        inspectorPanel.setHasPlayerController(false);
+        inspectorPanel.setHasPlayerTag(false);
+        return;
+    }
 
     inspectorPanel.setHasSprite(
-        player->hasComponent<SpriteComponent>()
+        selectedEntity->hasComponent<SpriteComponent>()
     );
 
     inspectorPanel.setHasVelocity(
-        player->hasComponent<VelocityComponent>()
+        selectedEntity->hasComponent<VelocityComponent>()
     );
 
     inspectorPanel.setHasCollider(
-        player->hasComponent<ColliderComponent>()
+        selectedEntity->hasComponent<ColliderComponent>()
     );
 
     inspectorPanel.setHasPlayerController(
-        player->hasComponent<PlayerControllerComponent>()
+        selectedEntity->hasComponent<PlayerControllerComponent>()
     );
 
     inspectorPanel.setHasPlayerTag(
-        player->hasComponent<PlayerTag>()
+        selectedEntity->hasComponent<PlayerTag>()
     );
 }
 
@@ -882,9 +903,6 @@ void GameLayer::updateGameplay(float dt)
     if (!player || player->isDestroyed())
         return;
 
-    if (!test || test->isDestroyed())
-        return;
-
     auto* playerTransform = player->getComponent<TransformComponent>();
 
     if (!playerTransform)
@@ -896,16 +914,19 @@ void GameLayer::updateGameplay(float dt)
 
     collisionSystem.update(*scene);
 
-    auto* testTransform = test->getComponent<TransformComponent>();
-
-    if (testTransform)
+    if (test && !test->isDestroyed())
     {
-        float dx = playerTransform->position.x - testTransform->position.x;
-        float dy = playerTransform->position.y - testTransform->position.y;
+        auto* testTransform = test->getComponent<TransformComponent>();
 
-        if (std::abs(dx) < 320.0f && std::abs(dy) < 320.0f)
+        if (testTransform)
         {
-            playerTransform->position = oldPlayerPosition;
+            float dx = playerTransform->position.x - testTransform->position.x;
+            float dy = playerTransform->position.y - testTransform->position.y;
+
+            if (std::abs(dx) < 320.0f && std::abs(dy) < 320.0f)
+            {
+                playerTransform->position = oldPlayerPosition;
+            }
         }
     }
 
@@ -979,7 +1000,91 @@ void GameLayer::onRender()
     editorUI.render();
 
     if (editorUI.isViewportVisible())
+    {
         viewportPanel.render();
+
+        if (viewportPanel.isLeftMouseClicked())
+        {
+            ImVec2 mousePosition =
+                ImGui::GetMousePos();
+
+            ImVec2 boundsMin =
+                viewportPanel.getBoundsMin();
+
+            ImVec2 viewportSize =
+                viewportPanel.getSize();
+
+            float localX =
+                mousePosition.x - boundsMin.x;
+
+            float localY =
+                mousePosition.y - boundsMin.y;
+
+            float normalizedX =
+                localX / viewportSize.x;
+
+            float normalizedY =
+                localY / viewportSize.y;
+
+            float worldX =
+                scene->camera.position.x +
+                (normalizedX * 2.0f - 1.0f) *
+                640.0f *
+                scene->camera.zoom;
+
+            float worldY =
+                scene->camera.position.y +
+                (1.0f - normalizedY * 2.0f) *
+                360.0f *
+                scene->camera.zoom;
+
+            Entity* selectedEntity = nullptr;
+
+            scene->forEach([&](Entity* entity)
+                {
+                    auto* transform =
+                        entity->getComponent<TransformComponent>();
+
+                    if (!transform)
+                        return;
+
+                    glm::vec2 size =
+                        transform->scale;
+
+                    auto* collider =
+                        entity->getComponent<ColliderComponent>();
+
+                    if (collider)
+                    {
+                        size = collider->size;
+                    }
+
+                    glm::vec2 halfSize = size * 0.5f;
+
+                    bool inside =
+                        worldX >= transform->position.x - halfSize.x &&
+                        worldX <= transform->position.x + halfSize.x &&
+                        worldY >= transform->position.y - halfSize.y &&
+                        worldY <= transform->position.y + halfSize.y;
+
+                    if (inside)
+                    {
+                        selectedEntity = entity;
+                    }
+                });
+
+            if (selectedEntity)
+            {
+                editorContext.setSelectedEntity(
+                    selectedEntity
+                );
+            }
+            else
+            {
+                editorContext.clearSelection();
+            }
+        }
+    }
 
     if (viewportPanel.consumeResetCameraRequest())
     {
