@@ -20,6 +20,8 @@ namespace Axiom {
         void beginRender();
         void endRender();
 
+        bool consumeResetCameraRequest();
+
     private:
         ImVec2 m_Size{ 0.0f, 0.0f };
         ImVec2 m_PendingSize{ 0.0f, 0.0f };
@@ -30,6 +32,8 @@ namespace Axiom {
         double m_LastResizeTime = 0.0;
 
         std::unique_ptr<Framebuffer> m_Framebuffer;
+
+        bool m_ResetCameraRequested = false;
     };
 
 }

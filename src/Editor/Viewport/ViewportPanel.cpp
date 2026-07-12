@@ -22,6 +22,22 @@ namespace Axiom {
         m_Focused = ImGui::IsWindowFocused();
         m_Hovered = ImGui::IsWindowHovered();
 
+        if (m_Hovered &&
+            ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+        {
+            ImGui::OpenPopup("Viewport Context Menu");
+        }
+
+        if (ImGui::BeginPopup("Viewport Context Menu"))
+        {
+            if (ImGui::MenuItem("Reset Camera"))
+            {
+                m_ResetCameraRequested = true;
+            }
+
+            ImGui::EndPopup();
+        }
+
         ImVec2 availableSize = ImGui::GetContentRegionAvail();
 
         if (availableSize.x >= 1.0f &&
@@ -107,6 +123,15 @@ namespace Axiom {
         m_Framebuffer->unbind();
 
         glViewport(0, 0, 1280, 720);
+    }
+
+    bool ViewportPanel::consumeResetCameraRequest()
+    {
+        if (!m_ResetCameraRequested)
+            return false;
+
+        m_ResetCameraRequested = false;
+        return true;
     }
 
 }

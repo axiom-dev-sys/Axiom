@@ -121,6 +121,10 @@ private:
     Axiom::Texture* playerTex = nullptr;
     Axiom::Texture* testTex = nullptr;
 
+    bool m_ViewportPanning = false;
+
+    double m_LastMouseX = 0.0;
+    double m_LastMouseY = 0.0;
 };
 
 }
