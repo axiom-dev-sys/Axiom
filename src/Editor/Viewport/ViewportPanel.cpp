@@ -13,20 +13,8 @@ namespace Axiom {
             ImVec2(0.0f, 0.0f)
         );
 
-        ImGui::SetNextWindowPos(
-            ImVec2(280.0f, 54.0f),
-            ImGuiCond_Always
-        );
-
-        ImGui::SetNextWindowSize(
-            ImVec2(640.0f, 636.0f),
-            ImGuiCond_Always
-        );
-
         ImGui::Begin("Viewport",
             nullptr,
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse);
@@ -45,8 +33,18 @@ namespace Axiom {
             const auto height =
                 static_cast<std::uint32_t>(availableSize.y);
 
-            if (width != m_Framebuffer->getWidth() ||
-                height != m_Framebuffer->getHeight())
+            if (width != static_cast<std::uint32_t>(m_PendingSize.x) ||
+                height != static_cast<std::uint32_t>(m_PendingSize.y))
+            {
+                m_PendingSize = availableSize;
+                m_LastResizeTime = ImGui::GetTime();
+            }
+
+            constexpr double resizeDelay = 0.1;
+
+            if (ImGui::GetTime() - m_LastResizeTime >= resizeDelay &&
+                (width != m_Framebuffer->getWidth() ||
+                    height != m_Framebuffer->getHeight()))
             {
                 m_Framebuffer->resize(width, height);
             }
@@ -55,7 +53,7 @@ namespace Axiom {
 
             ImGui::Image(
                 (ImTextureID)(std::intptr_t)
-                m_Framebuffer->getColorAttachmentID(),
+                    m_Framebuffer->getColorAttachmentID(),
                 m_Size,
                 ImVec2(0.0f, 1.0f),
                 ImVec2(1.0f, 0.0f)
