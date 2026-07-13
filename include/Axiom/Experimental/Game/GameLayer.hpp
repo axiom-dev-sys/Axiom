@@ -77,6 +77,14 @@ private:
     void enterRuntime();
     void enterMenu();
     void resetEditorInteractionState();
+    void handleViewportCamera(float dt);
+    void handleSceneEditingInput(float dt);
+    void handleViewportSelection();
+    void handleEntityDragging();
+    void handleViewportZoom();
+    void handleEditorShortcuts();
+    void updateDebugRenderer();
+    void handleViewportReset();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;

@@ -127,282 +127,18 @@ void GameLayer::onUpdate(float dt)
     if (!scene)
         return;
 
-    const bool snapKeyPressed =
-        Input::isKeyDown(GLFW_KEY_G);
-
-    if (snapKeyPressed &&
-        !m_SnapKeyPressedLastFrame)
-    {
-        m_SnapEnabled = !m_SnapEnabled;
-    }
-
-    m_SnapKeyPressedLastFrame =
-        snapKeyPressed;
-
-    const bool gridKeyPressed =
-        Input::isKeyDown(GLFW_KEY_H);
-
-    if (gridKeyPressed &&
-        !m_GridKeyPressedLastFrame)
-    {
-        m_GridVisible = !m_GridVisible;
-    }
-
-    m_GridKeyPressedLastFrame =
-        gridKeyPressed;
-
-    if (editorUI.isViewportVisible() &&
-        viewportPanel.isFocused())
-    {
-        const float cameraSpeed = 400.0f;
-
-        if (Input::isKeyPressed(GLFW_KEY_W))
-            scene->camera.position.y += cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_S))
-            scene->camera.position.y -= cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_A))
-            scene->camera.position.x -= cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_D))
-            scene->camera.position.x += cameraSpeed * dt;
-    }
-
-    if (m_Application->getMode() == EngineMode::Edit &&
-        editorUI.isViewportVisible() &&
-        viewportPanel.isFocused())
-    {
-        Entity* selectedEntity =
-            editorContext.getSelectedEntity();
-
-        if (selectedEntity &&
-            scene->containsEntity(selectedEntity) &&
-            !selectedEntity->isDestroyed())
-        {
-            auto* transform =
-                selectedEntity->getComponent<TransformComponent>();
-
-            if (transform && !m_EntityDragging)
-            {
-                if (m_SnapEnabled)
-                {
-                    const bool leftPressed =
-                        Input::isKeyDown(GLFW_KEY_LEFT);
-
-                    const bool rightPressed =
-                        Input::isKeyDown(GLFW_KEY_RIGHT);
-
-                    const bool upPressed =
-                        Input::isKeyDown(GLFW_KEY_UP);
-
-                    const bool downPressed =
-                        Input::isKeyDown(GLFW_KEY_DOWN);
-
-                    transform->position.x =
-                        std::round(
-                            transform->position.x / m_GridSize
-                        ) * m_GridSize;
-
-                    transform->position.y =
-                        std::round(
-                            transform->position.y / m_GridSize
-                        ) * m_GridSize;
-
-                    if (leftPressed &&
-                        !m_LeftArrowPressedLastFrame)
-                    {
-                        transform->position.x -= m_GridSize;
-                    }
-
-                    if (rightPressed &&
-                        !m_RightArrowPressedLastFrame)
-                    {
-                        transform->position.x += m_GridSize;
-                    }
-
-                    if (upPressed &&
-                        !m_UpArrowPressedLastFrame)
-                    {
-                        transform->position.y += m_GridSize;
-                    }
-
-                    if (downPressed &&
-                        !m_DownArrowPressedLastFrame)
-                    {
-                        transform->position.y -= m_GridSize;
-                    }
-
-                    m_LeftArrowPressedLastFrame = leftPressed;
-                    m_RightArrowPressedLastFrame = rightPressed;
-                    m_UpArrowPressedLastFrame = upPressed;
-                    m_DownArrowPressedLastFrame = downPressed;
-                }
-                else
-                {
-                    m_LeftArrowPressedLastFrame = false;
-                    m_RightArrowPressedLastFrame = false;
-                    m_UpArrowPressedLastFrame = false;
-                    m_DownArrowPressedLastFrame = false;
-                }
-            }
-        }
-    }
-
-    if (editorUI.isViewportVisible() &&
-        viewportPanel.isHovered())
-    {
-        if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE))
-        {
-            const double mouseX = Input::getMouseX();
-            const double mouseY = Input::getMouseY();
-
-            if (!m_ViewportPanning)
-            {
-                m_LastMouseX = mouseX;
-                m_LastMouseY = mouseY;
-
-                m_ViewportPanning = true;
-            }
-            else
-            {
-                const double deltaX =
-                    mouseX - m_LastMouseX;
-
-                const double deltaY =
-                    mouseY - m_LastMouseY;
-
-                scene->camera.position.x -=
-                    static_cast<float>(deltaX) *
-                    scene->camera.zoom;
-
-                scene->camera.position.y +=
-                    static_cast<float>(deltaY) *
-                    scene->camera.zoom;
-
-                m_LastMouseX = mouseX;
-                m_LastMouseY = mouseY;
-            }
-        }
-        else
-        {
-            m_ViewportPanning = false;
-        }
-    }
-    else
-    {
-        m_ViewportPanning = false;
-    }
-
-    bool f3Pressed = Input::isKeyDown(GLFW_KEY_F3);
-
-    if (f3Pressed && !f3PressedLastFrame)
-    {
-        debugOverlay.toggle();
-    }
-
-    f3PressedLastFrame = f3Pressed;
-
-    bool f4Pressed = Input::isKeyDown(GLFW_KEY_F4);
-
-    if (f4Pressed && !f4PressedLastFrame)
-    {
-        debugRenderer.toggle();
-    }
-
-    f4PressedLastFrame = f4Pressed;
-
-    bool f5Pressed = Input::isKeyDown(GLFW_KEY_F5);
-
-    if (f5Pressed && !f5PressedLastFrame)
-    {
-        inspectorPanel.toggle();
-    }
-
-    f5PressedLastFrame = f5Pressed;
-
-    bool f6Pressed = Input::isKeyDown(GLFW_KEY_F6);
-
-    if (f6Pressed && !f6PressedLastFrame)
-    {
-        hierarchyPanel.toggle();
-    }
-
-    f6PressedLastFrame = f6Pressed;
-
-    bool f7Pressed = Input::isKeyDown(GLFW_KEY_F7);
-
-    if (f7Pressed && !f7PressedLastFrame)
-    {
-        sceneEditorPanel.toggle();
-    }
-
-    f7PressedLastFrame = f7Pressed;
-
-    bool f8Pressed = Input::isKeyDown(GLFW_KEY_F8);
-
-    if (f8Pressed && !f8PressedLastFrame)
-    {
-        assetBrowserPanel.toggle();
-    }
-
-    f8PressedLastFrame = f8Pressed;
+    handleViewportCamera(dt);
+    handleSceneEditingInput(dt);
+    handleEditorShortcuts();
 
     debugOverlay.update(dt);
 
-    if (editorUI.isDebugRendererVisible())
-    {
-        debugRenderer.clear();
-
-        if (m_GridVisible)
-        {
-            const float gridSize = 64.0f;
-            const float gridExtent = 2048.0f;
-
-            for (float x = -gridExtent; x <= gridExtent; x += gridSize)
-            {
-                debugRenderer.drawLine(
-                    { x, -gridExtent },
-                    { x,  gridExtent }
-                );
-            }
-
-            for (float y = -gridExtent; y <= gridExtent; y += gridSize)
-            {
-                debugRenderer.drawLine(
-                    { -gridExtent, y },
-                    { gridExtent,  y }
-                );
-            }
-        }
-
-        scene->forEach([&](Entity* entity)
-            {
-                auto* transform = entity->getComponent<TransformComponent>();
-                auto* collider = entity->getComponent<ColliderComponent>();
-
-                if (!transform || !collider)
-                    return;
-
-                debugRenderer.drawRect(
-                    transform->position
-                    - collider->size * 0.5f
-                    + collider->offset,
-                    collider->size
-                );
-            });
-    }
-
+    updateDebugRenderer();
     handleSceneSerialization();
-
     handleRuntimeControls();
-
     handleEditorTools();
-
     updateInspectorInfo();
-
     updateEditorStatus(dt);
-
     updateGameplay(dt);
 
 }
@@ -1105,28 +841,529 @@ void GameLayer::resetEditorInteractionState()
     m_GridKeyPressedLastFrame = false;
 }
 
+void GameLayer::handleViewportCamera(float dt)
+{
+    if (!editorUI.isViewportVisible())
+        return;
+
+    if (viewportPanel.isFocused())
+    {
+        const float cameraSpeed = 400.0f;
+
+        if (Input::isKeyPressed(GLFW_KEY_W))
+            scene->camera.position.y += cameraSpeed * dt;
+
+        if (Input::isKeyPressed(GLFW_KEY_S))
+            scene->camera.position.y -= cameraSpeed * dt;
+
+        if (Input::isKeyPressed(GLFW_KEY_A))
+            scene->camera.position.x -= cameraSpeed * dt;
+
+        if (Input::isKeyPressed(GLFW_KEY_D))
+            scene->camera.position.x += cameraSpeed * dt;
+    }
+
+    if (viewportPanel.isHovered())
+    {
+        if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE))
+        {
+            const double mouseX = Input::getMouseX();
+            const double mouseY = Input::getMouseY();
+
+            if (!m_ViewportPanning)
+            {
+                m_LastMouseX = mouseX;
+                m_LastMouseY = mouseY;
+                m_ViewportPanning = true;
+            }
+            else
+            {
+                const double deltaX =
+                    mouseX - m_LastMouseX;
+
+                const double deltaY =
+                    mouseY - m_LastMouseY;
+
+                scene->camera.position.x -=
+                    static_cast<float>(deltaX) *
+                    scene->camera.zoom;
+
+                scene->camera.position.y +=
+                    static_cast<float>(deltaY) *
+                    scene->camera.zoom;
+
+                m_LastMouseX = mouseX;
+                m_LastMouseY = mouseY;
+            }
+        }
+        else
+        {
+            m_ViewportPanning = false;
+        }
+    }
+    else
+    {
+        m_ViewportPanning = false;
+    }
+}
+
+void GameLayer::handleSceneEditingInput(float dt)
+{
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
+    const bool snapKeyPressed =
+        Input::isKeyDown(GLFW_KEY_G);
+
+    if (snapKeyPressed &&
+        !m_SnapKeyPressedLastFrame)
+    {
+        m_SnapEnabled = !m_SnapEnabled;
+    }
+
+    m_SnapKeyPressedLastFrame =
+        snapKeyPressed;
+
+    const bool gridKeyPressed =
+        Input::isKeyDown(GLFW_KEY_H);
+
+    if (gridKeyPressed &&
+        !m_GridKeyPressedLastFrame)
+    {
+        m_GridVisible = !m_GridVisible;
+    }
+
+    m_GridKeyPressedLastFrame =
+        gridKeyPressed;
+
+    if (!editorUI.isViewportVisible() ||
+        !viewportPanel.isFocused())
+    {
+        return;
+    }
+
+    Entity* selectedEntity =
+        editorContext.getSelectedEntity();
+
+    if (!selectedEntity ||
+        !scene->containsEntity(selectedEntity) ||
+        selectedEntity->isDestroyed())
+    {
+        return;
+    }
+
+    auto* transform =
+        selectedEntity->getComponent<TransformComponent>();
+
+    if (!transform ||
+        m_EntityDragging)
+    {
+        return;
+    }
+
+    if (m_SnapEnabled)
+    {
+        const bool leftPressed =
+            Input::isKeyDown(GLFW_KEY_LEFT);
+
+        const bool rightPressed =
+            Input::isKeyDown(GLFW_KEY_RIGHT);
+
+        const bool upPressed =
+            Input::isKeyDown(GLFW_KEY_UP);
+
+        const bool downPressed =
+            Input::isKeyDown(GLFW_KEY_DOWN);
+
+        transform->position.x =
+            std::round(
+                transform->position.x /
+                m_GridSize
+            ) * m_GridSize;
+
+        transform->position.y =
+            std::round(
+                transform->position.y /
+                m_GridSize
+            ) * m_GridSize;
+
+        if (leftPressed &&
+            !m_LeftArrowPressedLastFrame)
+        {
+            transform->position.x -= m_GridSize;
+        }
+
+        if (rightPressed &&
+            !m_RightArrowPressedLastFrame)
+        {
+            transform->position.x += m_GridSize;
+        }
+
+        if (upPressed &&
+            !m_UpArrowPressedLastFrame)
+        {
+            transform->position.y += m_GridSize;
+        }
+
+        if (downPressed &&
+            !m_DownArrowPressedLastFrame)
+        {
+            transform->position.y -= m_GridSize;
+        }
+
+        m_LeftArrowPressedLastFrame = leftPressed;
+        m_RightArrowPressedLastFrame = rightPressed;
+        m_UpArrowPressedLastFrame = upPressed;
+        m_DownArrowPressedLastFrame = downPressed;
+    }
+    else
+    {
+        m_LeftArrowPressedLastFrame = false;
+        m_RightArrowPressedLastFrame = false;
+        m_UpArrowPressedLastFrame = false;
+        m_DownArrowPressedLastFrame = false;
+
+        const float moveSpeed = 200.0f;
+
+        if (Input::isKeyPressed(GLFW_KEY_LEFT))
+            transform->position.x -= moveSpeed * dt;
+
+        if (Input::isKeyPressed(GLFW_KEY_RIGHT))
+            transform->position.x += moveSpeed * dt;
+
+        if (Input::isKeyPressed(GLFW_KEY_UP))
+            transform->position.y += moveSpeed * dt;
+
+        if (Input::isKeyPressed(GLFW_KEY_DOWN))
+            transform->position.y -= moveSpeed * dt;
+    }
+}
+
+void GameLayer::handleViewportSelection()
+{
+    if (!editorUI.isViewportVisible())
+        return;
+
+    if (!viewportPanel.isLeftMouseClicked())
+        return;
+
+    const ImVec2 mousePosition =
+        ImGui::GetMousePos();
+
+    const ImVec2 boundsMin =
+        viewportPanel.getBoundsMin();
+
+    const ImVec2 viewportSize =
+        viewportPanel.getSize();
+
+    if (viewportSize.x <= 0.0f ||
+        viewportSize.y <= 0.0f)
+    {
+        return;
+    }
+
+    const float localX =
+        mousePosition.x - boundsMin.x;
+
+    const float localY =
+        mousePosition.y - boundsMin.y;
+
+    const float normalizedX =
+        localX / viewportSize.x;
+
+    const float normalizedY =
+        localY / viewportSize.y;
+
+    const float worldX =
+        scene->camera.position.x +
+        (normalizedX * 2.0f - 1.0f) *
+        640.0f *
+        scene->camera.zoom;
+
+    const float worldY =
+        scene->camera.position.y +
+        (1.0f - normalizedY * 2.0f) *
+        360.0f *
+        scene->camera.zoom;
+
+    Entity* selectedEntity = nullptr;
+
+    scene->forEach([&](Entity* entity)
+    {
+        auto* transform =
+            entity->getComponent<TransformComponent>();
+
+        if (!transform)
+            return;
+
+        glm::vec2 size =
+            transform->scale;
+
+        if (auto* collider =
+            entity->getComponent<ColliderComponent>())
+        {
+            size = collider->size;
+        }
+
+        const glm::vec2 halfSize =
+            size * 0.5f;
+
+        const bool inside =
+            worldX >= transform->position.x - halfSize.x &&
+            worldX <= transform->position.x + halfSize.x &&
+            worldY >= transform->position.y - halfSize.y &&
+            worldY <= transform->position.y + halfSize.y;
+
+        if (inside)
+        {
+            selectedEntity = entity;
+        }
+    });
+
+    if (selectedEntity)
+    {
+        editorContext.setSelectedEntity(
+            selectedEntity
+        );
+
+        m_EntityDragging = true;
+        m_DraggedEntity = selectedEntity;
+    }
+    else
+    {
+        editorContext.clearSelection();
+
+        m_EntityDragging = false;
+        m_DraggedEntity = nullptr;
+    }
+}
+
+void GameLayer::handleEntityDragging()
+{
+    if (!m_EntityDragging)
+        return;
+
+    const bool leftMouseDown =
+        ImGui::IsMouseDown(
+            ImGuiMouseButton_Left
+        );
+
+    if (!leftMouseDown)
+    {
+        m_EntityDragging = false;
+        m_DraggedEntity = nullptr;
+        return;
+    }
+
+    if (!m_DraggedEntity ||
+        !scene->containsEntity(m_DraggedEntity) ||
+        m_DraggedEntity->isDestroyed())
+    {
+        m_EntityDragging = false;
+        m_DraggedEntity = nullptr;
+        return;
+    }
+
+    const ImVec2 mouseDelta =
+        ImGui::GetIO().MouseDelta;
+
+    const ImVec2 viewportSize =
+        viewportPanel.getSize();
+
+    auto* transform =
+        m_DraggedEntity
+        ->getComponent<TransformComponent>();
+
+    if (!transform ||
+        viewportSize.x <= 0.0f ||
+        viewportSize.y <= 0.0f)
+    {
+        return;
+    }
+
+    const float worldPerPixelX =
+        1280.0f *
+        scene->camera.zoom /
+        viewportSize.x;
+
+    const float worldPerPixelY =
+        720.0f *
+        scene->camera.zoom /
+        viewportSize.y;
+
+    transform->position.x +=
+        mouseDelta.x *
+        worldPerPixelX;
+
+    transform->position.y -=
+        mouseDelta.y *
+        worldPerPixelY;
+}
+
+void GameLayer::handleViewportZoom()
+{
+    if (!editorUI.isViewportVisible() ||
+        !viewportPanel.isHovered())
+    {
+        return;
+    }
+    
+    const float wheel =
+        ImGui::GetIO().MouseWheel;
+    
+    if (wheel != 0.0f)
+    {
+        scene->camera.zoom -= wheel * 0.1f;
+        
+        scene->camera.zoom = std::clamp(
+            scene->camera.zoom,
+            0.1f,
+            5.0f
+        );
+    }
+}
+
+void GameLayer::handleEditorShortcuts()
+{
+    bool f3Pressed =
+        Input::isKeyDown(GLFW_KEY_F3);
+
+    if (f3Pressed &&
+        !f3PressedLastFrame)
+    {
+        debugOverlay.toggle();
+    }
+
+    f3PressedLastFrame =
+        f3Pressed;
+
+
+    bool f4Pressed =
+        Input::isKeyDown(GLFW_KEY_F4);
+
+    if (f4Pressed &&
+        !f4PressedLastFrame)
+    {
+        debugRenderer.toggle();
+    }
+
+    f4PressedLastFrame =
+        f4Pressed;
+
+
+    bool f5Pressed =
+        Input::isKeyDown(GLFW_KEY_F5);
+
+    if (f5Pressed &&
+        !f5PressedLastFrame)
+    {
+        inspectorPanel.toggle();
+    }
+
+    f5PressedLastFrame =
+        f5Pressed;
+
+
+    bool f6Pressed =
+        Input::isKeyDown(GLFW_KEY_F6);
+
+    if (f6Pressed &&
+        !f6PressedLastFrame)
+    {
+        hierarchyPanel.toggle();
+    }
+
+    f6PressedLastFrame =
+        f6Pressed;
+
+
+    bool f7Pressed =
+        Input::isKeyDown(GLFW_KEY_F7);
+
+    if (f7Pressed &&
+        !f7PressedLastFrame)
+    {
+        sceneEditorPanel.toggle();
+    }
+
+    f7PressedLastFrame =
+        f7Pressed;
+
+
+    bool f8Pressed =
+        Input::isKeyDown(GLFW_KEY_F8);
+
+    if (f8Pressed &&
+        !f8PressedLastFrame)
+    {
+        assetBrowserPanel.toggle();
+    }
+
+    f8PressedLastFrame =
+        f8Pressed;
+}
+
+void GameLayer::updateDebugRenderer()
+{
+    debugRenderer.clear();
+
+    if (!editorUI.isDebugRendererVisible())
+        return;
+
+    if (m_GridVisible)
+    {
+        const float gridSize = 64.0f;
+        const float gridExtent = 2048.0f;
+
+        for (float x = -gridExtent; x <= gridExtent; x += gridSize)
+        {
+            debugRenderer.drawLine(
+                { x, -gridExtent },
+                { x,  gridExtent }
+            );
+        }
+
+        for (float y = -gridExtent; y <= gridExtent; y += gridSize)
+        {
+            debugRenderer.drawLine(
+                { -gridExtent, y },
+                { gridExtent,  y }
+            );
+        }
+    }
+
+    scene->forEach([&](Entity* entity)
+        {
+            auto* transform = entity->getComponent<TransformComponent>();
+            auto* collider = entity->getComponent<ColliderComponent>();
+
+            if (!transform || !collider)
+                return;
+
+            debugRenderer.drawRect(
+                transform->position
+                - collider->size * 0.5f
+                + collider->offset,
+                collider->size
+            );
+        });
+}
+
+void GameLayer::handleViewportReset()
+{
+    if (viewportPanel.consumeResetCameraRequest())
+    {
+        scene->camera.position = { 0.0f, 0.0f };
+        scene->camera.zoom = 1.0f;
+    }
+}
+
 void GameLayer::onRender()
 {
     if (!scene)
         return;
 
-    if (editorUI.isViewportVisible() &&
-        viewportPanel.isHovered())
-    {
-        const float wheel =
-            ImGui::GetIO().MouseWheel;
-
-        if (wheel != 0.0f)
-        {
-            scene->camera.zoom -= wheel * 0.1f;
-
-            scene->camera.zoom = std::clamp(
-                scene->camera.zoom,
-                0.1f,
-                5.0f
-            );
-        }
-    }
+    handleViewportZoom();
 
     viewportPanel.beginRender();
 
@@ -1145,156 +1382,12 @@ void GameLayer::onRender()
     {
         viewportPanel.render();
 
-        if (viewportPanel.isLeftMouseClicked())
-        {
-            ImVec2 mousePosition =
-                ImGui::GetMousePos();
+        handleViewportSelection();
 
-            ImVec2 boundsMin =
-                viewportPanel.getBoundsMin();
-
-            ImVec2 viewportSize =
-                viewportPanel.getSize();
-
-            float localX =
-                mousePosition.x - boundsMin.x;
-
-            float localY =
-                mousePosition.y - boundsMin.y;
-
-            float normalizedX =
-                localX / viewportSize.x;
-
-            float normalizedY =
-                localY / viewportSize.y;
-
-            float worldX =
-                scene->camera.position.x +
-                (normalizedX * 2.0f - 1.0f) *
-                640.0f *
-                scene->camera.zoom;
-
-            float worldY =
-                scene->camera.position.y +
-                (1.0f - normalizedY * 2.0f) *
-                360.0f *
-                scene->camera.zoom;
-
-            Entity* selectedEntity = nullptr;
-
-            scene->forEach([&](Entity* entity)
-                {
-                    auto* transform =
-                        entity->getComponent<TransformComponent>();
-
-                    if (!transform)
-                        return;
-
-                    glm::vec2 size =
-                        transform->scale;
-
-                    auto* collider =
-                        entity->getComponent<ColliderComponent>();
-
-                    if (collider)
-                    {
-                        size = collider->size;
-                    }
-
-                    glm::vec2 halfSize = size * 0.5f;
-
-                    bool inside =
-                        worldX >= transform->position.x - halfSize.x &&
-                        worldX <= transform->position.x + halfSize.x &&
-                        worldY >= transform->position.y - halfSize.y &&
-                        worldY <= transform->position.y + halfSize.y;
-
-                    if (inside)
-                    {
-                        selectedEntity = entity;
-                    }
-                });
-
-            if (selectedEntity)
-            {
-                editorContext.setSelectedEntity(
-                    selectedEntity
-                );
-
-                m_EntityDragging = true;
-                m_DraggedEntity = selectedEntity;
-            }
-            else
-            {
-                editorContext.clearSelection();
-
-                m_EntityDragging = false;
-                m_DraggedEntity = nullptr;
-            }
-        }
-
-        if (m_EntityDragging)
-        {
-            const bool leftMouseDown =
-                ImGui::IsMouseDown(
-                    ImGuiMouseButton_Left
-                );
-
-            if (!leftMouseDown)
-            {
-                m_EntityDragging = false;
-                m_DraggedEntity = nullptr;
-            }
-            else if (m_DraggedEntity &&
-                scene->containsEntity(m_DraggedEntity) &&
-                !m_DraggedEntity->isDestroyed())
-            {
-                const ImVec2 mouseDelta =
-                    ImGui::GetIO().MouseDelta;
-
-                const ImVec2 viewportSize =
-                    viewportPanel.getSize();
-
-                auto* transform =
-                    m_DraggedEntity
-                    ->getComponent<TransformComponent>();
-
-                if (transform &&
-                    viewportSize.x > 0.0f &&
-                    viewportSize.y > 0.0f)
-                {
-                    const float worldPerPixelX =
-                        1280.0f *
-                        scene->camera.zoom /
-                        viewportSize.x;
-
-                    const float worldPerPixelY =
-                        720.0f *
-                        scene->camera.zoom /
-                        viewportSize.y;
-
-                    transform->position.x +=
-                        mouseDelta.x *
-                        worldPerPixelX;
-
-                    transform->position.y -=
-                        mouseDelta.y *
-                        worldPerPixelY;
-                }
-            }
-            else
-            {
-                m_EntityDragging = false;
-                m_DraggedEntity = nullptr;
-            }
-        }
+        handleEntityDragging();
     }
 
-    if (viewportPanel.consumeResetCameraRequest())
-    {
-        scene->camera.position = { 0.0f, 0.0f };
-        scene->camera.zoom = 1.0f;
-    }
+    handleViewportReset();
 
     if (editorUI.isDebugOverlayVisible())
         debugOverlay.render();
