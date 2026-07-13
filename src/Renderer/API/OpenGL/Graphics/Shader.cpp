@@ -102,6 +102,20 @@ void main() {
         glUniform2f(glGetUniformLocation(program, name), x, y);
     }
 
+    void Shader::setVec4(
+        const char* name,
+        const glm::vec4& value
+    )
+    {
+        glUniform4f(
+            glGetUniformLocation(program, name),
+            value.r,
+            value.g,
+            value.b,
+            value.a
+        );
+    }
+
     void Shader::initDebug()
     {
         const char* vertexSrc = R"(
@@ -121,9 +135,11 @@ void main() {
         #version 330 core
         out vec4 FragColor;
 
+        uniform vec4 uColor;
+
         void main()
         {
-            FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            FragColor = uColor;
         }
     )";
 

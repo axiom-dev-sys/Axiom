@@ -60,18 +60,19 @@ namespace Axiom {
 
     void Renderer::drawDebugLine(
         const glm::vec2& start,
-        const glm::vec2& end
+        const glm::vec2& end,
+        const glm::vec4& color
     )
     {
-        s_API->drawDebugLine(start, end);
+        s_API->drawDebugLine(start, end, color);
     }
 
-    void Renderer::drawDebugRect(const glm::vec2& position, const glm::vec2& size)
+    void Renderer::drawDebugRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
     {
-        drawDebugLine(position, { position.x + size.x, position.y });
-        drawDebugLine({ position.x + size.x, position.y }, { position.x + size.x, position.y + size.y });
-        drawDebugLine({ position.x + size.x, position.y + size.y }, { position.x, position.y + size.y });
-        drawDebugLine({ position.x, position.y + size.y }, position);
+        drawDebugLine(position, { position.x + size.x, position.y }, color);
+        drawDebugLine({ position.x + size.x, position.y }, { position.x + size.x, position.y + size.y }, color);
+        drawDebugLine({ position.x + size.x, position.y + size.y }, { position.x, position.y + size.y }, color);
+        drawDebugLine({ position.x, position.y + size.y }, position, color);
     }
 
 }

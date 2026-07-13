@@ -13,6 +13,7 @@ namespace Axiom {
         void setInt(const char* name, int value);
         void setMat4(const char* name, const glm::mat4& value);
         void setVec2(const char* name, float x, float y);
+        void setVec4(const char* name, const glm::vec4& value);
         void initDebug();
 
     private:

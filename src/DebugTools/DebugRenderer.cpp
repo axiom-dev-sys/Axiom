@@ -9,7 +9,7 @@ namespace Axiom {
             return;
 
         for (const auto& line : lines)
-            Renderer::drawDebugLine(line.start, line.end);
+            Renderer::drawDebugLine(line.start, line.end, line.color);
 
         for (const auto& rect : rects)
             Renderer::drawDebugRect(rect.position, rect.size);
@@ -30,9 +30,9 @@ namespace Axiom {
         visible = !visible;
     }
 
-    void DebugRenderer::drawLine(const glm::vec2& start, const glm::vec2& end)
+    void DebugRenderer::drawLine(const glm::vec2& start, const glm::vec2& end, const glm::vec4& color)
     {
-        lines.push_back({ start, end });
+        lines.push_back({ start, end, color });
     }
 
     void DebugRenderer::drawRect(const glm::vec2& position, const glm::vec2& size)

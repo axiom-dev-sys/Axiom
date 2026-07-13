@@ -32,7 +32,8 @@ namespace Axiom {
             const std::string& scene,
             const std::string& state,
             int entities,
-            float fpsValue
+            float fpsValue,
+            bool snapEnabled
         );
 
         bool isStopRequested() const;
@@ -72,6 +73,8 @@ namespace Axiom {
         bool showPreferences = false;
 
         bool showViewport = true;
+
+        bool snapEnabled = false;
     };
 
 }

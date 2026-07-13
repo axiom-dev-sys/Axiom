@@ -15,6 +15,7 @@ namespace Axiom {
 
         ImGui::Begin("Viewport",
             nullptr,
+            ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse);

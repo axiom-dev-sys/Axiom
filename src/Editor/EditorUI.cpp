@@ -173,6 +173,13 @@ namespace Axiom {
                 ImGui::SameLine(840);
                 ImGui::Text("FPS: %.1f", fps);
 
+                ImGui::SameLine(1020);
+
+                ImGui::Text(
+                    "Snap: %s",
+                    snapEnabled ? "ON" : "OFF"
+                );
+
                 ImGui::End();
             }
     }
@@ -261,13 +268,15 @@ namespace Axiom {
         const std::string& scene,
         const std::string& state,
         int entities,
-        float fpsValue
+        float fpsValue,
+        bool snapValue
     )
     {
         sceneName = scene;
         gameState = state;
         entityCount = entities;
         fps = fpsValue;
+        snapEnabled = snapValue;
     }
 
     bool EditorUI::isConsoleVisible() const

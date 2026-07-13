@@ -125,6 +125,31 @@ private:
 
     double m_LastMouseX = 0.0;
     double m_LastMouseY = 0.0;
+
+    bool m_SnapEnabled = true;
+    float m_GridSize = 64.0f;
+
+    bool m_GridVisible = true;
+    bool m_GridKeyPressedLastFrame = false;
+
+    bool m_SnapKeyPressedLastFrame = false;
+
+    bool m_LeftArrowPressedLastFrame = false;
+    bool m_RightArrowPressedLastFrame = false;
+    bool m_UpArrowPressedLastFrame = false;
+    bool m_DownArrowPressedLastFrame = false;
+
+    bool m_EntityDragging = false;
+
+    Entity* m_DraggedEntity = nullptr;
+
+    glm::vec2 m_EntityDragOffset{
+        0.0f,
+        0.0f
+    };
+
+    double m_LastEntityMouseX = 0.0;
+    double m_LastEntityMouseY = 0.0;
 };
 
 }

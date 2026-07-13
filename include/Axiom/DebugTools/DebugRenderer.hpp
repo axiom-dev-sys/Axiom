@@ -19,6 +19,7 @@ namespace Axiom {
         {
             glm::vec2 start;
             glm::vec2 end;
+            glm::vec4 color;
         };
 
         struct DebugRect
@@ -27,7 +28,7 @@ namespace Axiom {
             glm::vec2 size;
         };
 
-        void drawLine(const glm::vec2& start, const glm::vec2& end);
+        void drawLine(const glm::vec2& start, const glm::vec2& end, const glm::vec4& color = glm::vec4(1.0f));
         void drawRect(const glm::vec2& position, const glm::vec2& size);
         void clear();
 
