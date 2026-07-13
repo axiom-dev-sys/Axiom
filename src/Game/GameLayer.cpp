@@ -127,6 +127,30 @@ void GameLayer::onUpdate(float dt)
     if (!scene)
         return;
 
+    const bool snapKeyPressed =
+        Input::isKeyDown(GLFW_KEY_G);
+
+    if (snapKeyPressed &&
+        !m_SnapKeyPressedLastFrame)
+    {
+        m_SnapEnabled = !m_SnapEnabled;
+    }
+
+    m_SnapKeyPressedLastFrame =
+        snapKeyPressed;
+
+    const bool gridKeyPressed =
+        Input::isKeyDown(GLFW_KEY_H);
+
+    if (gridKeyPressed &&
+        !m_GridKeyPressedLastFrame)
+    {
+        m_GridVisible = !m_GridVisible;
+    }
+
+    m_GridKeyPressedLastFrame =
+        gridKeyPressed;
+
     if (editorUI.isViewportVisible() &&
         viewportPanel.isFocused())
     {
@@ -149,19 +173,6 @@ void GameLayer::onUpdate(float dt)
         editorUI.isViewportVisible() &&
         viewportPanel.isFocused())
     {
-
-        const bool snapKeyPressed =
-            Input::isKeyDown(GLFW_KEY_G);
-
-        if (snapKeyPressed &&
-            !m_SnapKeyPressedLastFrame)
-        {
-            m_SnapEnabled = !m_SnapEnabled;
-        }
-
-        m_SnapKeyPressedLastFrame =
-            snapKeyPressed;
-
         Entity* selectedEntity =
             editorContext.getSelectedEntity();
 
@@ -237,18 +248,6 @@ void GameLayer::onUpdate(float dt)
             }
         }
     }
-
-    const bool gridKeyPressed =
-        Input::isKeyDown(GLFW_KEY_H);
-
-    if (gridKeyPressed &&
-        !m_GridKeyPressedLastFrame)
-    {
-        m_GridVisible = !m_GridVisible;
-    }
-
-    m_GridKeyPressedLastFrame =
-        gridKeyPressed;
 
     if (editorUI.isViewportVisible() &&
         viewportPanel.isHovered())
@@ -442,11 +441,6 @@ void GameLayer::refreshSceneReferences()
     test = scene->findEntityByName("Test");
 
     editorContext.clearSelection();
-
-    if (player)
-    {
-        editorContext.setSelectedEntity(player);
-    }
 }
 
 void GameLayer::handleRuntimeControls()
@@ -493,6 +487,8 @@ void GameLayer::handleRuntimeControls()
 
 void GameLayer::startRuntime()
 {
+    resetEditorInteractionState();
+
     runtimeScene = editorScene->clone();
 
     enterRuntime();
@@ -500,6 +496,8 @@ void GameLayer::startRuntime()
 
 void GameLayer::stopRuntime()
 {
+    resetEditorInteractionState();
+
     runtimeScene = nullptr;
 
     enterEditor();
@@ -1091,6 +1089,22 @@ void GameLayer::enterMenu()
     setActiveScene("Menu", menuScene);
 }
 
+void GameLayer::resetEditorInteractionState()
+{
+    m_EntityDragging = false;
+    m_DraggedEntity = nullptr;
+
+    m_ViewportPanning = false;
+
+    m_LeftArrowPressedLastFrame = false;
+    m_RightArrowPressedLastFrame = false;
+    m_UpArrowPressedLastFrame = false;
+    m_DownArrowPressedLastFrame = false;
+
+    m_SnapKeyPressedLastFrame = false;
+    m_GridKeyPressedLastFrame = false;
+}
+
 void GameLayer::onRender()
 {
     if (!scene)
@@ -1209,9 +1223,6 @@ void GameLayer::onRender()
 
                 m_EntityDragging = true;
                 m_DraggedEntity = selectedEntity;
-
-                m_LastEntityMouseX = Input::getMouseX();
-                m_LastEntityMouseY = Input::getMouseY();
             }
             else
             {

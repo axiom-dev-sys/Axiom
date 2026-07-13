@@ -76,6 +76,7 @@ private:
     void enterEditor();
     void enterRuntime();
     void enterMenu();
+    void resetEditorInteractionState();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -142,14 +143,6 @@ private:
     bool m_EntityDragging = false;
 
     Entity* m_DraggedEntity = nullptr;
-
-    glm::vec2 m_EntityDragOffset{
-        0.0f,
-        0.0f
-    };
-
-    double m_LastEntityMouseX = 0.0;
-    double m_LastEntityMouseY = 0.0;
 };
 
 }
