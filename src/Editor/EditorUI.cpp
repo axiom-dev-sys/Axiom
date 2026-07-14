@@ -219,9 +219,19 @@ namespace Axiom {
         return saveSceneRequested;
     }
 
+    void EditorUI::requestSaveScene()
+    {
+        saveSceneRequested = true;
+    }
+
     bool EditorUI::isLoadSceneRequested() const
     {
         return loadSceneRequested;
+    }
+
+    void EditorUI::requestLoadScene()
+    {
+        loadSceneRequested = true;
     }
 
     bool EditorUI::isExitRequested() const

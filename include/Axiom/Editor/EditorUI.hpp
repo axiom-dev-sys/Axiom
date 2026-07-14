@@ -16,7 +16,9 @@ namespace Axiom {
         bool isSceneEditorVisible() const;
         bool isAssetBrowserVisible() const;
         bool isSaveSceneRequested() const;
+        void requestSaveScene();
         bool isLoadSceneRequested() const;
+        void requestLoadScene();
         bool isExitRequested() const;
         void resetSaveSceneRequest();
         void resetLoadSceneRequest();

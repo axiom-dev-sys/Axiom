@@ -62,6 +62,8 @@ public:
 private:
     Application* m_Application = nullptr;
 
+    Entity* duplicateEntity(Entity* source);
+
     void handleInteractions();
     void refreshSceneReferences();
     void handleRuntimeControls();
@@ -148,7 +150,17 @@ private:
     bool m_UpArrowPressedLastFrame = false;
     bool m_DownArrowPressedLastFrame = false;
 
+    bool m_DeleteKeyPressedLastFrame = false;
+
     bool m_EntityDragging = false;
+
+    bool m_DuplicateKeyPressedLastFrame = false;
+
+    bool m_FocusKeyPressedLastFrame = false;
+
+    bool m_SaveKeyPressedLastFrame = false;
+
+    bool m_LoadKeyPressedLastFrame = false;
 
     Entity* m_DraggedEntity = nullptr;
 };

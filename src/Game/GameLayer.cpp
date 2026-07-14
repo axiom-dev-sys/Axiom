@@ -456,29 +456,7 @@ void GameLayer::handleEditorTools()
 
     if (Entity* source = hierarchyPanel.getDuplicateEntity())
     {
-        if (!source->isDestroyed())
-        {
-            Entity* copy = scene->createEntity(source->getName() + " Copy");
-
-            if (auto* sourceTransform = source->getComponent<TransformComponent>())
-            {
-                auto* transform = copy->addComponent<TransformComponent>();
-                *transform = *sourceTransform;
-
-                transform->position.x += 32.0f;
-                transform->position.y += 32.0f;
-            }
-
-            if (auto* sourceSprite = source->getComponent<SpriteComponent>())
-            {
-                copy->addComponent<SpriteComponent>(
-                    sourceSprite->getTextureID(),
-                    sourceSprite->getTexture()
-                );
-            }
-
-            editorContext.setSelectedEntity(copy);
-        }
+        duplicateEntity(source);
 
         hierarchyPanel.resetDuplicateEntityRequest();
     }
@@ -840,6 +818,15 @@ void GameLayer::resetEditorInteractionState()
 
     m_SnapKeyPressedLastFrame = false;
     m_GridKeyPressedLastFrame = false;
+
+    m_DeleteKeyPressedLastFrame = false;
+
+    m_DuplicateKeyPressedLastFrame = false;
+
+    m_FocusKeyPressedLastFrame = false;
+
+    m_SaveKeyPressedLastFrame = false;
+    m_LoadKeyPressedLastFrame = false;
 }
 
 void GameLayer::handleViewportCamera(float dt)
@@ -847,7 +834,12 @@ void GameLayer::handleViewportCamera(float dt)
     if (!editorUI.isViewportVisible())
         return;
 
-    if (viewportPanel.isFocused())
+    const bool ctrlPressed =
+        Input::isKeyDown(GLFW_KEY_LEFT_CONTROL) ||
+        Input::isKeyDown(GLFW_KEY_RIGHT_CONTROL);
+
+    if (viewportPanel.isFocused() &&
+        !ctrlPressed)
     {
         const float cameraSpeed = 400.0f;
 
@@ -943,8 +935,86 @@ void GameLayer::handleSceneEditingInput(float dt)
         return;
     }
 
+    const bool deleteKeyPressed =
+        Input::isKeyDown(GLFW_KEY_DELETE);
+
     Entity* selectedEntity =
         editorContext.getSelectedEntity();
+
+    if (deleteKeyPressed &&
+        !m_DeleteKeyPressedLastFrame &&
+        selectedEntity &&
+        scene->containsEntity(selectedEntity) &&
+        !selectedEntity->isDestroyed())
+    {
+        selectedEntity->destroy();
+
+        editorContext.clearSelection();
+
+        if (m_DraggedEntity == selectedEntity)
+        {
+            m_EntityDragging = false;
+            m_DraggedEntity = nullptr;
+        }
+    }
+
+    m_DeleteKeyPressedLastFrame =
+        deleteKeyPressed;
+
+    const bool ctrlPressed =
+        Input::isKeyDown(GLFW_KEY_LEFT_CONTROL) ||
+        Input::isKeyDown(GLFW_KEY_RIGHT_CONTROL);
+
+    const bool duplicateKeyPressed =
+        Input::isKeyDown(GLFW_KEY_D);
+
+    const bool duplicateShortcutPressed =
+        ctrlPressed &&
+        duplicateKeyPressed;
+
+    if (duplicateShortcutPressed &&
+        !m_DuplicateKeyPressedLastFrame)
+    {
+        Entity* selectedEntity =
+            editorContext.getSelectedEntity();
+
+        duplicateEntity(selectedEntity);
+    }
+
+    m_DuplicateKeyPressedLastFrame =
+        duplicateShortcutPressed;
+
+    const bool saveKeyPressed =
+        Input::isKeyDown(GLFW_KEY_S);
+
+    const bool saveShortcutPressed =
+        ctrlPressed &&
+        saveKeyPressed;
+
+    if (saveShortcutPressed &&
+        !m_SaveKeyPressedLastFrame)
+    {
+        editorUI.requestSaveScene();
+    }
+
+    m_SaveKeyPressedLastFrame =
+        saveShortcutPressed;
+
+    const bool loadKeyPressed =
+        Input::isKeyDown(GLFW_KEY_O);
+
+    const bool loadShortcutPressed =
+        ctrlPressed &&
+        loadKeyPressed;
+
+    if (loadShortcutPressed &&
+        !m_LoadKeyPressedLastFrame)
+    {
+        editorUI.requestLoadScene();
+    }
+
+    m_LoadKeyPressedLastFrame =
+        loadShortcutPressed;
 
     if (!selectedEntity ||
         !scene->containsEntity(selectedEntity) ||
@@ -952,6 +1022,28 @@ void GameLayer::handleSceneEditingInput(float dt)
     {
         return;
     }
+
+    const bool focusKeyPressed =
+        Input::isKeyDown(GLFW_KEY_F);
+
+    if (focusKeyPressed &&
+        !m_FocusKeyPressedLastFrame &&
+        selectedEntity &&
+        scene->containsEntity(selectedEntity) &&
+        !selectedEntity->isDestroyed())
+    {
+        auto* transform =
+            selectedEntity->getComponent<TransformComponent>();
+
+        if (transform)
+        {
+            scene->camera.position =
+                transform->position;
+        }
+    }
+
+    m_FocusKeyPressedLastFrame =
+        focusKeyPressed;
 
     auto* transform =
         selectedEntity->getComponent<TransformComponent>();
@@ -1348,6 +1440,55 @@ void GameLayer::updateDebugRenderer()
                 collider->size
             );
         });
+
+    Entity* selectedEntity =
+        editorContext.getSelectedEntity();
+
+    if (!selectedEntity ||
+        !scene->containsEntity(selectedEntity) ||
+        selectedEntity->isDestroyed())
+    {
+        return;
+    }
+
+    auto* transform =
+        selectedEntity->getComponent<TransformComponent>();
+
+    if (!transform)
+        return;
+
+    glm::vec2 selectionSize =
+        transform->scale;
+
+    if (auto* collider =
+        selectedEntity->getComponent<ColliderComponent>())
+    {
+        selectionSize = collider->size;
+    }
+
+    selectionSize += glm::vec2(
+        4.0f,
+        4.0f
+    );
+
+    debugRenderer.drawRect(
+        transform->position -
+        selectionSize * 0.5f,
+        selectionSize
+    );
+
+    glm::vec2 outerSize =
+        selectionSize +
+        glm::vec2(
+            4.0f,
+            4.0f
+        );
+
+    debugRenderer.drawRect(
+        transform->position -
+        outerSize * 0.5f,
+        outerSize
+    );
 }
 
 void GameLayer::handleViewportReset()
@@ -1357,6 +1498,78 @@ void GameLayer::handleViewportReset()
         scene->camera.position = { 0.0f, 0.0f };
         scene->camera.zoom = 1.0f;
     }
+}
+
+Entity* GameLayer::duplicateEntity(Entity* source)
+{
+    if (!source ||
+        source->isDestroyed() ||
+        !scene->containsEntity(source))
+    {
+        return nullptr;
+    }
+
+    Entity* copy =
+        scene->createEntity(
+            source->getName() + " Copy"
+        );
+
+    if (auto* sourceTransform =
+        source->getComponent<TransformComponent>())
+    {
+        auto* transform =
+            copy->addComponent<TransformComponent>();
+
+        *transform = *sourceTransform;
+
+        transform->position.x += 32.0f;
+        transform->position.y += 32.0f;
+    }
+
+    if (auto* sourceSprite =
+        source->getComponent<SpriteComponent>())
+    {
+        copy->addComponent<SpriteComponent>(
+            sourceSprite->getTextureID(),
+            sourceSprite->getTexture()
+        );
+    }
+
+    if (auto* sourceVelocity =
+        source->getComponent<VelocityComponent>())
+    {
+        auto* velocity =
+            copy->addComponent<VelocityComponent>();
+
+        *velocity = *sourceVelocity;
+    }
+
+    if (auto* sourceCollider =
+        source->getComponent<ColliderComponent>())
+    {
+        auto* collider =
+            copy->addComponent<ColliderComponent>();
+
+        *collider = *sourceCollider;
+    }
+
+    if (auto* sourceController =
+        source->getComponent<PlayerControllerComponent>())
+    {
+        auto* controller =
+            copy->addComponent<PlayerControllerComponent>();
+
+        *controller = *sourceController;
+    }
+
+    if (source->hasComponent<PlayerTag>())
+    {
+        copy->addComponent<PlayerTag>();
+    }
+
+    editorContext.setSelectedEntity(copy);
+
+    return copy;
 }
 
 void GameLayer::onRender()
