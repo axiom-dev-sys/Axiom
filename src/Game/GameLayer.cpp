@@ -127,6 +127,8 @@ void GameLayer::onUpdate(float dt)
     if (!scene)
         return;
 
+    handleRuntimeControls();
+
     handleViewportCamera(dt);
     handleSceneEditingInput(dt);
     handleEditorShortcuts();
@@ -135,7 +137,6 @@ void GameLayer::onUpdate(float dt)
 
     updateDebugRenderer();
     handleSceneSerialization();
-    handleRuntimeControls();
     handleEditorTools();
     updateInspectorInfo();
     updateEditorStatus(dt);

@@ -42,4 +42,9 @@ namespace Axiom {
         return m_Mode == EngineMode::Stop;
     }
 
+    void RuntimeSession::edit()
+    {
+        m_Mode = EngineMode::Edit;
+    }
+
 }

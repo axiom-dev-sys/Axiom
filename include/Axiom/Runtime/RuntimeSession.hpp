@@ -10,6 +10,7 @@ namespace Axiom {
         void play();
         void pause();
         void stop();
+        void edit();
 
         EngineMode getMode() const;
         bool isPlaying() const;
