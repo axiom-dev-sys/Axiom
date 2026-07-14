@@ -283,38 +283,9 @@ void GameLayer::handleSceneSerialization()
 
 void GameLayer::handleEditorTools()
 {
-    hierarchyPanel.setEditorContext(&editorContext);
-    inspectorPanel.setEditorContext(&editorContext);
-    sceneEditorPanel.setEditorContext(&editorContext);
-    assetBrowserPanel.setEditorContext(&editorContext);
-
-    sceneEditorPanel.setSceneInfo(
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(scene->getEntityCount())
-    );
-
-    sceneEditorPanel.clearSceneNames();
-
-    for (const auto& sceneInfo : editorScenes)
-    {
-        sceneEditorPanel.addSceneName(sceneInfo.first);
-    }
-
-    if (sceneEditorPanel.isRenameSceneRequested())
-    {
-        sceneManager.renameActiveScene(
-            sceneEditorPanel.getRequestedSceneName()
-        );
-
-        sceneEditorPanel.resetRenameSceneRequest();
-    }
-
-    hierarchyPanel.clear();
-
-    scene->forEach([&](Entity* entity)
-        {
-            hierarchyPanel.addEntity(entity);
-        });
+    updateEditorPanels();
+    handleSceneEditorRequests();
+    handleHierarchyRequests();
 
     Entity* selectedEntity = editorContext.getSelectedEntity();
 
@@ -323,161 +294,6 @@ void GameLayer::handleEditorTools()
         editorContext.clearSelection();
 
         selectedEntity = nullptr;
-    }
-
-    assetBrowserPanel.clear();
-
-    assetBrowserPanel.addAsset("player");
-    assetBrowserPanel.addAsset("test");
-    assetBrowserPanel.addAsset("office");
-    assetBrowserPanel.addAsset("fallback");
-
-    if (sceneEditorPanel.isNewSceneRequested())
-    {
-        auto newScene = std::make_shared<Scene>();
-
-        std::string name =
-            "New Scene " + std::to_string(editorScenes.size() + 1);
-
-        editorScenes.push_back({ name, newScene });
-
-        setActiveScene(name, newScene);
-
-        editorContext.clearSelection();
-
-        sceneEditorPanel.resetNewSceneRequest();
-    }
-
-    if (sceneEditorPanel.isSwitchSceneRequested())
-    {
-        const std::string& name =
-            sceneEditorPanel.getRequestedSceneSwitchName();
-
-        for (const auto& sceneInfo : editorScenes)
-        {
-            if (sceneInfo.first == name)
-            {
-                setActiveScene(sceneInfo.first, sceneInfo.second);
-                break;
-            }
-        }
-
-        sceneEditorPanel.resetSwitchSceneRequest();
-    }
-
-    if (sceneEditorPanel.isDeleteSceneRequested())
-    {
-        if (editorScenes.size() > 1)
-        {
-            const std::string activeName =
-                sceneManager.getActiveSceneName();
-
-            editorScenes.erase(
-                std::remove_if(
-                    editorScenes.begin(),
-                    editorScenes.end(),
-                    [&](const auto& sceneInfo)
-                    {
-                        return sceneInfo.first == activeName;
-                    }
-                ),
-                editorScenes.end()
-            );
-
-            const auto& nextScene = editorScenes.front();
-
-            setActiveScene(nextScene.first, nextScene.second);
-
-            editorContext.clearSelection();
-        }
-
-        sceneEditorPanel.resetDeleteSceneRequest();
-    }
-
-    if (sceneEditorPanel.isCreateEntityRequested())
-    {
-        Entity* entity = scene->createEntity("New Entity");
-
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-        
-        editorContext.setSelectedEntity(entity);
-
-        sceneEditorPanel.resetCreateEntityRequest();
-    }
-
-    hierarchyPanel.clear();
-
-    scene->forEach([&](Entity* entity)
-        {
-            hierarchyPanel.addEntity(entity);
-        });
-
-    if (hierarchyPanel.isCreateEntityRequested())
-    {
-        Entity* entity = scene->createEntity("New Entity");
-
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-
-        editorContext.setSelectedEntity(entity);
-
-        hierarchyPanel.resetCreateEntityRequest();
-    }
-
-    if (sceneEditorPanel.isDestroyEntityRequested())
-    {
-        Entity* selectedEntity = editorContext.getSelectedEntity();
-
-        if (selectedEntity && !selectedEntity->isDestroyed())
-        {
-            selectedEntity->destroy();
-            editorContext.clearSelection();
-        }
-
-        sceneEditorPanel.resetDestroyEntityRequest();
-    }
-
-    if (Entity* source = hierarchyPanel.getDuplicateEntity())
-    {
-        duplicateEntity(source);
-
-        hierarchyPanel.resetDuplicateEntityRequest();
-    }
-
-    if (Entity* target =
-        hierarchyPanel.getFocusEntity())
-    {
-        if (!target->isDestroyed() &&
-            scene->containsEntity(target))
-        {
-            auto* transform =
-                target->getComponent<TransformComponent>();
-
-            if (transform)
-            {
-                scene->camera.position =
-                    transform->position;
-            }
-        }
-
-        hierarchyPanel.resetFocusEntityRequest();
     }
 
     if (assetBrowserPanel.isApplyAssetRequested())
@@ -1594,6 +1410,196 @@ Entity* GameLayer::duplicateEntity(Entity* source)
     editorContext.setSelectedEntity(copy);
 
     return copy;
+}
+
+void GameLayer::updateEditorPanels()
+{
+    hierarchyPanel.setEditorContext(&editorContext);
+    inspectorPanel.setEditorContext(&editorContext);
+    sceneEditorPanel.setEditorContext(&editorContext);
+    assetBrowserPanel.setEditorContext(&editorContext);
+
+    sceneEditorPanel.setSceneInfo(
+        sceneManager.getActiveSceneName(),
+        static_cast<int>(scene->getEntityCount())
+    );
+
+    sceneEditorPanel.clearSceneNames();
+
+    for (const auto& sceneInfo : editorScenes)
+    {
+        sceneEditorPanel.addSceneName(sceneInfo.first);
+    }
+
+    hierarchyPanel.clear();
+
+    scene->forEach([&](Entity* entity)
+        {
+            hierarchyPanel.addEntity(entity);
+        });
+
+    assetBrowserPanel.clear();
+
+    assetBrowserPanel.addAsset("player");
+    assetBrowserPanel.addAsset("test");
+    assetBrowserPanel.addAsset("office");
+    assetBrowserPanel.addAsset("fallback");
+}
+
+void GameLayer::handleSceneEditorRequests()
+{
+    if (sceneEditorPanel.isRenameSceneRequested())
+    {
+        sceneManager.renameActiveScene(
+            sceneEditorPanel.getRequestedSceneName()
+        );
+
+        sceneEditorPanel.resetRenameSceneRequest();
+    }
+
+    if (sceneEditorPanel.isNewSceneRequested())
+    {
+        auto newScene = std::make_shared<Scene>();
+
+        std::string name =
+            "New Scene " + std::to_string(editorScenes.size() + 1);
+
+        editorScenes.push_back({ name, newScene });
+
+        setActiveScene(name, newScene);
+
+        editorContext.clearSelection();
+
+        sceneEditorPanel.resetNewSceneRequest();
+    }
+
+    if (sceneEditorPanel.isSwitchSceneRequested())
+    {
+        const std::string& name =
+            sceneEditorPanel.getRequestedSceneSwitchName();
+
+        for (const auto& sceneInfo : editorScenes)
+        {
+            if (sceneInfo.first == name)
+            {
+                setActiveScene(sceneInfo.first, sceneInfo.second);
+                break;
+            }
+        }
+
+        sceneEditorPanel.resetSwitchSceneRequest();
+    }
+
+    if (sceneEditorPanel.isDeleteSceneRequested())
+    {
+        if (editorScenes.size() > 1)
+        {
+            const std::string activeName =
+                sceneManager.getActiveSceneName();
+
+            editorScenes.erase(
+                std::remove_if(
+                    editorScenes.begin(),
+                    editorScenes.end(),
+                    [&](const auto& sceneInfo)
+                    {
+                        return sceneInfo.first == activeName;
+                    }
+                ),
+                editorScenes.end()
+            );
+
+            const auto& nextScene = editorScenes.front();
+
+            setActiveScene(nextScene.first, nextScene.second);
+
+            editorContext.clearSelection();
+        }
+
+        sceneEditorPanel.resetDeleteSceneRequest();
+    }
+
+    if (sceneEditorPanel.isCreateEntityRequested())
+    {
+        Entity* entity = scene->createEntity("New Entity");
+
+        auto* transform =
+            entity->addComponent<TransformComponent>();
+
+        transform->position = { 0.0f, 0.0f };
+        transform->scale = { 128.0f, 128.0f };
+
+        entity->addComponent<SpriteComponent>(
+            "test",
+            ResourceManager::getTexture("test")
+        );
+
+        editorContext.setSelectedEntity(entity);
+
+        sceneEditorPanel.resetCreateEntityRequest();
+    }
+
+    if (sceneEditorPanel.isDestroyEntityRequested())
+    {
+        Entity* selectedEntity = editorContext.getSelectedEntity();
+
+        if (selectedEntity && !selectedEntity->isDestroyed())
+        {
+            selectedEntity->destroy();
+            editorContext.clearSelection();
+        }
+
+        sceneEditorPanel.resetDestroyEntityRequest();
+    }
+}
+
+void GameLayer::handleHierarchyRequests()
+{
+    if (hierarchyPanel.isCreateEntityRequested())
+    {
+        Entity* entity = scene->createEntity("New Entity");
+
+        auto* transform =
+            entity->addComponent<TransformComponent>();
+
+        transform->position = { 0.0f, 0.0f };
+        transform->scale = { 128.0f, 128.0f };
+
+        entity->addComponent<SpriteComponent>(
+            "test",
+            ResourceManager::getTexture("test")
+        );
+
+        editorContext.setSelectedEntity(entity);
+
+        hierarchyPanel.resetCreateEntityRequest();
+    }
+
+    if (Entity* source = hierarchyPanel.getDuplicateEntity())
+    {
+        duplicateEntity(source);
+
+        hierarchyPanel.resetDuplicateEntityRequest();
+    }
+
+    if (Entity* target =
+        hierarchyPanel.getFocusEntity())
+    {
+        if (!target->isDestroyed() &&
+            scene->containsEntity(target))
+        {
+            auto* transform =
+                target->getComponent<TransformComponent>();
+
+            if (transform)
+            {
+                scene->camera.position =
+                    transform->position;
+            }
+        }
+
+        hierarchyPanel.resetFocusEntityRequest();
+    }
 }
 
 void GameLayer::onRender()

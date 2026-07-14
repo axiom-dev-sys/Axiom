@@ -87,6 +87,9 @@ private:
     void handleEditorShortcuts();
     void updateDebugRenderer();
     void handleViewportReset();
+    void updateEditorPanels();
+    void handleSceneEditorRequests();
+    void handleHierarchyRequests();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
