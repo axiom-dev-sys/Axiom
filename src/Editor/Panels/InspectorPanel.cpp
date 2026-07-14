@@ -122,6 +122,23 @@ namespace Axiom {
                     1.0f
                 );
             }
+
+            if (ImGui::Button("Reset Position"))
+            {
+                transform->position = { 0.0f, 0.0f };
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Reset Scale"))
+            {
+                transform->scale = { 1.0f, 1.0f };
+            }
+
+            if (ImGui::Button("Reset Rotation"))
+            {
+                transform->rotation = 0.0f;
+            }
         }
 
         if (ImGui::CollapsingHeader("Components"))

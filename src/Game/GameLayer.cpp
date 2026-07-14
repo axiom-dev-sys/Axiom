@@ -461,6 +461,25 @@ void GameLayer::handleEditorTools()
         hierarchyPanel.resetDuplicateEntityRequest();
     }
 
+    if (Entity* target =
+        hierarchyPanel.getFocusEntity())
+    {
+        if (!target->isDestroyed() &&
+            scene->containsEntity(target))
+        {
+            auto* transform =
+                target->getComponent<TransformComponent>();
+
+            if (transform)
+            {
+                scene->camera.position =
+                    transform->position;
+            }
+        }
+
+        hierarchyPanel.resetFocusEntityRequest();
+    }
+
     if (assetBrowserPanel.isApplyAssetRequested())
     {
         Entity* selectedEntity = editorContext.getSelectedEntity();
@@ -904,6 +923,11 @@ void GameLayer::handleSceneEditingInput(float dt)
 {
     if (m_Application->getMode() != EngineMode::Edit)
         return;
+
+    if (ImGui::GetIO().WantTextInput)
+    {
+        return;
+    }
 
     const bool snapKeyPressed =
         Input::isKeyDown(GLFW_KEY_G);
