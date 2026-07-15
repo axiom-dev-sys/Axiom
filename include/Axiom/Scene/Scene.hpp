@@ -69,6 +69,20 @@ namespace Axiom {
             return m_Entities;
         }
 
+        bool containsEntity(const Entity* entity) const
+        {
+            if (!entity)
+                return false;
+
+            for (const auto& currentEntity : m_Entities)
+            {
+                if (currentEntity.get() == entity)
+                    return true;
+            }
+
+            return false;
+        }
+
         void destroyEntity(Entity* entity)
         {
             if (entity)

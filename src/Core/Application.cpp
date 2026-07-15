@@ -36,7 +36,9 @@ namespace Axiom {
 
     void Application::setMode(EngineMode mode)
     {
-        if (mode == EngineMode::Play)
+        if (mode == EngineMode::Edit)
+            m_RuntimeSession.edit();
+        else if (mode == EngineMode::Play)
             m_RuntimeSession.play();
         else if (mode == EngineMode::Pause)
             m_RuntimeSession.pause();

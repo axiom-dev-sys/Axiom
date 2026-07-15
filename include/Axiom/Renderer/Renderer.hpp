@@ -34,9 +34,9 @@ namespace Axiom {
             return s_Camera;
         }
 
-        static void drawDebugLine(const glm::vec2& start, const glm::vec2& end);
+        static void drawDebugLine(const glm::vec2& start, const glm::vec2& end, const glm::vec4& color);
 
-        static void drawDebugRect(const glm::vec2& position, const glm::vec2& size);
+        static void drawDebugRect(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color = glm::vec4(1.0f));
 
     private:
         static std::unique_ptr<RendererAPI> s_API;

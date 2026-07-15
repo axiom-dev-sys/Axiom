@@ -1,4 +1,5 @@
 #include "Axiom/DebugTools/DebugOverlay.hpp"
+#include "Axiom/Core/Version.hpp"
 
 #include <imgui.h>
 
@@ -23,7 +24,7 @@ namespace Axiom {
 
         if (ImGui::CollapsingHeader("Editor", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Text("Version: 1.2.9");
+            ImGui::Text("Version: %s", AXIOM_VERSION);
             ImGui::Text("Renderer: OpenGL");
         }
 

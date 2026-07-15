@@ -3,7 +3,6 @@
 #include "Axiom/Core/Layer.hpp"
 #include "Axiom/Scene/Scene.hpp"
 #include "Axiom/Scene/SceneManager.hpp"
-#include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Scene/Systems/CollisionSystem.hpp"
 #include "Axiom/Experimental/Game/GameState.hpp"
 #include "Axiom/Experimental/Game/GameContext.hpp"
@@ -20,6 +19,7 @@
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/EditorUI.hpp"
 #include "Axiom/Editor/Panels/PreferencesPanel.hpp"
+#include "Axiom/Editor/Viewport/ViewportPanel.hpp"
 
 #include <memory>
 #include <string>
@@ -61,6 +61,8 @@ public:
 private:
     Application* m_Application = nullptr;
 
+    Entity* duplicateEntity(Entity* source);
+
     void handleInteractions();
     void refreshSceneReferences();
     void handleRuntimeControls();
@@ -75,6 +77,20 @@ private:
     void enterEditor();
     void enterRuntime();
     void enterMenu();
+    void resetEditorInteractionState();
+    void handleViewportCamera(float dt);
+    void handleSceneEditingInput(float dt);
+    void handleViewportSelection();
+    void handleEntityDragging();
+    void handleViewportZoom();
+    void handleEditorShortcuts();
+    void updateDebugRenderer();
+    void handleViewportReset();
+    void updateEditorPanels();
+    void handleSceneEditorRequests();
+    void handleHierarchyRequests();
+    void handleAssetBrowserRequests();
+    void refreshCachedEntities();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -94,6 +110,7 @@ private:
     StatisticsPanel statisticsPanel;
     EditorContext editorContext;
     EditorUI editorUI;
+    ViewportPanel viewportPanel;
     PreferencesPanel preferencesPanel;
     GameState gameState = GameState::Gameplay;
 
@@ -116,9 +133,37 @@ private:
     Entity* player = nullptr;
     Entity* test = nullptr;
 
-    Axiom::Texture* playerTex = nullptr;
-    Axiom::Texture* testTex = nullptr;
+    bool m_ViewportPanning = false;
 
+    double m_LastMouseX = 0.0;
+    double m_LastMouseY = 0.0;
+
+    bool m_SnapEnabled = true;
+    float m_GridSize = 64.0f;
+
+    bool m_GridVisible = true;
+    bool m_GridKeyPressedLastFrame = false;
+
+    bool m_SnapKeyPressedLastFrame = false;
+
+    bool m_LeftArrowPressedLastFrame = false;
+    bool m_RightArrowPressedLastFrame = false;
+    bool m_UpArrowPressedLastFrame = false;
+    bool m_DownArrowPressedLastFrame = false;
+
+    bool m_DeleteKeyPressedLastFrame = false;
+
+    bool m_EntityDragging = false;
+
+    bool m_DuplicateKeyPressedLastFrame = false;
+
+    bool m_FocusKeyPressedLastFrame = false;
+
+    bool m_SaveKeyPressedLastFrame = false;
+
+    bool m_LoadKeyPressedLastFrame = false;
+
+    Entity* m_DraggedEntity = nullptr;
 };
 
 }

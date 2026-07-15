@@ -37,10 +37,23 @@ namespace Axiom {
 
         void setEditorContext(EditorContext* context);
 
+        void clear()
+        {
+            entityName = "No selected entity";
+
+            entityID = 0;
+
+            hasSprite = false;
+            hasVelocity = false;
+            hasCollider = false;
+            hasPlayerController = false;
+            hasPlayerTag = false;
+        }
+
     private:
         bool visible = true;
 
-        std::string entityName = "None";
+        std::string entityName = "No selected entity";
         std::uint32_t entityID = 0;
 
         bool hasSprite = false;

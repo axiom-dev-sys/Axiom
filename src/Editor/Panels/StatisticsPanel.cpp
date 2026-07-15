@@ -1,4 +1,5 @@
 #include "Axiom/Editor/Panels/StatisticsPanel.hpp"
+#include "Axiom/Core/Version.hpp"
 
 #include <imgui.h>
 
@@ -13,7 +14,7 @@ namespace Axiom {
 
         if (ImGui::CollapsingHeader("Engine", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            ImGui::Text("Version: %s", "1.2.9");
+            ImGui::Text("Version: %s", AXIOM_VERSION);
             ImGui::Text("Renderer: OpenGL");
         }
 

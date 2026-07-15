@@ -1,4 +1,5 @@
 #include "Axiom/Editor/EditorUI.hpp"
+#include "Axiom/Core/Version.hpp"
 
 #include <imgui.h>
 
@@ -43,6 +44,7 @@ namespace Axiom {
                 ImGui::MenuItem("Statistics", nullptr, &showStatistics);
                 ImGui::MenuItem("Status Bar", nullptr, &showStatusBar);
                 ImGui::MenuItem("Preferences", nullptr, &showPreferences);
+                ImGui::MenuItem("Viewport", nullptr, &showViewport);
 
                 ImGui::EndMenu();
             }
@@ -96,7 +98,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 1.2.9");
+                ImGui::Text("Version: %s", AXIOM_VERSION);
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -133,7 +135,7 @@ namespace Axiom {
                     ImGuiWindowFlags_NoScrollWithMouse
                 );
 
-                ImGui::Text("Axiom 1.2.9");
+                ImGui::Text("Axiom %s", AXIOM_VERSION);
 
                 ImGui::SameLine(180);
                 ImGui::Text("Scene: %s", sceneName.c_str());
@@ -171,6 +173,13 @@ namespace Axiom {
 
                 ImGui::SameLine(840);
                 ImGui::Text("FPS: %.1f", fps);
+
+                ImGui::SameLine(1020);
+
+                ImGui::Text(
+                    "Snap: %s",
+                    snapEnabled ? "ON" : "OFF"
+                );
 
                 ImGui::End();
             }
@@ -211,9 +220,19 @@ namespace Axiom {
         return saveSceneRequested;
     }
 
+    void EditorUI::requestSaveScene()
+    {
+        saveSceneRequested = true;
+    }
+
     bool EditorUI::isLoadSceneRequested() const
     {
         return loadSceneRequested;
+    }
+
+    void EditorUI::requestLoadScene()
+    {
+        loadSceneRequested = true;
     }
 
     bool EditorUI::isExitRequested() const
@@ -260,13 +279,15 @@ namespace Axiom {
         const std::string& scene,
         const std::string& state,
         int entities,
-        float fpsValue
+        float fpsValue,
+        bool snapValue
     )
     {
         sceneName = scene;
         gameState = state;
         entityCount = entities;
         fps = fpsValue;
+        snapEnabled = snapValue;
     }
 
     bool EditorUI::isConsoleVisible() const
@@ -292,6 +313,11 @@ namespace Axiom {
     bool EditorUI::isPreferencesVisible() const
     {
         return showPreferences;
+    }
+
+    bool EditorUI::isViewportVisible() const
+    {
+        return showViewport;
     }
 
 }

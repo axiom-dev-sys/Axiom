@@ -122,6 +122,23 @@ namespace Axiom {
                     1.0f
                 );
             }
+
+            if (ImGui::Button("Reset Position"))
+            {
+                transform->position = { 0.0f, 0.0f };
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Reset Scale"))
+            {
+                transform->scale = { 1.0f, 1.0f };
+            }
+
+            if (ImGui::Button("Reset Rotation"))
+            {
+                transform->rotation = 0.0f;
+            }
         }
 
         if (ImGui::CollapsingHeader("Components"))
@@ -254,87 +271,87 @@ namespace Axiom {
                         }
                     }
                 }
-
-                if (hasVelocity)
+            }
+            
+            if (hasVelocity)
+            {
+                ImGui::Separator();
+                
+                if (ImGui::CollapsingHeader("VelocityComponent"))
                 {
-                    ImGui::Separator();
-
-                    if (ImGui::CollapsingHeader("VelocityComponent"))
+                    if (ImGui::Button("Remove VelocityComponent"))
                     {
-                        if (ImGui::Button("Remove VelocityComponent"))
-                        {
-                            selectedEntity->removeComponent<VelocityComponent>();
-                        }
-
-                        auto* velocity =
-                            selectedEntity->getComponent<VelocityComponent>();
-
-                        if (velocity)
-                        {
-                            ImGui::DragFloat2(
-                                "Velocity",
-                                &velocity->velocity.x,
-                                1.0f
-                            );
-                        }
+                        selectedEntity->removeComponent<VelocityComponent>();
+                    }
+                    
+                    auto* velocity =
+                        selectedEntity->getComponent<VelocityComponent>();
+                    
+                    if (velocity)
+                    {
+                        ImGui::DragFloat2(
+                            "Velocity",
+                            &velocity->velocity.x,
+                            1.0f
+                        );
                     }
                 }
-
-                if (hasCollider)
+            }
+            
+            if (hasCollider)
+            {
+                ImGui::Separator();
+                
+                if (ImGui::CollapsingHeader("ColliderComponent"))
                 {
-                    ImGui::Separator();
-
-                    if (ImGui::CollapsingHeader("ColliderComponent"))
+                    if (ImGui::Button("Remove ColliderComponent"))
                     {
-                        if (ImGui::Button("Remove ColliderComponent"))
-                        {
-                            selectedEntity->removeComponent<ColliderComponent>();
-                        }
-
-                        auto* collider =
-                            selectedEntity->getComponent<ColliderComponent>();
-
-                        if (collider)
-                        {
-                            ImGui::DragFloat2(
-                                "Size",
-                                &collider->size.x,
-                                1.0f
-                            );
-
-                            ImGui::DragFloat2(
-                                "Offset",
-                                &collider->offset.x,
-                                1.0f
-                            );
-
-                            ImGui::Checkbox(
-                                "Is Trigger",
-                                &collider->isTrigger
-                            );
-                        }
+                        selectedEntity->removeComponent<ColliderComponent>();
+                    }
+                    
+                    auto* collider =
+                        selectedEntity->getComponent<ColliderComponent>();
+                    
+                    if (collider)
+                    {
+                        ImGui::DragFloat2(
+                            "Size",
+                            &collider->size.x,
+                            1.0f
+                        );
+                        
+                        ImGui::DragFloat2(
+                            "Offset",
+                            &collider->offset.x,
+                            1.0f
+                        );
+                        
+                        ImGui::Checkbox(
+                            "Is Trigger",
+                            &collider->isTrigger
+                        );
                     }
                 }
-
-                if (hasPlayerController)
+            }
+            
+            if (hasPlayerController)
+            {
+                ImGui::Separator();
+                
+                if (ImGui::CollapsingHeader("PlayerControllerComponent"))
                 {
-                    ImGui::Separator();
-
-                    if (ImGui::CollapsingHeader("PlayerControllerComponent"))
+                    auto* controller =
+                        selectedEntity->getComponent<PlayerControllerComponent>();
+                    
+                    if (controller)
                     {
-                        auto* controller =
-                            selectedEntity->getComponent<PlayerControllerComponent>();
-
-                        if (controller)
-                        {
-                            ImGui::DragFloat(
-                                "Speed",
-                                &controller->speed,
-                                1.0f,
-                                0.0f,
-                                5000.0f
-                            );
-                        }
+                        ImGui::DragFloat(
+                            "Speed",
+                            &controller->speed,
+                            1.0f,
+                            0.0f,
+                            5000.0f
+                        );
                     }
                 }
             }

@@ -4,6 +4,7 @@
 #include "Axiom/Editor/EditorContext.hpp"
 
 #include <vector>
+#include <string>
 
 namespace Axiom {
 
@@ -28,6 +29,16 @@ namespace Axiom {
         Entity* getDuplicateEntity() const;
         void resetDuplicateEntityRequest();
 
+        Entity* getFocusEntity() const
+        {
+            return focusEntityRequest;
+        }
+
+        void resetFocusEntityRequest()
+        {
+            focusEntityRequest = nullptr;
+        }
+
     private:
         bool visible = true;
 
@@ -41,6 +52,9 @@ namespace Axiom {
         char renameBuffer[256] = {};
 
         Entity* duplicateEntity = nullptr;
+        Entity* focusEntityRequest = nullptr;
+
+        char searchBuffer[128] = {};
     };
 
 }

@@ -18,7 +18,8 @@ namespace Axiom {
 
         virtual void drawDebugLine(
             const glm::vec2& start,
-            const glm::vec2& end
+            const glm::vec2& end,
+            const glm::vec4& color
         ) = 0;
     };
 

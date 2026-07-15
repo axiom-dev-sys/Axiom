@@ -7,6 +7,8 @@
 #include <fstream>
 #include <string>
 
+#include "Axiom/Core/Version.hpp"
+
 namespace Axiom {
 
     void SceneSerializer::save(
@@ -23,7 +25,7 @@ namespace Axiom {
         }
 
         file << "Axiom Scene\n";
-        file << "Version: 1.2.9\n";
+        file << "Version: " << AXIOM_VERSION << "\n";
         file << "Entities: "
             << scene.getEntityCount()
             << "\n";

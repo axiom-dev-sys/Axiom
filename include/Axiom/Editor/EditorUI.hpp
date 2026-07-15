@@ -16,7 +16,9 @@ namespace Axiom {
         bool isSceneEditorVisible() const;
         bool isAssetBrowserVisible() const;
         bool isSaveSceneRequested() const;
+        void requestSaveScene();
         bool isLoadSceneRequested() const;
+        void requestLoadScene();
         bool isExitRequested() const;
         void resetSaveSceneRequest();
         void resetLoadSceneRequest();
@@ -32,13 +34,16 @@ namespace Axiom {
             const std::string& scene,
             const std::string& state,
             int entities,
-            float fpsValue
+            float fpsValue,
+            bool snapEnabled
         );
 
         bool isStopRequested() const;
         void resetStopRequest();
 
         bool isPreferencesVisible() const;
+
+        bool isViewportVisible() const;
 
     private:
         bool showDemo = false;
@@ -68,6 +73,10 @@ namespace Axiom {
         bool showStatusBar = true;
 
         bool showPreferences = false;
+
+        bool showViewport = true;
+
+        bool snapEnabled = false;
     };
 
 }

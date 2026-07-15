@@ -9,11 +9,14 @@ Its core systems include ECS, scene management, resource management, scene seria
 
 ## Editor
 
-The first generation of the Axiom Editor.
+The second generation of the Axiom Editor.
 
-It provides integrated tools for scene editing, entity inspection,
-asset management, debugging, and runtime control, forming the foundation
-for 2D game development with Axiom.
+The editor now includes a viewport-based workflow with integrated tools
+for scene editing, entity inspection, asset management, debugging,
+and runtime control.
+
+It provides entity selection, dragging, grid snapping, scene management,
+runtime interaction, and development tools for 2D game creation.
 
 ![Axiom Editor](docs/images/axiom-editor.png)
 
@@ -33,6 +36,8 @@ for 2D game development with Axiom.
   - Timer System
   - Input System
   - Runtime System
+  - Grid System
+  - Snap System
 
 - Debug
   - Debug Overlay
@@ -48,6 +53,7 @@ for 2D game development with Axiom.
   - Statistics Panel
   - Status Bar
   - Preferences Panel
+  - Viewport Panel
 
 ## Technologies
 
@@ -95,8 +101,19 @@ Build and run the project
 
 ## Current Status
 
-Axiom Engine 1.2.x completes the first generation of the integrated editor, extending the Runtime architecture with a complete editor workflow for scene editing, debugging, resource management, and runtime control.
+Axiom Engine 1.3.x introduces the second generation of the integrated editor.
 
-The engine now provides a solid 2D foundation including rendering, ECS, runtime management, scene management, resource management, serialization, debugging tools, and the first-generation integrated editor.
+The engine now provides a viewport-based workflow with scene editing,
+entity manipulation, runtime controls, debugging tools, resource
+management, and editor interaction systems.
 
+<<<<<<< HEAD
 Future versions will continue expanding the engine with gameplay systems, rendering improvements, editor enhancements, and additional development tools.
+=======
+Axiom currently offers a solid foundation for 2D game development,
+including rendering, ECS, runtime management, scene serialization,
+debugging tools, and an integrated editor.
+
+Future versions will focus on gameplay frameworks, editor architecture,
+rendering improvements, and additional development tools.
+>>>>>>> dev

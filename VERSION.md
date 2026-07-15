@@ -232,3 +232,56 @@ Complete the first generation of the Axiom Editor.
 Provide a stable, integrated editor for scene management, debugging,
 resource browsing and runtime control before moving to the next stage
 of engine development.
+
+---
+
+## v1.3 — Editor Generation II
+
+### Added
+
+- Viewport panel
+- Framebuffer rendering
+- Viewport camera controls
+- Entity selection in viewport
+- Entity dragging
+- Grid rendering
+- Snap system
+- Scene editing shortcuts
+- Runtime session improvements
+- Editor version system
+
+### Improved
+
+- Hierarchy search
+- Hierarchy context actions
+- Inspector tools
+- Asset Browser workflow
+- Scene management workflow
+- Runtime controls
+
+### Refactored
+
+- Runtime architecture cleanup
+- GameLayer editor systems split
+- Editor panel synchronization
+- Editor request handling
+- Asset workflow organization
+
+### Fixed
+
+- Viewport interaction issues
+- Play / Pause / Stop state restoration
+- Entity duplication behavior
+- Shortcut conflicts while typing
+- Grid and snap synchronization
+- Various editor bugs
+
+### Goal
+
+Complete the second generation of the Axiom Editor.
+
+Provide a stable viewport-based workflow with scene editing tools,
+runtime controls and a cleaner editor architecture before moving to
+the Game Framework stage.
+
+---

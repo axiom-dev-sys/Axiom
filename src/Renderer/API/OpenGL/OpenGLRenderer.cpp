@@ -119,7 +119,8 @@ namespace Axiom {
 
         void OpenGLRenderer::drawDebugLine(
             const glm::vec2& start,
-            const glm::vec2& end
+            const glm::vec2& end,
+            const glm::vec4& color
         )
         {
             float vertices[] = {
@@ -132,6 +133,7 @@ namespace Axiom {
             debugShader.use();
             debugShader.setMat4("uView", Renderer::s_View);
             debugShader.setMat4("uProjection", Renderer::s_Projection);
+            debugShader.setVec4("uColor", color);
 
             glBindVertexArray(debugLineVAO);
             glBindBuffer(GL_ARRAY_BUFFER, debugLineVBO);

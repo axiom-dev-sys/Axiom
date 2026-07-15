@@ -3,6 +3,8 @@
 #include <imgui.h>
 #include <string>
 #include <cstring>
+#include <algorithm>
+#include <cctype>
 
 namespace Axiom {
 
@@ -13,6 +15,26 @@ namespace Axiom {
 
         ImGui::Begin("Hierarchy");
 
+        ImGui::SetNextItemWidth(
+            ImGui::GetContentRegionAvail().x - 60.0f
+        );
+
+        ImGui::InputTextWithHint(
+            "##HierarchySearch",
+            "Search entities...",
+            searchBuffer,
+            sizeof(searchBuffer)
+        );
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Clear"))
+        {
+            searchBuffer[0] = '\0';
+        }
+
+        ImGui::Separator();
+
         for (Entity* entity : entities)
         {
             if (!entity)
@@ -20,6 +42,45 @@ namespace Axiom {
 
             if (entity->isDestroyed())
                 continue;
+
+            if (searchBuffer[0] != '\0')
+            {
+                std::string entityName =
+                    entity->getName();
+
+                std::string searchText =
+                    searchBuffer;
+
+                std::transform(
+                    entityName.begin(),
+                    entityName.end(),
+                    entityName.begin(),
+                    [](unsigned char c)
+                    {
+                        return static_cast<char>(
+                            std::tolower(c)
+                            );
+                    }
+                );
+
+                std::transform(
+                    searchText.begin(),
+                    searchText.end(),
+                    searchText.begin(),
+                    [](unsigned char c)
+                    {
+                        return static_cast<char>(
+                            std::tolower(c)
+                            );
+                    }
+                );
+
+                if (entityName.find(searchText) ==
+                    std::string::npos)
+                {
+                    continue;
+                }
+            }
 
             Entity* selectedEntity =
                 editorContext ? editorContext->getSelectedEntity() : nullptr;
@@ -45,7 +106,9 @@ namespace Axiom {
             }
             else
             {
-                if (ImGui::Selectable(label.c_str(), selected))
+                if (ImGui::Selectable(label.c_str(),
+                    selected,
+                    ImGuiSelectableFlags_AllowDoubleClick))
                 {
                     if (editorContext)
                     {
@@ -67,6 +130,19 @@ namespace Axiom {
                     );
 
                     renameBuffer[sizeof(renameBuffer) - 1] = '\0';
+                }
+
+                if (ImGui::MenuItem("Focus"))
+                {
+                    focusEntityRequest = entity;
+                }
+
+                if (ImGui::MenuItem("Select"))
+                {
+                    if (editorContext)
+                    {
+                        editorContext->setSelectedEntity(entity);
+                    }
                 }
 
                 if (ImGui::MenuItem("Duplicate"))
