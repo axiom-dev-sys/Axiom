@@ -1,4 +1,5 @@
 #include "Axiom/Editor/EditorUI.hpp"
+#include "Axiom/Core/Version.hpp"
 
 #include <imgui.h>
 
@@ -97,7 +98,7 @@ namespace Axiom {
                 ImGui::Text("Axiom Engine");
                 ImGui::Separator();
 
-                ImGui::Text("Version: 1.2.9");
+                ImGui::Text("Version: %s", AXIOM_VERSION);
                 ImGui::Text("Language: C++17");
                 ImGui::Text("Renderer: OpenGL");
                 ImGui::Text("UI: ImGui");
@@ -134,7 +135,7 @@ namespace Axiom {
                     ImGuiWindowFlags_NoScrollWithMouse
                 );
 
-                ImGui::Text("Axiom 1.2.9");
+                ImGui::Text("Axiom %s", AXIOM_VERSION);
 
                 ImGui::SameLine(180);
                 ImGui::Text("Scene: %s", sceneName.c_str());

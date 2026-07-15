@@ -3,7 +3,6 @@
 #include "Axiom/Core/Layer.hpp"
 #include "Axiom/Scene/Scene.hpp"
 #include "Axiom/Scene/SceneManager.hpp"
-#include "Axiom/Renderer/Texture.hpp"
 #include "Axiom/Scene/Systems/CollisionSystem.hpp"
 #include "Axiom/Experimental/Game/GameState.hpp"
 #include "Axiom/Experimental/Game/GameContext.hpp"
@@ -90,6 +89,8 @@ private:
     void updateEditorPanels();
     void handleSceneEditorRequests();
     void handleHierarchyRequests();
+    void handleAssetBrowserRequests();
+    void refreshCachedEntities();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -131,9 +132,6 @@ private:
 
     Entity* player = nullptr;
     Entity* test = nullptr;
-
-    Axiom::Texture* playerTex = nullptr;
-    Axiom::Texture* testTex = nullptr;
 
     bool m_ViewportPanning = false;
 

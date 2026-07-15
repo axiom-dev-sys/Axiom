@@ -25,10 +25,6 @@ GameLayer::GameLayer(Application* application)
     : m_Application(application)
 {
 
-    playerTex = ResourceManager::getTexture("player");
-
-    testTex = ResourceManager::getTexture("test");
-
     gameplayScene = std::make_shared<Scene>();
     menuScene = std::make_shared<Scene>();
 
@@ -286,44 +282,15 @@ void GameLayer::handleEditorTools()
     updateEditorPanels();
     handleSceneEditorRequests();
     handleHierarchyRequests();
+    handleAssetBrowserRequests();
+    refreshCachedEntities();
 
     Entity* selectedEntity = editorContext.getSelectedEntity();
 
     if (selectedEntity && selectedEntity->isDestroyed())
     {
         editorContext.clearSelection();
-
-        selectedEntity = nullptr;
     }
-
-    if (assetBrowserPanel.isApplyAssetRequested())
-    {
-        Entity* selectedEntity = editorContext.getSelectedEntity();
-
-        if (selectedEntity && !selectedEntity->isDestroyed())
-        {
-            auto* sprite =
-                selectedEntity->getComponent<SpriteComponent>();
-
-            if (sprite)
-            {
-                const std::string& asset =
-                    assetBrowserPanel.getSelectedAsset();
-
-                sprite->setTexture(
-                    asset,
-                    ResourceManager::getTexture(asset)
-                );
-            }
-        }
-
-        assetBrowserPanel.resetApplyAssetRequest();
-    }
-
-    scene->cleanupDestroyedEntities();
-
-    player = scene->findEntityByName("Player");
-    test = scene->findEntityByName("Test");
 }
 
 void GameLayer::updateInspectorInfo()
@@ -346,14 +313,14 @@ void GameLayer::updateInspectorInfo()
         return;
     }
 
-    if (!selectedEntity ||
-        selectedEntity->isDestroyed())
+    if (selectedEntity->isDestroyed())
     {
         inspectorPanel.setHasSprite(false);
         inspectorPanel.setHasVelocity(false);
         inspectorPanel.setHasCollider(false);
         inspectorPanel.setHasPlayerController(false);
         inspectorPanel.setHasPlayerTag(false);
+
         return;
     }
 
@@ -384,8 +351,6 @@ void GameLayer::updateEditorStatus(float dt)
     int colliderCount = 0;
     int velocityCount = 0;
     int playerControllerCount = 0;
-    int registeredTextureCount = 0;
-    int loadedTextureCount = 0;
 
     scene->forEach([&](Entity* entity)
         {
@@ -1245,22 +1210,22 @@ void GameLayer::updateDebugRenderer()
 
     if (m_GridVisible)
     {
-        const float gridSize = 64.0f;
-        const float gridExtent = 2048.0f;
+        const float m_GridSize = 64.0f;
+        const float m_GridExtent = 2048.0f;
 
-        for (float x = -gridExtent; x <= gridExtent; x += gridSize)
+        for (float x = -m_GridExtent; x <= m_GridExtent; x += m_GridSize)
         {
             debugRenderer.drawLine(
-                { x, -gridExtent },
-                { x,  gridExtent }
+                { x, -m_GridExtent },
+                { x,  m_GridExtent }
             );
         }
 
-        for (float y = -gridExtent; y <= gridExtent; y += gridSize)
+        for (float y = -m_GridExtent; y <= m_GridExtent; y += m_GridSize)
         {
             debugRenderer.drawLine(
-                { -gridExtent, y },
-                { gridExtent,  y }
+                { -m_GridExtent, y },
+                { m_GridExtent,  y }
             );
         }
     }
@@ -1600,6 +1565,44 @@ void GameLayer::handleHierarchyRequests()
 
         hierarchyPanel.resetFocusEntityRequest();
     }
+}
+
+void GameLayer::handleAssetBrowserRequests()
+{
+    if (!assetBrowserPanel.isApplyAssetRequested())
+        return;
+
+    Entity* selectedEntity =
+        editorContext.getSelectedEntity();
+
+    if (selectedEntity &&
+        scene->containsEntity(selectedEntity) &&
+        !selectedEntity->isDestroyed())
+    {
+        auto* sprite =
+            selectedEntity->getComponent<SpriteComponent>();
+
+        if (sprite)
+        {
+            const std::string& asset =
+                assetBrowserPanel.getSelectedAsset();
+
+            sprite->setTexture(
+                asset,
+                ResourceManager::getTexture(asset)
+            );
+        }
+    }
+
+    assetBrowserPanel.resetApplyAssetRequest();
+}
+
+void GameLayer::refreshCachedEntities()
+{
+    scene->cleanupDestroyedEntities();
+
+    player = scene->findEntityByName("Player");
+    test = scene->findEntityByName("Test");
 }
 
 void GameLayer::onRender()
