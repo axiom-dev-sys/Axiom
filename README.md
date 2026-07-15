@@ -107,13 +107,9 @@ The engine now provides a viewport-based workflow with scene editing,
 entity manipulation, runtime controls, debugging tools, resource
 management, and editor interaction systems.
 
-<<<<<<< HEAD
-Future versions will continue expanding the engine with gameplay systems, rendering improvements, editor enhancements, and additional development tools.
-=======
 Axiom currently offers a solid foundation for 2D game development,
 including rendering, ECS, runtime management, scene serialization,
 debugging tools, and an integrated editor.
 
 Future versions will focus on gameplay frameworks, editor architecture,
 rendering improvements, and additional development tools.
->>>>>>> dev
