@@ -24,59 +24,11 @@ namespace Axiom {
 GameLayer::GameLayer(Application* application)
     : m_Application(application)
 {
-
-    gameplayScene = std::make_shared<Scene>();
-    menuScene = std::make_shared<Scene>();
-
-    editorScene = gameplayScene;
-    runtimeScene = nullptr;
-
-    scene = gameplayScene;
-    sceneManager.setActiveScene("Gameplay", scene);
-
-    test = scene->createEntity("Test");
-    
-    auto* testTransform = test->addComponent<TransformComponent>();    
-    testTransform->position = {500.0f, 0.0f};
-    testTransform->scale = {512.0f, 512.0f};
-    testTransform->rotation = 0.0f;
-
-    auto* testCollider = test->addComponent<ColliderComponent>();
-    testCollider->size = {512.0f, 512.0f};
-    testCollider->offset = {0.0f, 0.0f};
-    testCollider->isTrigger = false;
-
-    test->addComponent<SpriteComponent>(
-        "test",
-        ResourceManager::getTexture("test")
-    );
-
-    player = scene->createEntity("Player");
-
-    auto* playerTransform = player->addComponent<TransformComponent>();
-    player->addComponent<VelocityComponent>();
-    player->addComponent<PlayerControllerComponent>();
-    player->addComponent<PlayerTag>();
-    playerTransform->position = {0.0f, 0.0f};
-    playerTransform->scale = {128.0f, 128.0f};
-    playerTransform->rotation = 0.0f;
-
-    auto* playerCollider = player->addComponent<ColliderComponent>();
-    playerCollider->size = {128.0f, 128.0f};
-    playerCollider->offset = {0.0f, 0.0f};
-    playerCollider->isTrigger = false;
-
-    player->addComponent<SpriteComponent>(
-        "player",
-        ResourceManager::getTexture("player")
-    );
+    initializeDefaultScene();
 
     consolePanel.addLog("[INFO] Axiom editor started");
     consolePanel.addLog("[INFO] Gameplay scene loaded");
     consolePanel.addLog("[INFO] ResourceManager initialized");
-
-    editorScenes.push_back({ "Gameplay", gameplayScene });
-
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -452,18 +404,14 @@ void GameLayer::updateEditorStatus(float dt)
     sceneEditorPanel.setSceneMode(stateText);
 }
 
-void GameLayer::updateGameplay(float dt)
+void GameLayer::handleGameplayPause()
 {
-    if (!m_Application->isPlaying())
+    bool pauseKeyPressed =
+        Input::isKeyPressed(GLFW_KEY_P);
+
+    if (pauseKeyPressed &&
+        !pauseKeyWasPressed)
     {
-        return;
-    }
-
-    bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
-
-    if (pauseKeyPressed && !pauseKeyWasPressed)
-    {
-
         if (gameState == GameState::Gameplay)
         {
             gameState = GameState::Pause;
@@ -472,10 +420,81 @@ void GameLayer::updateGameplay(float dt)
         {
             gameState = GameState::Gameplay;
         }
-
     }
 
-    pauseKeyWasPressed = pauseKeyPressed;
+    pauseKeyWasPressed =
+        pauseKeyPressed;
+}
+
+void GameLayer::handleRuntimeSceneSwitch()
+{
+    bool sceneSwitchKeyPressed =
+        Input::isKeyPressed(GLFW_KEY_F1);
+
+    if (sceneSwitchKeyPressed &&
+        !sceneSwitchKeyWasPressed)
+    {
+        if (sceneManager.getActiveSceneName() == "Gameplay")
+        {
+            enterMenu();
+        }
+        else
+        {
+            enterRuntime();
+        }
+    }
+
+    sceneSwitchKeyWasPressed =
+        sceneSwitchKeyPressed;
+}
+
+void GameLayer::updateGameSystems(float dt)
+{
+    if (gameState == GameState::Gameplay)
+    {
+        gameContext.nightTime += dt;
+
+        if (gameContext.nightTime >=
+            gameContext.nightDuration)
+        {
+            gameContext.win = true;
+        }
+
+        powerSystem.update(gameContext);
+        enemySystem.update(gameContext);
+    }
+
+    if (gameContext.win)
+    {
+        gameState = GameState::Win;
+        consolePanel.addLog("[INFO] YOU WIN");
+    }
+
+    if (gameContext.gameOver)
+    {
+        gameState = GameState::GameOver;
+        consolePanel.addLog("[INFO] GAME OVER");
+    }
+}
+
+Entity* GameLayer::findPlayer() const
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    return scene->findEntityByName("Player");
+}
+
+void GameLayer::updateGameplay(float dt)
+{
+    if (!m_Application->isPlaying())
+    {
+        return;
+    }
+
+    handleGameplayPause();
 
     if (gameState == GameState::Pause)
     {
@@ -487,22 +506,7 @@ void GameLayer::updateGameplay(float dt)
         return;
     }
 
-    bool sceneSwitchKeyPressed = Input::isKeyPressed(GLFW_KEY_F1);
-
-    if (sceneSwitchKeyPressed && !sceneSwitchKeyWasPressed)
-    {
-
-        if (sceneManager.getActiveSceneName() == "Gameplay")
-        {
-            enterMenu();
-        }
-        else
-        {
-            enterRuntime();
-        }
-    }
-
-    sceneSwitchKeyWasPressed = sceneSwitchKeyPressed;
+    handleRuntimeSceneSwitch();
 
     if (sceneManager.getActiveSceneName() == "Menu")
     {
@@ -514,32 +518,9 @@ void GameLayer::updateGameplay(float dt)
 
     gameContext.dt = dt;
 
-    if (gameState == GameState::Gameplay)
-    {
-        gameContext.nightTime += dt;
+    updateGameSystems(dt);
 
-        if (gameContext.nightTime >= gameContext.nightDuration)
-        {
-            gameContext.win = true;
-        }
-        powerSystem.update(gameContext);
-
-        enemySystem.update(gameContext);
-    }
-
-    if (gameContext.win)
-    {
-        gameState = GameState::Win;
-        consolePanel.addLog("[INFO] YOU WIN");
-        return;
-    }
-
-    if (gameContext.gameOver)
-    {
-        gameState = GameState::GameOver;
-        consolePanel.addLog("[INFO] GAME OVER");
-        return;
-    }
+    Entity* currentPlayer = findPlayer();
 
     if (!player || player->isDestroyed())
         return;
@@ -572,6 +553,118 @@ void GameLayer::updateGameplay(float dt)
     }
 
     scene->followCamera(player, dt);
+}
+
+void GameLayer::initializeDefaultScene()
+{
+    gameplayScene = std::make_shared<Scene>();
+    menuScene = std::make_shared<Scene>();
+
+    editorScene = gameplayScene;
+    runtimeScene = nullptr;
+
+    scene = gameplayScene;
+    sceneManager.setActiveScene("Gameplay", scene);
+
+    test = createTestEntity();
+    player = createPlayerEntity();
+
+    editorScenes.push_back({ "Gameplay", gameplayScene });
+}
+
+Entity* GameLayer::createDefaultEntity(
+    const std::string& name
+)
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity(name);
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 128.0f, 128.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<SpriteComponent>(
+        "test",
+        ResourceManager::getTexture("test")
+    );
+
+    return entity;
+}
+
+Entity* GameLayer::createTestEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Test");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 500.0f, 0.0f };
+    transform->scale = { 512.0f, 512.0f };
+    transform->rotation = 0.0f;
+
+    auto* collider =
+        entity->addComponent<ColliderComponent>();
+
+    collider->size = { 512.0f, 512.0f };
+    collider->offset = { 0.0f, 0.0f };
+    collider->isTrigger = false;
+
+    entity->addComponent<SpriteComponent>(
+        "test",
+        ResourceManager::getTexture("test")
+    );
+
+    return entity;
+}
+
+Entity* GameLayer::createPlayerEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Player");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 128.0f, 128.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<VelocityComponent>();
+    entity->addComponent<PlayerControllerComponent>();
+    entity->addComponent<PlayerTag>();
+
+    auto* collider =
+        entity->addComponent<ColliderComponent>();
+
+    collider->size = { 128.0f, 128.0f };
+    collider->offset = { 0.0f, 0.0f };
+    collider->isTrigger = false;
+
+    entity->addComponent<SpriteComponent>(
+        "player",
+        ResourceManager::getTexture("player")
+    );
+
+    return entity;
 }
 
 void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene)
@@ -1486,20 +1579,12 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isCreateEntityRequested())
     {
-        Entity* entity = scene->createEntity("New Entity");
+        Entity* entity = createDefaultEntity("New Entity");
 
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-
-        editorContext.setSelectedEntity(entity);
+        if (entity)
+        {
+            editorContext.setSelectedEntity(entity);
+        }
 
         sceneEditorPanel.resetCreateEntityRequest();
     }
@@ -1522,20 +1607,12 @@ void GameLayer::handleHierarchyRequests()
 {
     if (hierarchyPanel.isCreateEntityRequested())
     {
-        Entity* entity = scene->createEntity("New Entity");
+        Entity* entity = createDefaultEntity("New Entity");
 
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-
-        editorContext.setSelectedEntity(entity);
+        if (entity)
+        {
+            editorContext.setSelectedEntity(entity);
+        }
 
         hierarchyPanel.resetCreateEntityRequest();
     }

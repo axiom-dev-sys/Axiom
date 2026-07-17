@@ -61,7 +61,13 @@ public:
 private:
     Application* m_Application = nullptr;
 
+    void initializeDefaultScene();
+
+    Entity* createDefaultEntity(const std::string& name);
+    Entity* createPlayerEntity();
+    Entity* createTestEntity();
     Entity* duplicateEntity(Entity* source);
+    Entity* findPlayer() const;
 
     void handleInteractions();
     void refreshSceneReferences();
@@ -73,6 +79,9 @@ private:
     void updateInspectorInfo();
     void updateEditorStatus(float dt);
     void updateGameplay(float dt);
+    void handleGameplayPause();
+    void handleRuntimeSceneSwitch();
+    void updateGameSystems(float dt);
     void setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene);
     void enterEditor();
     void enterRuntime();
