@@ -75,6 +75,7 @@ private:
     void startRuntime();
     void stopRuntime();
     void resetGameSession();
+    void handleGameStateTransitions();
     void handleSceneSerialization();
     void handleEditorTools();
     void updateInspectorInfo();
@@ -101,6 +102,7 @@ private:
     void handleHierarchyRequests();
     void handleAssetBrowserRequests();
     void refreshCachedEntities();
+    void handleGameRestart();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -172,6 +174,8 @@ private:
     bool m_SaveKeyPressedLastFrame = false;
 
     bool m_LoadKeyPressedLastFrame = false;
+
+    bool restartKeyWasPressed = false;
 
     Entity* m_DraggedEntity = nullptr;
 };

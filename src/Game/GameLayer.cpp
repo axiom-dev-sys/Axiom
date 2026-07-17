@@ -480,7 +480,20 @@ void GameLayer::updateGameSystems(float dt)
         powerSystem.update(gameContext);
         enemySystem.update(gameContext);
     }
+}
 
+Entity* GameLayer::findPlayer() const
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    return scene->findEntityByName("Player");
+}
+
+void GameLayer::handleGameStateTransitions()
+{
     if (gameContext.win)
     {
         gameState = GameState::Win;
@@ -494,14 +507,26 @@ void GameLayer::updateGameSystems(float dt)
     }
 }
 
-Entity* GameLayer::findPlayer() const
+void GameLayer::handleGameRestart()
 {
-    if (!scene)
+    bool restartKeyPressed =
+        Input::isKeyPressed(GLFW_KEY_R);
+
+    if (restartKeyPressed &&
+        !restartKeyWasPressed)
     {
-        return nullptr;
+        if (gameState == GameState::Win ||
+            gameState == GameState::GameOver)
+        {
+            stopRuntime();
+            startRuntime();
+
+            m_Application->play();
+        }
     }
 
-    return scene->findEntityByName("Player");
+    restartKeyWasPressed =
+        restartKeyPressed;
 }
 
 void GameLayer::updateGameplay(float dt)
@@ -512,6 +537,7 @@ void GameLayer::updateGameplay(float dt)
     }
 
     handleGameplayPause();
+    handleGameRestart();
 
     if (gameState == GameState::Pause)
     {
@@ -536,6 +562,8 @@ void GameLayer::updateGameplay(float dt)
     gameContext.dt = dt;
 
     updateGameSystems(dt);
+
+    handleGameStateTransitions();
 
     if (!player || player->isDestroyed())
         return;
