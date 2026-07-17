@@ -74,6 +74,7 @@ private:
     void handleRuntimeControls();
     void startRuntime();
     void stopRuntime();
+    void resetGameSession();
     void handleSceneSerialization();
     void handleEditorTools();
     void updateInspectorInfo();

@@ -139,7 +139,6 @@ void GameLayer::handleRuntimeControls()
         }
 
         m_Application->play();
-        gameState = GameState::Gameplay;
 
         editorUI.resetPlayRequest();
     }
@@ -176,6 +175,8 @@ void GameLayer::startRuntime()
 
     runtimeScene = editorScene->clone();
 
+    resetGameSession();
+
     enterRuntime();
 }
 
@@ -186,6 +187,22 @@ void GameLayer::stopRuntime()
     runtimeScene = nullptr;
 
     enterEditor();
+}
+
+void GameLayer::resetGameSession()
+{
+    gameContext.nightTime = 0.0f;
+    gameContext.power = 100.0f;
+
+    gameContext.cameraOn = false;
+    gameContext.doorClosed = false;
+
+    gameContext.win = false;
+    gameContext.gameOver = false;
+
+    gameContext.enemyState = EnemyState::Idle;
+
+    gameState = GameState::Gameplay;
 }
 
 void GameLayer::handleSceneSerialization()
@@ -519,8 +536,6 @@ void GameLayer::updateGameplay(float dt)
     gameContext.dt = dt;
 
     updateGameSystems(dt);
-
-    Entity* currentPlayer = findPlayer();
 
     if (!player || player->isDestroyed())
         return;
