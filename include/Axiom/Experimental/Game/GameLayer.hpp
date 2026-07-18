@@ -110,6 +110,7 @@ private:
     void handleAssetBrowserRequests();
     void refreshCachedEntities();
     void handleGameRestart();
+    void renderGameplayHUD();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;

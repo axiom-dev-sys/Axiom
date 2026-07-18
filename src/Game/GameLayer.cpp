@@ -1943,6 +1943,66 @@ void GameLayer::refreshCachedEntities()
     test = scene->findEntityByName("Test");
 }
 
+void GameLayer::renderGameplayHUD()
+{
+    if (!m_Application->isPlaying())
+        return;
+
+    if (gameState != GameState::Gameplay)
+        return;
+
+    if (sceneManager.getActiveSceneName() != "Gameplay")
+        return;
+
+    const ImVec2 viewportPosition =
+        viewportPanel.getBoundsMin();
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            viewportPosition.x + 16.0f,
+            viewportPosition.y + 16.0f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_AlwaysAutoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoInputs;
+
+    ImGui::Begin("Gameplay HUD", nullptr, flags);
+
+    ImGui::Text(
+        "Power: %.0f%%",
+        gameContext.power
+    );
+
+    ImGui::ProgressBar(
+        gameContext.power / 100.0f,
+        ImVec2(200.0f, 0.0f)
+    );
+
+    ImGui::Text(
+        "Night Time: %.0f / %.0f",
+        gameContext.nightTime,
+        gameContext.nightDuration
+    );
+
+    ImGui::Text(
+        "Door: %s",
+        gameContext.doorClosed ? "Closed" : "Open"
+    );
+
+    ImGui::Text(
+        "Camera: %s",
+        gameContext.cameraOn ? "On" : "Off"
+    );
+
+    ImGui::End();
+}
+
 void GameLayer::onRender()
 {
     if (!scene)
@@ -1971,8 +2031,9 @@ void GameLayer::onRender()
     {
         viewportPanel.render();
 
-        handleViewportSelection();
+        renderGameplayHUD();
 
+        handleViewportSelection();
         handleEntityDragging();
     }
 
