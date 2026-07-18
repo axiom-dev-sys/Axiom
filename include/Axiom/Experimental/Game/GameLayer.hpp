@@ -88,11 +88,13 @@ private:
     void renderPauseUI();
     void returnToMenuFromPause();
     void startGameFromMenu();
+    void renderMainMenuUI();
     void returnToMenu();
     void setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene);
     void enterEditor();
     void enterRuntime();
     void enterMenu();
+    void exitToEditor();
     void resetEditorInteractionState();
     void handleViewportCamera(float dt);
     void handleSceneEditingInput(float dt);

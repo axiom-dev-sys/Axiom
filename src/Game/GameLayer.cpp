@@ -184,9 +184,14 @@ void GameLayer::stopRuntime()
 {
     resetEditorInteractionState();
 
+    editorContext.clearSelection();
+
     runtimeScene = nullptr;
 
     enterEditor();
+
+    updateEditorPanels();
+    refreshCachedEntities();
 }
 
 void GameLayer::resetGameSession()
@@ -371,6 +376,10 @@ void GameLayer::updateEditorStatus(float dt)
     {
         switch (gameState)
         {
+        case GameState::Menu:
+            stateText = "Menu";
+            break;
+
         case GameState::Gameplay:
             stateText = "Gameplay";
             break;
@@ -661,6 +670,64 @@ void GameLayer::startGameFromMenu()
     m_Application->play();
 }
 
+void GameLayer::renderMainMenuUI()
+{
+    if (gameState != GameState::Menu)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec2 windowSize(320.0f, 180.0f);
+
+    ImGui::SetNextWindowSize(
+        windowSize,
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - windowSize.x) * 0.5f,
+            (io.DisplaySize.y - windowSize.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse;
+
+    ImGui::Begin("Main Menu", nullptr, flags);
+
+    ImGui::Spacing();
+    ImGui::Text("AXIOM GAME");
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (ImGui::Button(
+        "Start Game",
+        ImVec2(280.0f, 40.0f)
+    ))
+    {
+        startGameFromMenu();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button(
+        "Exit to Editor",
+        ImVec2(280.0f, 40.0f)
+    ))
+    {
+        exitToEditor();
+    }
+
+    ImGui::End();
+}
+
 void GameLayer::returnToMenu()
 {
     gameState = GameState::Menu;
@@ -879,6 +946,16 @@ void GameLayer::enterMenu()
         return;
 
     setActiveScene("Menu", menuScene);
+}
+
+void GameLayer::exitToEditor()
+{
+    stopRuntime();
+
+    m_Application->stop();
+    m_Application->setMode(EngineMode::Edit);
+
+    gameState = GameState::Gameplay;
 }
 
 void GameLayer::resetEditorInteractionState()
@@ -1886,6 +1963,7 @@ void GameLayer::onRender()
 
     editorUI.render();
 
+    renderMainMenuUI();
     renderGameStateUI();
     renderPauseUI();
 
