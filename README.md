@@ -55,6 +55,14 @@ runtime interaction, and development tools for 2D game creation.
   - Preferences Panel
   - Viewport Panel
 
+- Runtime
+  - Runtime Session Lifecycle
+  - Play / Pause / Stop
+  - Main Menu
+  - Gameplay HUD
+  - Win / Game Over States
+  - Runtime Scene Transitions
+
 ## Technologies
 
 - C++17
@@ -101,15 +109,15 @@ Build and run the project
 
 ## Current Status
 
-Axiom Engine 1.3.x introduces the second generation of the integrated editor.
+Axiom Engine 1.4.x completes the Game Framework stage.
 
-The engine now provides a viewport-based workflow with scene editing,
-entity manipulation, runtime controls, debugging tools, resource
-management, and editor interaction systems.
+The engine now combines the second generation editor with runtime
+systems, gameplay state management, an integrated HUD, scene transitions,
+and debugging tools.
 
-Axiom currently offers a solid foundation for 2D game development,
-including rendering, ECS, runtime management, scene serialization,
-debugging tools, and an integrated editor.
+Axiom currently provides a complete foundation for 2D game development,
+including rendering, ECS, scene management, runtime architecture,
+serialization, debugging tools, and an integrated editor.
 
-Future versions will focus on gameplay frameworks, editor architecture,
-rendering improvements, and additional development tools.
+The next stage of development will focus on creating the first playable
+prototype using Axiom Engine.

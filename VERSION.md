@@ -285,3 +285,33 @@ runtime controls and a cleaner editor architecture before moving to
 the Game Framework stage.
 
 ---
+
+## v1.4 — Game Framework
+
+### Added
+
+- Main Menu
+- Gameplay HUD
+- Runtime scene transitions
+- Pause Menu
+- Win / Game Over UI
+- Runtime gameplay states
+
+### Improved
+
+- Runtime lifecycle
+- Editor and runtime interaction
+- GameLayer architecture
+- HUD rendering workflow
+
+### Fixed
+
+- Runtime transitions
+- Play / Pause / Stop synchronization
+- Editor state restoration
+- Viewport interaction issues
+
+### Goal
+
+Complete the Game Framework stage and prepare the engine
+for the first playable prototype.

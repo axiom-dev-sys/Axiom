@@ -634,6 +634,7 @@ void GameLayer::renderPauseUI()
     if (ImGui::Button("Resume"))
     {
         gameState = GameState::Gameplay;
+        m_Application->play();
     }
 
     ImGui::Spacing();
@@ -985,6 +986,9 @@ void GameLayer::resetEditorInteractionState()
 
 void GameLayer::handleViewportCamera(float dt)
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!editorUI.isViewportVisible())
         return;
 
@@ -1293,6 +1297,9 @@ void GameLayer::handleSceneEditingInput(float dt)
 
 void GameLayer::handleViewportSelection()
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!editorUI.isViewportVisible())
         return;
 
@@ -1392,6 +1399,9 @@ void GameLayer::handleViewportSelection()
 
 void GameLayer::handleEntityDragging()
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!m_EntityDragging)
         return;
 
@@ -1454,6 +1464,9 @@ void GameLayer::handleEntityDragging()
 
 void GameLayer::handleViewportZoom()
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!editorUI.isViewportVisible() ||
         !viewportPanel.isHovered())
     {
@@ -1564,7 +1577,6 @@ void GameLayer::updateDebugRenderer()
 
     if (m_GridVisible)
     {
-        const float m_GridSize = 64.0f;
         const float m_GridExtent = 2048.0f;
 
         for (float x = -m_GridExtent; x <= m_GridExtent; x += m_GridSize)
