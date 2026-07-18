@@ -582,6 +582,80 @@ void GameLayer::renderGameStateUI()
     ImGui::End();
 }
 
+void GameLayer::renderPauseUI()
+{
+    if (gameState != GameState::Pause)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec2 windowSize(320.0f, 140.0f);
+
+    ImGui::SetNextWindowSize(windowSize);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - windowSize.x) * 0.5f,
+            (io.DisplaySize.y - windowSize.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse;
+
+    ImGui::Begin("Pause", nullptr, flags);
+
+    ImGui::Spacing();
+
+    ImGui::Text("PAUSED");
+
+    ImGui::Separator();
+
+    ImGui::Spacing();
+
+    ImGui::Text("Press P to continue");
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Resume"))
+    {
+        gameState = GameState::Gameplay;
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Restart"))
+    {
+        stopRuntime();
+        startRuntime();
+
+        m_Application->play();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Return to Menu"))
+    {
+        returnToMenuFromPause();
+    }
+
+    ImGui::End();
+}
+
+void GameLayer::returnToMenuFromPause()
+{
+    gameState = GameState::Menu;
+
+    m_Application->play();
+
+    enterMenu();
+}
+
 void GameLayer::updateGameplay(float dt)
 {
     if (!m_Application->isPlaying())
@@ -1799,6 +1873,7 @@ void GameLayer::onRender()
     editorUI.render();
 
     renderGameStateUI();
+    renderPauseUI();
 
     if (editorUI.isViewportVisible())
     {
