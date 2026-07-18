@@ -87,6 +87,8 @@ private:
     void renderGameStateUI();
     void renderPauseUI();
     void returnToMenuFromPause();
+    void startGameFromMenu();
+    void returnToMenu();
     void setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene);
     void enterEditor();
     void enterRuntime();

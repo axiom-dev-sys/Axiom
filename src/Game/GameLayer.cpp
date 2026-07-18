@@ -451,13 +451,13 @@ void GameLayer::handleRuntimeSceneSwitch()
     if (sceneSwitchKeyPressed &&
         !sceneSwitchKeyWasPressed)
     {
-        if (sceneManager.getActiveSceneName() == "Gameplay")
+        if (gameState == GameState::Menu)
         {
-            enterMenu();
+            startGameFromMenu();
         }
-        else
+        else if (gameState == GameState::Gameplay)
         {
-            enterRuntime();
+            returnToMenu();
         }
     }
 
@@ -648,6 +648,20 @@ void GameLayer::renderPauseUI()
 }
 
 void GameLayer::returnToMenuFromPause()
+{
+    returnToMenu();
+}
+
+void GameLayer::startGameFromMenu()
+{
+    resetGameSession();
+
+    enterRuntime();
+
+    m_Application->play();
+}
+
+void GameLayer::returnToMenu()
 {
     gameState = GameState::Menu;
 
