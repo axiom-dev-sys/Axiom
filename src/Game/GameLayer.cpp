@@ -24,59 +24,11 @@ namespace Axiom {
 GameLayer::GameLayer(Application* application)
     : m_Application(application)
 {
-
-    gameplayScene = std::make_shared<Scene>();
-    menuScene = std::make_shared<Scene>();
-
-    editorScene = gameplayScene;
-    runtimeScene = nullptr;
-
-    scene = gameplayScene;
-    sceneManager.setActiveScene("Gameplay", scene);
-
-    test = scene->createEntity("Test");
-    
-    auto* testTransform = test->addComponent<TransformComponent>();    
-    testTransform->position = {500.0f, 0.0f};
-    testTransform->scale = {512.0f, 512.0f};
-    testTransform->rotation = 0.0f;
-
-    auto* testCollider = test->addComponent<ColliderComponent>();
-    testCollider->size = {512.0f, 512.0f};
-    testCollider->offset = {0.0f, 0.0f};
-    testCollider->isTrigger = false;
-
-    test->addComponent<SpriteComponent>(
-        "test",
-        ResourceManager::getTexture("test")
-    );
-
-    player = scene->createEntity("Player");
-
-    auto* playerTransform = player->addComponent<TransformComponent>();
-    player->addComponent<VelocityComponent>();
-    player->addComponent<PlayerControllerComponent>();
-    player->addComponent<PlayerTag>();
-    playerTransform->position = {0.0f, 0.0f};
-    playerTransform->scale = {128.0f, 128.0f};
-    playerTransform->rotation = 0.0f;
-
-    auto* playerCollider = player->addComponent<ColliderComponent>();
-    playerCollider->size = {128.0f, 128.0f};
-    playerCollider->offset = {0.0f, 0.0f};
-    playerCollider->isTrigger = false;
-
-    player->addComponent<SpriteComponent>(
-        "player",
-        ResourceManager::getTexture("player")
-    );
+    initializeDefaultScene();
 
     consolePanel.addLog("[INFO] Axiom editor started");
     consolePanel.addLog("[INFO] Gameplay scene loaded");
     consolePanel.addLog("[INFO] ResourceManager initialized");
-
-    editorScenes.push_back({ "Gameplay", gameplayScene });
-
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -187,7 +139,6 @@ void GameLayer::handleRuntimeControls()
         }
 
         m_Application->play();
-        gameState = GameState::Gameplay;
 
         editorUI.resetPlayRequest();
     }
@@ -224,6 +175,8 @@ void GameLayer::startRuntime()
 
     runtimeScene = editorScene->clone();
 
+    resetGameSession();
+
     enterRuntime();
 }
 
@@ -231,9 +184,30 @@ void GameLayer::stopRuntime()
 {
     resetEditorInteractionState();
 
+    editorContext.clearSelection();
+
     runtimeScene = nullptr;
 
     enterEditor();
+
+    updateEditorPanels();
+    refreshCachedEntities();
+}
+
+void GameLayer::resetGameSession()
+{
+    gameContext.nightTime = 0.0f;
+    gameContext.power = 100.0f;
+
+    gameContext.cameraOn = false;
+    gameContext.doorClosed = false;
+
+    gameContext.win = false;
+    gameContext.gameOver = false;
+
+    gameContext.enemyState = EnemyState::Idle;
+
+    gameState = GameState::Gameplay;
 }
 
 void GameLayer::handleSceneSerialization()
@@ -402,6 +376,10 @@ void GameLayer::updateEditorStatus(float dt)
     {
         switch (gameState)
         {
+        case GameState::Menu:
+            stateText = "Menu";
+            break;
+
         case GameState::Gameplay:
             stateText = "Gameplay";
             break;
@@ -452,18 +430,14 @@ void GameLayer::updateEditorStatus(float dt)
     sceneEditorPanel.setSceneMode(stateText);
 }
 
-void GameLayer::updateGameplay(float dt)
+void GameLayer::handleGameplayPause()
 {
-    if (!m_Application->isPlaying())
+    bool pauseKeyPressed =
+        Input::isKeyPressed(GLFW_KEY_P);
+
+    if (pauseKeyPressed &&
+        !pauseKeyWasPressed)
     {
-        return;
-    }
-
-    bool pauseKeyPressed = Input::isKeyPressed(GLFW_KEY_P);
-
-    if (pauseKeyPressed && !pauseKeyWasPressed)
-    {
-
         if (gameState == GameState::Gameplay)
         {
             gameState = GameState::Pause;
@@ -472,10 +446,307 @@ void GameLayer::updateGameplay(float dt)
         {
             gameState = GameState::Gameplay;
         }
-
     }
 
-    pauseKeyWasPressed = pauseKeyPressed;
+    pauseKeyWasPressed =
+        pauseKeyPressed;
+}
+
+void GameLayer::handleRuntimeSceneSwitch()
+{
+    bool sceneSwitchKeyPressed =
+        Input::isKeyPressed(GLFW_KEY_F1);
+
+    if (sceneSwitchKeyPressed &&
+        !sceneSwitchKeyWasPressed)
+    {
+        if (gameState == GameState::Menu)
+        {
+            startGameFromMenu();
+        }
+        else if (gameState == GameState::Gameplay)
+        {
+            returnToMenu();
+        }
+    }
+
+    sceneSwitchKeyWasPressed =
+        sceneSwitchKeyPressed;
+}
+
+void GameLayer::updateGameSystems(float dt)
+{
+    if (gameState == GameState::Gameplay)
+    {
+        gameContext.nightTime += dt;
+
+        if (gameContext.nightTime >=
+            gameContext.nightDuration)
+        {
+            gameContext.win = true;
+        }
+
+        powerSystem.update(gameContext);
+        enemySystem.update(gameContext);
+    }
+}
+
+Entity* GameLayer::findPlayer() const
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    return scene->findEntityByName("Player");
+}
+
+void GameLayer::handleGameStateTransitions()
+{
+    if (gameContext.win)
+    {
+        gameState = GameState::Win;
+        consolePanel.addLog("[INFO] YOU WIN");
+    }
+
+    if (gameContext.gameOver)
+    {
+        gameState = GameState::GameOver;
+        consolePanel.addLog("[INFO] GAME OVER");
+    }
+}
+
+void GameLayer::handleGameRestart()
+{
+    bool restartKeyPressed =
+        Input::isKeyPressed(GLFW_KEY_R);
+
+    if (restartKeyPressed &&
+        !restartKeyWasPressed)
+    {
+        if (gameState == GameState::Win ||
+            gameState == GameState::GameOver)
+        {
+            stopRuntime();
+            startRuntime();
+
+            m_Application->play();
+        }
+    }
+
+    restartKeyWasPressed =
+        restartKeyPressed;
+}
+
+void GameLayer::renderGameStateUI()
+{
+    if (gameState != GameState::Win &&
+        gameState != GameState::GameOver)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec2 windowSize(320.0f, 140.0f);
+
+    ImGui::SetNextWindowSize(windowSize);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - windowSize.x) * 0.5f,
+            (io.DisplaySize.y - windowSize.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse;
+
+    const char* windowTitle =
+        gameState == GameState::Win
+        ? "Victory"
+        : "Game Over";
+
+    ImGui::Begin(windowTitle, nullptr, flags);
+
+    ImGui::Spacing();
+
+    if (gameState == GameState::Win)
+    {
+        ImGui::Text("YOU WIN");
+    }
+    else
+    {
+        ImGui::Text("GAME OVER");
+    }
+
+    ImGui::Separator();
+
+    ImGui::Spacing();
+    ImGui::Text("Press R to restart");
+
+    ImGui::End();
+}
+
+void GameLayer::renderPauseUI()
+{
+    if (gameState != GameState::Pause)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec2 windowSize(320.0f, 140.0f);
+
+    ImGui::SetNextWindowSize(windowSize);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - windowSize.x) * 0.5f,
+            (io.DisplaySize.y - windowSize.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse;
+
+    ImGui::Begin("Pause", nullptr, flags);
+
+    ImGui::Spacing();
+
+    ImGui::Text("PAUSED");
+
+    ImGui::Separator();
+
+    ImGui::Spacing();
+
+    ImGui::Text("Press P to continue");
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Resume"))
+    {
+        gameState = GameState::Gameplay;
+        m_Application->play();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Restart"))
+    {
+        stopRuntime();
+        startRuntime();
+
+        m_Application->play();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Return to Menu"))
+    {
+        returnToMenuFromPause();
+    }
+
+    ImGui::End();
+}
+
+void GameLayer::returnToMenuFromPause()
+{
+    returnToMenu();
+}
+
+void GameLayer::startGameFromMenu()
+{
+    resetGameSession();
+
+    enterRuntime();
+
+    m_Application->play();
+}
+
+void GameLayer::renderMainMenuUI()
+{
+    if (gameState != GameState::Menu)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec2 windowSize(320.0f, 180.0f);
+
+    ImGui::SetNextWindowSize(
+        windowSize,
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - windowSize.x) * 0.5f,
+            (io.DisplaySize.y - windowSize.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse;
+
+    ImGui::Begin("Main Menu", nullptr, flags);
+
+    ImGui::Spacing();
+    ImGui::Text("AXIOM GAME");
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (ImGui::Button(
+        "Start Game",
+        ImVec2(280.0f, 40.0f)
+    ))
+    {
+        startGameFromMenu();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button(
+        "Exit to Editor",
+        ImVec2(280.0f, 40.0f)
+    ))
+    {
+        exitToEditor();
+    }
+
+    ImGui::End();
+}
+
+void GameLayer::returnToMenu()
+{
+    gameState = GameState::Menu;
+
+    m_Application->play();
+
+    enterMenu();
+}
+
+void GameLayer::updateGameplay(float dt)
+{
+    if (!m_Application->isPlaying())
+    {
+        return;
+    }
+
+    handleGameplayPause();
+    handleGameRestart();
 
     if (gameState == GameState::Pause)
     {
@@ -487,22 +758,7 @@ void GameLayer::updateGameplay(float dt)
         return;
     }
 
-    bool sceneSwitchKeyPressed = Input::isKeyPressed(GLFW_KEY_F1);
-
-    if (sceneSwitchKeyPressed && !sceneSwitchKeyWasPressed)
-    {
-
-        if (sceneManager.getActiveSceneName() == "Gameplay")
-        {
-            enterMenu();
-        }
-        else
-        {
-            enterRuntime();
-        }
-    }
-
-    sceneSwitchKeyWasPressed = sceneSwitchKeyPressed;
+    handleRuntimeSceneSwitch();
 
     if (sceneManager.getActiveSceneName() == "Menu")
     {
@@ -514,32 +770,9 @@ void GameLayer::updateGameplay(float dt)
 
     gameContext.dt = dt;
 
-    if (gameState == GameState::Gameplay)
-    {
-        gameContext.nightTime += dt;
+    updateGameSystems(dt);
 
-        if (gameContext.nightTime >= gameContext.nightDuration)
-        {
-            gameContext.win = true;
-        }
-        powerSystem.update(gameContext);
-
-        enemySystem.update(gameContext);
-    }
-
-    if (gameContext.win)
-    {
-        gameState = GameState::Win;
-        consolePanel.addLog("[INFO] YOU WIN");
-        return;
-    }
-
-    if (gameContext.gameOver)
-    {
-        gameState = GameState::GameOver;
-        consolePanel.addLog("[INFO] GAME OVER");
-        return;
-    }
+    handleGameStateTransitions();
 
     if (!player || player->isDestroyed())
         return;
@@ -574,6 +807,118 @@ void GameLayer::updateGameplay(float dt)
     scene->followCamera(player, dt);
 }
 
+void GameLayer::initializeDefaultScene()
+{
+    gameplayScene = std::make_shared<Scene>();
+    menuScene = std::make_shared<Scene>();
+
+    editorScene = gameplayScene;
+    runtimeScene = nullptr;
+
+    scene = gameplayScene;
+    sceneManager.setActiveScene("Gameplay", scene);
+
+    test = createTestEntity();
+    player = createPlayerEntity();
+
+    editorScenes.push_back({ "Gameplay", gameplayScene });
+}
+
+Entity* GameLayer::createDefaultEntity(
+    const std::string& name
+)
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity(name);
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 128.0f, 128.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<SpriteComponent>(
+        "test",
+        ResourceManager::getTexture("test")
+    );
+
+    return entity;
+}
+
+Entity* GameLayer::createTestEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Test");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 500.0f, 0.0f };
+    transform->scale = { 512.0f, 512.0f };
+    transform->rotation = 0.0f;
+
+    auto* collider =
+        entity->addComponent<ColliderComponent>();
+
+    collider->size = { 512.0f, 512.0f };
+    collider->offset = { 0.0f, 0.0f };
+    collider->isTrigger = false;
+
+    entity->addComponent<SpriteComponent>(
+        "test",
+        ResourceManager::getTexture("test")
+    );
+
+    return entity;
+}
+
+Entity* GameLayer::createPlayerEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Player");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 128.0f, 128.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<VelocityComponent>();
+    entity->addComponent<PlayerControllerComponent>();
+    entity->addComponent<PlayerTag>();
+
+    auto* collider =
+        entity->addComponent<ColliderComponent>();
+
+    collider->size = { 128.0f, 128.0f };
+    collider->offset = { 0.0f, 0.0f };
+    collider->isTrigger = false;
+
+    entity->addComponent<SpriteComponent>(
+        "player",
+        ResourceManager::getTexture("player")
+    );
+
+    return entity;
+}
+
 void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene)
 {
     scene = newScene;
@@ -604,6 +949,16 @@ void GameLayer::enterMenu()
     setActiveScene("Menu", menuScene);
 }
 
+void GameLayer::exitToEditor()
+{
+    stopRuntime();
+
+    m_Application->stop();
+    m_Application->setMode(EngineMode::Edit);
+
+    gameState = GameState::Gameplay;
+}
+
 void GameLayer::resetEditorInteractionState()
 {
     m_EntityDragging = false;
@@ -631,6 +986,9 @@ void GameLayer::resetEditorInteractionState()
 
 void GameLayer::handleViewportCamera(float dt)
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!editorUI.isViewportVisible())
         return;
 
@@ -939,6 +1297,9 @@ void GameLayer::handleSceneEditingInput(float dt)
 
 void GameLayer::handleViewportSelection()
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!editorUI.isViewportVisible())
         return;
 
@@ -1038,6 +1399,9 @@ void GameLayer::handleViewportSelection()
 
 void GameLayer::handleEntityDragging()
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!m_EntityDragging)
         return;
 
@@ -1100,6 +1464,9 @@ void GameLayer::handleEntityDragging()
 
 void GameLayer::handleViewportZoom()
 {
+    if (m_Application->getMode() != EngineMode::Edit)
+        return;
+
     if (!editorUI.isViewportVisible() ||
         !viewportPanel.isHovered())
     {
@@ -1210,7 +1577,6 @@ void GameLayer::updateDebugRenderer()
 
     if (m_GridVisible)
     {
-        const float m_GridSize = 64.0f;
         const float m_GridExtent = 2048.0f;
 
         for (float x = -m_GridExtent; x <= m_GridExtent; x += m_GridSize)
@@ -1486,20 +1852,12 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isCreateEntityRequested())
     {
-        Entity* entity = scene->createEntity("New Entity");
+        Entity* entity = createDefaultEntity("New Entity");
 
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-
-        editorContext.setSelectedEntity(entity);
+        if (entity)
+        {
+            editorContext.setSelectedEntity(entity);
+        }
 
         sceneEditorPanel.resetCreateEntityRequest();
     }
@@ -1522,20 +1880,12 @@ void GameLayer::handleHierarchyRequests()
 {
     if (hierarchyPanel.isCreateEntityRequested())
     {
-        Entity* entity = scene->createEntity("New Entity");
+        Entity* entity = createDefaultEntity("New Entity");
 
-        auto* transform =
-            entity->addComponent<TransformComponent>();
-
-        transform->position = { 0.0f, 0.0f };
-        transform->scale = { 128.0f, 128.0f };
-
-        entity->addComponent<SpriteComponent>(
-            "test",
-            ResourceManager::getTexture("test")
-        );
-
-        editorContext.setSelectedEntity(entity);
+        if (entity)
+        {
+            editorContext.setSelectedEntity(entity);
+        }
 
         hierarchyPanel.resetCreateEntityRequest();
     }
@@ -1605,6 +1955,66 @@ void GameLayer::refreshCachedEntities()
     test = scene->findEntityByName("Test");
 }
 
+void GameLayer::renderGameplayHUD()
+{
+    if (!m_Application->isPlaying())
+        return;
+
+    if (gameState != GameState::Gameplay)
+        return;
+
+    if (sceneManager.getActiveSceneName() != "Gameplay")
+        return;
+
+    const ImVec2 viewportPosition =
+        viewportPanel.getBoundsMin();
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            viewportPosition.x + 16.0f,
+            viewportPosition.y + 16.0f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_AlwaysAutoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoInputs;
+
+    ImGui::Begin("Gameplay HUD", nullptr, flags);
+
+    ImGui::Text(
+        "Power: %.0f%%",
+        gameContext.power
+    );
+
+    ImGui::ProgressBar(
+        gameContext.power / 100.0f,
+        ImVec2(200.0f, 0.0f)
+    );
+
+    ImGui::Text(
+        "Night Time: %.0f / %.0f",
+        gameContext.nightTime,
+        gameContext.nightDuration
+    );
+
+    ImGui::Text(
+        "Door: %s",
+        gameContext.doorClosed ? "Closed" : "Open"
+    );
+
+    ImGui::Text(
+        "Camera: %s",
+        gameContext.cameraOn ? "On" : "Off"
+    );
+
+    ImGui::End();
+}
+
 void GameLayer::onRender()
 {
     if (!scene)
@@ -1625,12 +2035,17 @@ void GameLayer::onRender()
 
     editorUI.render();
 
+    renderMainMenuUI();
+    renderGameStateUI();
+    renderPauseUI();
+
     if (editorUI.isViewportVisible())
     {
         viewportPanel.render();
 
-        handleViewportSelection();
+        renderGameplayHUD();
 
+        handleViewportSelection();
         handleEntityDragging();
     }
 

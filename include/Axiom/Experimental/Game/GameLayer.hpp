@@ -61,22 +61,40 @@ public:
 private:
     Application* m_Application = nullptr;
 
+    void initializeDefaultScene();
+
+    Entity* createDefaultEntity(const std::string& name);
+    Entity* createPlayerEntity();
+    Entity* createTestEntity();
     Entity* duplicateEntity(Entity* source);
+    Entity* findPlayer() const;
 
     void handleInteractions();
     void refreshSceneReferences();
     void handleRuntimeControls();
     void startRuntime();
     void stopRuntime();
+    void resetGameSession();
+    void handleGameStateTransitions();
     void handleSceneSerialization();
     void handleEditorTools();
     void updateInspectorInfo();
     void updateEditorStatus(float dt);
     void updateGameplay(float dt);
+    void handleGameplayPause();
+    void handleRuntimeSceneSwitch();
+    void updateGameSystems(float dt);
+    void renderGameStateUI();
+    void renderPauseUI();
+    void returnToMenuFromPause();
+    void startGameFromMenu();
+    void renderMainMenuUI();
+    void returnToMenu();
     void setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene);
     void enterEditor();
     void enterRuntime();
     void enterMenu();
+    void exitToEditor();
     void resetEditorInteractionState();
     void handleViewportCamera(float dt);
     void handleSceneEditingInput(float dt);
@@ -91,6 +109,8 @@ private:
     void handleHierarchyRequests();
     void handleAssetBrowserRequests();
     void refreshCachedEntities();
+    void handleGameRestart();
+    void renderGameplayHUD();
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -162,6 +182,8 @@ private:
     bool m_SaveKeyPressedLastFrame = false;
 
     bool m_LoadKeyPressedLastFrame = false;
+
+    bool restartKeyWasPressed = false;
 
     Entity* m_DraggedEntity = nullptr;
 };
