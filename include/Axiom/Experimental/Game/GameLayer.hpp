@@ -84,6 +84,7 @@ private:
     void handleGameplayPause();
     void handleRuntimeSceneSwitch();
     void updateGameSystems(float dt);
+    void renderGameStateUI();
     void setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene);
     void enterEditor();
     void enterRuntime();

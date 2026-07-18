@@ -529,6 +529,59 @@ void GameLayer::handleGameRestart()
         restartKeyPressed;
 }
 
+void GameLayer::renderGameStateUI()
+{
+    if (gameState != GameState::Win &&
+        gameState != GameState::GameOver)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImVec2 windowSize(320.0f, 140.0f);
+
+    ImGui::SetNextWindowSize(windowSize);
+
+    ImGui::SetNextWindowPos(
+        ImVec2(
+            (io.DisplaySize.x - windowSize.x) * 0.5f,
+            (io.DisplaySize.y - windowSize.y) * 0.5f
+        ),
+        ImGuiCond_Always
+    );
+
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse;
+
+    const char* windowTitle =
+        gameState == GameState::Win
+        ? "Victory"
+        : "Game Over";
+
+    ImGui::Begin(windowTitle, nullptr, flags);
+
+    ImGui::Spacing();
+
+    if (gameState == GameState::Win)
+    {
+        ImGui::Text("YOU WIN");
+    }
+    else
+    {
+        ImGui::Text("GAME OVER");
+    }
+
+    ImGui::Separator();
+
+    ImGui::Spacing();
+    ImGui::Text("Press R to restart");
+
+    ImGui::End();
+}
+
 void GameLayer::updateGameplay(float dt)
 {
     if (!m_Application->isPlaying())
@@ -1744,6 +1797,8 @@ void GameLayer::onRender()
     viewportPanel.endRender();
 
     editorUI.render();
+
+    renderGameStateUI();
 
     if (editorUI.isViewportVisible())
     {
