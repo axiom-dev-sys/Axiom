@@ -1,5 +1,7 @@
 #include "Axiom/Resource/AssetRegistry.hpp"
 
+#include <algorithm>
+
 namespace Axiom {
 
     std::unordered_map<std::string, std::string>
@@ -9,17 +11,19 @@ namespace Axiom {
     {
         s_Textures.clear();
             
+        registerTexture("fallback", "textures/fallback.png");
         registerTexture("player", "textures/player.png");
         registerTexture("test", "textures/test.png");
         registerTexture("office", "textures/office.png");
-        registerTexture("fallback", "textures/fallback.png");
-        registerTexture("camera", "textures/camera.png");
-        registerTexture("camera_2", "textures/camera_2.png");
-        registerTexture("office_empty", "textures/office_empty.png");
+        registerTexture("office_door_closed", "textures/office_door_closed.png");
         registerTexture("office_enemy_close", "textures/office_enemy_close.png");
         registerTexture("office_enemy_far", "textures/office_enemy_far.png");
+        registerTexture("office_empty", "textures/office_empty.png");
+        registerTexture("camera_1_empty", "textures/camera_1_empty.png");
+        registerTexture("camera_1_enemy", "textures/camera_1_enemy.png");
+        registerTexture("camera_2_empty", "textures/camera_2_empty.png");
+        registerTexture("camera_2_enemy", "textures/camera_2_enemy.png");
         registerTexture("teaser", "textures/teaser.png");
-        registerTexture("the_enemy_is_started", "textures/the_enemy_is_started.png");
     }
 
     void AssetRegistry::shutdown()
@@ -50,6 +54,23 @@ namespace Axiom {
     int AssetRegistry::getRegisteredTextureCount()
     {
         return static_cast<int>(s_Textures.size());
+    }
+
+    std::vector<std::string>
+        AssetRegistry::getRegisteredTextureIDs()
+    {
+        std::vector<std::string> ids;
+
+        ids.reserve(s_Textures.size());
+
+        for (const auto& [id, path] : s_Textures)
+        {
+            ids.push_back(id);
+        }
+
+        std::sort(ids.begin(), ids.end());
+
+        return ids;
     }
 
 }

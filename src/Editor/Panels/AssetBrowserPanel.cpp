@@ -1,4 +1,5 @@
 #include "Axiom/Editor/Panels/AssetBrowserPanel.hpp"
+#include "Axiom/Resource/AssetRegistry.hpp"
 
 #include <imgui.h>
 
@@ -12,7 +13,7 @@ namespace Axiom {
         ImGui::Begin("Asset Browser");
 
         ImGui::Text("Assets");
-        ImGui::Text("Count: %d", static_cast<int>(assets.size()));
+        ImGui::Text("Count: %d", AssetRegistry::getRegisteredTextureCount());
 
         ImGui::Separator();
 
@@ -31,19 +32,19 @@ namespace Axiom {
 
         ImGui::Separator();
 
+        const auto textureIDs =
+            AssetRegistry::getRegisteredTextureIDs();
+
         if (ImGui::CollapsingHeader("Textures", ImGuiTreeNodeFlags_DefaultOpen))
         {
-            for (const auto& asset : assets)
+            for (const std::string& textureID : textureIDs)
             {
-                if (searchBuffer[0] != '\0')
-                {
-                    if (asset.find(searchBuffer) == std::string::npos)
-                        continue;
-                }
+                const bool selected =
+                    selectedAsset == textureID;
 
-                if (ImGui::Selectable(asset.c_str(), asset == selectedAsset))
+                if (ImGui::Selectable(textureID.c_str(), selected))
                 {
-                    selectedAsset = asset;
+                    selectedAsset = textureID;
                 }
             }
         }

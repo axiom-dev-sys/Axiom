@@ -7,7 +7,29 @@ namespace Axiom {
         Idle,
         Watching,
         Approaching,
-        Attack
+        Attack,
+
+        Hidden,
+        Camera2,
+        Camera1,
+        OfficeFar,
+        OfficeClose
+    };
+
+    enum class OfficeState
+    {
+        Normal,
+        DoorClosed,
+        EnemyFar,
+        EnemyClose,
+        PowerOut
+    };
+
+    enum class CameraView
+    {
+        None,
+        Camera1,
+        Camera2
     };
 
     enum class Difficulty
@@ -34,9 +56,11 @@ namespace Axiom {
 
         float power = 100.0f;
 
-        EnemyState enemyState = EnemyState::Idle;
+        EnemyState enemyState = EnemyState::Hidden;
 
         Difficulty difficulty = Difficulty::Normal;
+
+        CameraView cameraView = CameraView::None;
     };
 
 }
