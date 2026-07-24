@@ -205,7 +205,7 @@ void GameLayer::resetGameSession()
     gameContext.win = false;
     gameContext.gameOver = false;
 
-    gameContext.enemyState = EnemyState::Idle;
+    gameContext.enemyState = EnemyState::Hidden;
 
     gameState = GameState::Gameplay;
 }

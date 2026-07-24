@@ -15,6 +15,26 @@ public:
 
         switch (ctx.enemyState)
         {
+        case EnemyState::Hidden:
+            updateHidden(ctx);
+            break;
+
+        case EnemyState::Camera2:
+            updateCamera2(ctx);
+            break;
+
+        case EnemyState::Camera1:
+            updateCamera1(ctx);
+            break;
+
+        case EnemyState::OfficeFar:
+            updateOfficeFar(ctx);
+            break;
+
+        case EnemyState::OfficeClose:
+            updateOfficeClose(ctx);
+            break;
+
         case EnemyState::Idle:
             updateIdle(ctx);
             break;
@@ -30,6 +50,9 @@ public:
         case EnemyState::Attack:
             updateAttack(ctx);
             break;
+
+        default:
+            break;
         }
 
         debugStateChange(ctx);
@@ -37,6 +60,11 @@ public:
 
 private:
     float timer = 0.0f;
+
+    float hiddenTime = 2.0f;
+    float camera2Time = 3.0f;
+    float camera1Time = 3.0f;
+    float officeFarTime = 3.0f;
 
     float idleTime = 2.0f;
     float watchingTime = 3.0f;
@@ -54,13 +82,51 @@ private:
         ctx.enemyState = newState;
     }
 
+    void updateHidden(GameContext& ctx)
+    {
+        if (timer > hiddenTime)
+            changeState(ctx, EnemyState::Camera2);
+    }
+
+    void updateCamera2(GameContext& ctx)
+    {
+        if (timer > camera2Time)
+            changeState(ctx, EnemyState::Camera1);
+    }
+
+    void updateCamera1(GameContext& ctx)
+    {
+        if (timer > camera1Time)
+            changeState(ctx, EnemyState::OfficeFar);
+    }
+
+    void updateOfficeFar(GameContext& ctx)
+    {
+        if (timer > officeFarTime)
+            changeState(ctx, EnemyState::OfficeClose);
+    }
+
+    void updateOfficeClose(GameContext& ctx)
+    {
+        if (!ctx.doorClosed)
+        {
+            changeState(ctx, EnemyState::Attack);
+            return;
+        }
+
+        if (timer > 2.0f)
+        {
+            changeState(ctx, EnemyState::Camera1);
+        }
+    }
+
     void updateIdle(GameContext& ctx)
     {
         if (timer > idleTime && randomChance(ctx))
             changeState(ctx, EnemyState::Watching);
     }
 
-    EnemyState lastDebugState = EnemyState::Idle;
+    EnemyState lastDebugState = EnemyState::Hidden;
 
     void debugStateChange(GameContext& ctx)
     {
