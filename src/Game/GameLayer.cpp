@@ -103,6 +103,19 @@ void GameLayer::handleInteractions()
 
     cameraKeyWasPressed = cameraKeyPressed;
 
+    if (gameContext.cameraOn)
+    {
+        if (Input::isKeyPressed(GLFW_KEY_1))
+        {
+            gameContext.cameraView = CameraView::Camera1;
+        }
+
+        if (Input::isKeyPressed(GLFW_KEY_2))
+        {
+            gameContext.cameraView = CameraView::Camera2;
+        }
+    }
+
     bool doorKeyPressed = Input::isKeyPressed(GLFW_KEY_E);
 
     if (doorKeyPressed && !doorKeyWasPressed)
@@ -124,6 +137,8 @@ void GameLayer::refreshSceneReferences()
 
     player = scene->findEntityByName("Player");
     test = scene->findEntityByName("Test");
+    office = scene->findEntityByName("Office");
+    camera = scene->findEntityByName("Camera");
 
     editorContext.clearSelection();
 }
@@ -772,6 +787,8 @@ void GameLayer::updateGameplay(float dt)
 
     updateGameSystems(dt);
 
+    updateGameplayPresentation();
+
     handleGameStateTransitions();
 
     if (!player || player->isDestroyed())
@@ -807,6 +824,117 @@ void GameLayer::updateGameplay(float dt)
     scene->followCamera(player, dt);
 }
 
+void GameLayer::updateGameplayPresentation()
+{
+    if (!office || office->isDestroyed())
+    {
+        return;
+    }
+
+    if (!camera || camera->isDestroyed())
+    {
+        return;
+    }
+
+    const bool powerOut = gameContext.power <= 0.0f;
+    const bool cameraVisible =
+        gameContext.cameraOn && !powerOut;
+
+    office->setActive(!cameraVisible);
+    camera->setActive(cameraVisible);
+
+    if (cameraVisible)
+    {
+        auto* cameraSprite =
+            camera->getComponent<SpriteComponent>();
+
+        if (!cameraSprite)
+        {
+            return;
+        }
+
+        std::string cameraTextureID;
+
+        switch (gameContext.cameraView)
+        {
+        case CameraView::Camera1:
+            cameraTextureID =
+                gameContext.enemyState == EnemyState::Camera1
+                ? "camera_1_enemy"
+                : "camera_1_empty";
+            break;
+
+        case CameraView::Camera2:
+            cameraTextureID =
+                gameContext.enemyState == EnemyState::Camera2
+                ? "camera_2_enemy"
+                : "camera_2_empty";
+            break;
+
+        case CameraView::None:
+        default:
+            cameraTextureID = "camera_1_empty";
+            break;
+        }
+
+        if (cameraSprite->getTextureID() != cameraTextureID)
+        {
+            cameraSprite->setTexture(
+                cameraTextureID,
+                ResourceManager::getTexture(cameraTextureID)
+            );
+        }
+
+        return;
+    }
+
+    auto* sprite =
+        office->getComponent<SpriteComponent>();
+
+    if (!sprite)
+    {
+        return;
+    }
+
+    std::string textureID = "office";
+
+    if (powerOut)
+    {
+        textureID = "office_empty";
+    }
+    else if (gameContext.doorClosed)
+    {
+        textureID = "office_door_closed";
+    }
+    else
+    {
+        switch (gameContext.enemyState)
+        {
+        case EnemyState::OfficeFar:
+            textureID = "office_enemy_far";
+            break;
+
+        case EnemyState::OfficeClose:
+            textureID = "office_enemy_close";
+            break;
+
+        default:
+            textureID = "office";
+            break;
+        }
+
+        if (sprite->getTextureID() == textureID)
+        {
+            return;
+        }
+    }
+    
+    sprite->setTexture(
+        textureID,
+        ResourceManager::getTexture(textureID)
+    );
+}
+
 void GameLayer::initializeDefaultScene()
 {
     gameplayScene = std::make_shared<Scene>();
@@ -817,6 +945,9 @@ void GameLayer::initializeDefaultScene()
 
     scene = gameplayScene;
     sceneManager.setActiveScene("Gameplay", scene);
+
+    office = createOfficeEntity();
+    camera = createCameraEntity();
 
     test = createTestEntity();
     player = createPlayerEntity();
@@ -915,6 +1046,58 @@ Entity* GameLayer::createPlayerEntity()
         "player",
         ResourceManager::getTexture("player")
     );
+
+    return entity;
+}
+
+Entity* GameLayer::createOfficeEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Office");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 1280.0f, 720.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<SpriteComponent>(
+        "office",
+        ResourceManager::getTexture("office")
+    );
+
+    return entity;
+}
+
+Entity* GameLayer::createCameraEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Camera");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 1280.0f, 720.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<SpriteComponent>(
+        "camera_1_empty",
+        ResourceManager::getTexture("camera_1_empty")
+    );
+
+    entity->setActive(false);
 
     return entity;
 }
@@ -1953,6 +2136,8 @@ void GameLayer::refreshCachedEntities()
 
     player = scene->findEntityByName("Player");
     test = scene->findEntityByName("Test");
+    office = scene->findEntityByName("Office");
+    camera = scene->findEntityByName("Camera");
 }
 
 void GameLayer::renderGameplayHUD()

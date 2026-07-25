@@ -65,6 +65,7 @@ private:
     float camera2Time = 3.0f;
     float camera1Time = 3.0f;
     float officeFarTime = 3.0f;
+    float officeCloseTime = 2.0f;
 
     float idleTime = 2.0f;
     float watchingTime = 3.0f;
@@ -108,16 +109,18 @@ private:
 
     void updateOfficeClose(GameContext& ctx)
     {
-        if (!ctx.doorClosed)
+        if (timer <= officeCloseTime)
         {
-            changeState(ctx, EnemyState::Attack);
             return;
         }
 
-        if (timer > 2.0f)
+        if (ctx.doorClosed)
         {
             changeState(ctx, EnemyState::Camera1);
+            return;
         }
+
+        changeState(ctx, EnemyState::Attack);
     }
 
     void updateIdle(GameContext& ctx)

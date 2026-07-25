@@ -37,7 +37,7 @@ namespace Axiom {
         {
             for (auto& entity : m_Entities)
             {
-                if (!entity->isActive() || entity->isDestroyed())
+                if (!entity || entity->isDestroyed())
                 continue;
             
                 if (entity->getName() == name)

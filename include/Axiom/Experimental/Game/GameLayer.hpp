@@ -66,6 +66,8 @@ private:
     Entity* createDefaultEntity(const std::string& name);
     Entity* createPlayerEntity();
     Entity* createTestEntity();
+    Entity* createOfficeEntity();
+    Entity* createCameraEntity();
     Entity* duplicateEntity(Entity* source);
     Entity* findPlayer() const;
 
@@ -84,6 +86,7 @@ private:
     void handleGameplayPause();
     void handleRuntimeSceneSwitch();
     void updateGameSystems(float dt);
+    void updateGameplayPresentation();
     void renderGameStateUI();
     void renderPauseUI();
     void returnToMenuFromPause();
@@ -152,6 +155,8 @@ private:
 
     Entity* player = nullptr;
     Entity* test = nullptr;
+    Entity* office = nullptr;
+    Entity* camera = nullptr;
 
     bool m_ViewportPanning = false;
 
