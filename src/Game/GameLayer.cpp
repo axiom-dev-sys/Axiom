@@ -2163,13 +2163,29 @@ void GameLayer::renderGameplayHUD()
     );
 
     ImGuiWindowFlags flags =
-        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_AlwaysAutoResize |
         ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_NoInputs;
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoSavedSettings;
 
-    ImGui::Begin("Gameplay HUD", nullptr, flags);
+    ImGui::SetNextWindowPos(
+        ImVec2(180.0f, 120.0f),
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowSize(
+        ImVec2(220.0f, 150.0f),
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowBgAlpha(0.75f);
+
+    ImGui::Begin("Gameplay Status", nullptr, flags);
+
+    ImGui::Text("STATUS");
+    ImGui::Separator();
+    ImGui::Spacing();
 
     ImGui::Text(
         "Power: %.0f%%",
@@ -2178,7 +2194,7 @@ void GameLayer::renderGameplayHUD()
 
     ImGui::ProgressBar(
         gameContext.power / 100.0f,
-        ImVec2(200.0f, 0.0f)
+        ImVec2(-1.0f, 0.0f)
     );
 
     ImGui::Text(
@@ -2192,8 +2208,114 @@ void GameLayer::renderGameplayHUD()
         gameContext.doorClosed ? "Closed" : "Open"
     );
 
+    ImGui::End();
+
+    ImGui::SetNextWindowPos(
+        ImVec2(810.0f, 120.0f),
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowSize(
+        ImVec2(210.0f, 230.0f),
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowBgAlpha(0.75f);
+
+    ImGui::Begin("Gameplay Controls", nullptr, flags);
+
+    ImGui::Separator();
+    ImGui::Text("CURRENT MODE");
+    ImGui::Spacing();
+
+    if (gameContext.cameraOn)
+    {
+        switch (gameContext.cameraView)
+        {
+        case CameraView::Camera1:
+            ImGui::Text("Camera 1");
+            break;
+
+        case CameraView::Camera2:
+            ImGui::Text("Camera 2");
+            break;
+
+        default:
+            ImGui::Text("Camera");
+            break;
+        }
+    }
+    else
+    {
+        ImGui::Text("Office");
+    }
+    
+    ImGui::Spacing();
+
+    ImGui::Text("CONTROLS");
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (gameContext.cameraOn)
+    {
+        ImGui::Text("[1] Camera 1");
+        ImGui::Text("[2] Camera 2");
+        ImGui::Text("[C] Return to Office");
+    }
+    else
+    {
+        ImGui::Text("[E] Toggle Door");
+        ImGui::Text("[C] Open Cameras");
+    }
+
+    ImGui::Spacing();
+
+    ImGui::Text("DEBUG");
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("Enemy:");
+
+    switch (gameContext.enemyState)
+    {
+    case EnemyState::Hidden:
+        ImGui::SameLine();
+        ImGui::Text("Hidden");
+        break;
+
+    case EnemyState::Camera2:
+        ImGui::SameLine();
+        ImGui::Text("Camera 2");
+        break;
+
+    case EnemyState::Camera1:
+        ImGui::SameLine();
+        ImGui::Text("Camera 1");
+        break;
+
+    case EnemyState::OfficeFar:
+        ImGui::SameLine();
+        ImGui::Text("Office Far");
+        break;
+
+    case EnemyState::OfficeClose:
+        ImGui::SameLine();
+        ImGui::Text("Office Close");
+        break;
+
+    case EnemyState::Attack:
+        ImGui::SameLine();
+        ImGui::Text("Attack");
+        break;
+
+    default:
+        ImGui::SameLine();
+        ImGui::Text("Unknown");
+        break;
+    }
+
     ImGui::Text(
-        "Camera: %s",
+        "Camera System: %s",
         gameContext.cameraOn ? "On" : "Off"
     );
 
