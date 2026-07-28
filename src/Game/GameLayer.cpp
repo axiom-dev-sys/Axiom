@@ -2319,6 +2319,11 @@ void GameLayer::renderGameplayHUD()
         gameContext.cameraOn ? "On" : "Off"
     );
 
+    ImGui::Text(
+        "Camera Watch: %.1f s",
+        enemySystem.getCameraWatchTime()
+    );
+
     ImGui::End();
 }
 

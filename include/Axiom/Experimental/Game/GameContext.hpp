@@ -60,7 +60,7 @@ namespace Axiom {
 
         Difficulty difficulty = Difficulty::Normal;
 
-        CameraView cameraView = CameraView::None;
+        CameraView cameraView = CameraView::Camera1;
     };
 
 }
