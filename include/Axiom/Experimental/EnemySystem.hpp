@@ -11,8 +11,6 @@ class EnemySystem
 public:
     void update(GameContext& ctx)
     {
-        timer += ctx.dt;
-
         const bool watchingEnemy =
             ctx.cameraOn &&
             (
@@ -23,14 +21,10 @@ public:
                     ctx.enemyState == EnemyState::Camera2)
                 );
 
-        if (watchingEnemy)
-        {
-            cameraWatchTime += ctx.dt;
-        }
-        else
-        {
-            cameraWatchTime = 0.0f;
-        }
+        const float timerSpeed =
+            watchingEnemy ? 0.5f : 1.0f;
+
+        timer += ctx.dt * timerSpeed;
 
         switch (ctx.enemyState)
         {
@@ -77,14 +71,8 @@ public:
         debugStateChange(ctx);
     }
 
-    float getCameraWatchTime() const
-    {
-        return cameraWatchTime;
-    }
-
 private:
     float timer = 0.0f;
-    float cameraWatchTime = 0.0f;
 
     float hiddenTime = 2.0f;
     float officeFarTime = 3.0f;
@@ -108,8 +96,8 @@ private:
     int normalChance = 40;
     int lowPowerBonus = 20;
 
-    int stayChance = 20;
-    int retreatChance = 15;
+    int stayChance = 15;
+    int retreatChance = 20;
 
     void changeState(GameContext& ctx, EnemyState newState)
     {
@@ -151,18 +139,6 @@ private:
 
     bool shouldStay()
     {
-        int currentStayChance = stayChance;
-
-        if (cameraWatchTime > 5.0f)
-        {
-            currentStayChance += 20;
-        }
-
-        if (currentStayChance > 80)
-        {
-            currentStayChance = 80;
-        }
-
         return rand() % 100 < stayChance;
     }
 
@@ -215,7 +191,6 @@ private:
         if (shouldStay())
         {
             timer = 0.0f;
-            cameraWatchTime = 0.0f;
 
             stateDuration = randomRange(
                 camera2MinTime,
@@ -241,7 +216,6 @@ private:
         if (shouldStay())
         {
             timer = 0.0f;
-            cameraWatchTime = 0.0f;
 
             stateDuration = randomRange(
                 camera1MinTime,
