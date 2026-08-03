@@ -13,6 +13,7 @@
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Application.hpp"
 #include "Axiom/Core/EngineMode.hpp"
+#include "Axiom/Core/Version.hpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <cmath>
@@ -592,16 +593,36 @@ void GameLayer::renderGameStateUI()
     if (gameState == GameState::Win)
     {
         ImGui::Text("YOU WIN");
+        ImGui::Text("Congratulations!");
     }
     else
     {
         ImGui::Text("GAME OVER");
+        ImGui::Text("Try Again!");
     }
 
     ImGui::Separator();
 
     ImGui::Spacing();
-    ImGui::Text("Press R to restart");
+    
+    if (ImGui::Button("Restart", ImVec2(280.0f, 40.0f)))
+    {
+        stopRuntime();
+        startRuntime();
+
+        m_Application->play();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Return to Menu", ImVec2(280.0f, 40.0f)))
+    {
+        returnToMenu();
+    }
+
+    ImGui::Spacing();
+
+    ImGui::Text("Shortcut: R");
 
     ImGui::End();
 }
@@ -719,8 +740,11 @@ void GameLayer::renderMainMenuUI()
 
     ImGui::Spacing();
     ImGui::Text("AXIOM GAME");
-
     ImGui::Separator();
+
+    ImGui::TextDisabled("Gameplay Prototype");
+    ImGui::TextDisabled("Version %s", AXIOM_VERSION);
+    
     ImGui::Spacing();
 
     if (ImGui::Button(
@@ -733,6 +757,74 @@ void GameLayer::renderMainMenuUI()
 
     ImGui::Spacing();
 
+    ImGui::Text("Difficulty");
+
+    int difficultyIndex = 1;
+
+    switch (gameContext.difficulty)
+    {
+    case Difficulty::Easy:
+        difficultyIndex = 0;
+        break;
+
+    case Difficulty::Normal:
+        difficultyIndex = 1;
+        break;
+
+    case Difficulty::Hard:
+        difficultyIndex = 2;
+        break;
+    }
+
+    if (ImGui::RadioButton("Easy", difficultyIndex == 0))
+    {
+        gameContext.difficulty = Difficulty::Easy;
+    }
+
+    if (ImGui::RadioButton("Normal", difficultyIndex == 1))
+    {
+        gameContext.difficulty = Difficulty::Normal;
+    }
+
+    if (ImGui::RadioButton("Hard", difficultyIndex == 2))
+    {
+        gameContext.difficulty = Difficulty::Hard;
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    ImGui::Text("Selected:");
+
+    ImGui::SameLine();
+
+    switch (gameContext.difficulty)
+    {
+    case Difficulty::Easy:
+        ImGui::TextColored(
+            ImVec4(0.3f, 1.0f, 0.3f, 1.0f),
+            "Easy"
+        );
+        break;
+
+    case Difficulty::Normal:
+        ImGui::TextColored(
+            ImVec4(1.0f, 1.0f, 0.3f, 1.0f),
+            "Normal"
+        );
+        break;
+
+    case Difficulty::Hard:
+        ImGui::TextColored(
+            ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
+            "Hard"
+        );
+        break;
+    }
+
+
+    ImGui::Spacing();
+
     if (ImGui::Button(
         "Exit to Editor",
         ImVec2(280.0f, 40.0f)
@@ -740,6 +832,11 @@ void GameLayer::renderMainMenuUI()
     {
         exitToEditor();
     }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::TextDisabled("Powered by Axiom Engine");
 
     ImGui::End();
 }
@@ -2215,17 +2312,12 @@ void GameLayer::renderGameplayHUD()
         ImGuiCond_Always
     );
 
-    ImGui::SetNextWindowSize(
-        ImVec2(210.0f, 230.0f),
-        ImGuiCond_Always
-    );
-
     ImGui::SetNextWindowBgAlpha(0.75f);
 
     ImGui::Begin("Gameplay Controls", nullptr, flags);
 
-    ImGui::Separator();
     ImGui::Text("CURRENT MODE");
+    ImGui::Separator();
     ImGui::Spacing();
 
     if (gameContext.cameraOn)
@@ -2250,10 +2342,9 @@ void GameLayer::renderGameplayHUD()
         ImGui::Text("Office");
     }
     
-    ImGui::Spacing();
+    ImGui::Separator();
 
     ImGui::Text("CONTROLS");
-    ImGui::Separator();
     ImGui::Spacing();
 
     if (gameContext.cameraOn)
@@ -2268,56 +2359,57 @@ void GameLayer::renderGameplayHUD()
         ImGui::Text("[C] Open Cameras");
     }
 
-    ImGui::Spacing();
-
-    ImGui::Text("DEBUG");
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    ImGui::Text("Enemy:");
-
-    switch (gameContext.enemyState)
+    if (debugOverlay.isVisible())
     {
-    case EnemyState::Hidden:
-        ImGui::SameLine();
-        ImGui::Text("Hidden");
-        break;
+        ImGui::Separator();
+        ImGui::Text("DEBUG");
+        ImGui::Spacing();
 
-    case EnemyState::Camera2:
-        ImGui::SameLine();
-        ImGui::Text("Camera 2");
-        break;
+        ImGui::Text("Enemy:");
 
-    case EnemyState::Camera1:
-        ImGui::SameLine();
-        ImGui::Text("Camera 1");
-        break;
+        switch (gameContext.enemyState)
+        {
+        case EnemyState::Hidden:
+            ImGui::SameLine();
+            ImGui::Text("Hidden");
+            break;
 
-    case EnemyState::OfficeFar:
-        ImGui::SameLine();
-        ImGui::Text("Office Far");
-        break;
+        case EnemyState::Camera2:
+            ImGui::SameLine();
+            ImGui::Text("Camera 2");
+            break;
 
-    case EnemyState::OfficeClose:
-        ImGui::SameLine();
-        ImGui::Text("Office Close");
-        break;
+        case EnemyState::Camera1:
+            ImGui::SameLine();
+            ImGui::Text("Camera 1");
+            break;
 
-    case EnemyState::Attack:
-        ImGui::SameLine();
-        ImGui::Text("Attack");
-        break;
+        case EnemyState::OfficeFar:
+            ImGui::SameLine();
+            ImGui::Text("Office Far");
+            break;
 
-    default:
-        ImGui::SameLine();
-        ImGui::Text("Unknown");
-        break;
+        case EnemyState::OfficeClose:
+            ImGui::SameLine();
+            ImGui::Text("Office Close");
+            break;
+
+        case EnemyState::Attack:
+            ImGui::SameLine();
+            ImGui::Text("Attack");
+            break;
+
+        default:
+            ImGui::SameLine();
+            ImGui::Text("Unknown");
+            break;
+        }
+
+        ImGui::Text(
+            "Camera System: %s",
+            gameContext.cameraOn ? "On" : "Off"
+        );
     }
-
-    ImGui::Text(
-        "Camera System: %s",
-        gameContext.cameraOn ? "On" : "Off"
-    );
 
     ImGui::End();
 }
@@ -2357,9 +2449,8 @@ void GameLayer::onRender()
     }
 
     handleViewportReset();
-
-    if (editorUI.isDebugOverlayVisible())
-        debugOverlay.render();
+    
+    debugOverlay.render();
 
     if (editorUI.isInspectorVisible())
         inspectorPanel.render();
