@@ -315,3 +315,39 @@ the Game Framework stage.
 
 Complete the Game Framework stage and prepare the engine
 for the first playable prototype.
+
+---
+
+## v1.5 — First Gameplay Prototype
+
+### Added
+
+- Main Menu
+- Difficulty Selection
+- Enemy AI improvements
+- Camera gameplay
+- Power management
+- Gameplay HUD
+- Victory / Game Over UI
+- Runtime gameplay flow
+
+### Improved
+
+- Enemy behavior balancing
+- Gameplay difficulty
+- Runtime UI
+- Gameplay polish
+- Runtime transitions
+
+### Fixed
+
+- Runtime game flow
+- Menu startup
+- HUD and Debug synchronization
+- Gameplay state transitions
+- Runtime stability
+
+### Goal
+
+Complete the first playable gameplay prototype and provide a stable
+foundation for future game development using Axiom Engine.

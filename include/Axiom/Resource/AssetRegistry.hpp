@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace Axiom {
 
@@ -21,6 +22,8 @@ namespace Axiom {
         );
 
         static int getRegisteredTextureCount();
+
+        static std::vector<std::string> getRegisteredTextureIDs();
 
     private:
         static std::unordered_map<std::string, std::string> s_Textures;

@@ -13,6 +13,7 @@
 #include "Axiom/Input/Input.hpp"
 #include "Axiom/Core/Application.hpp"
 #include "Axiom/Core/EngineMode.hpp"
+#include "Axiom/Core/Version.hpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <cmath>
@@ -103,6 +104,19 @@ void GameLayer::handleInteractions()
 
     cameraKeyWasPressed = cameraKeyPressed;
 
+    if (gameContext.cameraOn)
+    {
+        if (Input::isKeyPressed(GLFW_KEY_1))
+        {
+            gameContext.cameraView = CameraView::Camera1;
+        }
+
+        if (Input::isKeyPressed(GLFW_KEY_2))
+        {
+            gameContext.cameraView = CameraView::Camera2;
+        }
+    }
+
     bool doorKeyPressed = Input::isKeyPressed(GLFW_KEY_E);
 
     if (doorKeyPressed && !doorKeyWasPressed)
@@ -124,6 +138,8 @@ void GameLayer::refreshSceneReferences()
 
     player = scene->findEntityByName("Player");
     test = scene->findEntityByName("Test");
+    office = scene->findEntityByName("Office");
+    camera = scene->findEntityByName("Camera");
 
     editorContext.clearSelection();
 }
@@ -177,6 +193,7 @@ void GameLayer::startRuntime()
 
     resetGameSession();
 
+    gameState = GameState::Menu;
     enterRuntime();
 }
 
@@ -205,7 +222,7 @@ void GameLayer::resetGameSession()
     gameContext.win = false;
     gameContext.gameOver = false;
 
-    gameContext.enemyState = EnemyState::Idle;
+    gameContext.enemyState = EnemyState::Hidden;
 
     gameState = GameState::Gameplay;
 }
@@ -577,16 +594,36 @@ void GameLayer::renderGameStateUI()
     if (gameState == GameState::Win)
     {
         ImGui::Text("YOU WIN");
+        ImGui::Text("Congratulations!");
     }
     else
     {
         ImGui::Text("GAME OVER");
+        ImGui::Text("Try Again!");
     }
 
     ImGui::Separator();
 
     ImGui::Spacing();
-    ImGui::Text("Press R to restart");
+    
+    if (ImGui::Button("Restart", ImVec2(280.0f, 40.0f)))
+    {
+        stopRuntime();
+        startRuntime();
+
+        m_Application->play();
+    }
+
+    ImGui::Spacing();
+
+    if (ImGui::Button("Return to Menu", ImVec2(280.0f, 40.0f)))
+    {
+        returnToMenu();
+    }
+
+    ImGui::Spacing();
+
+    ImGui::Text("Shortcut: R");
 
     ImGui::End();
 }
@@ -704,8 +741,11 @@ void GameLayer::renderMainMenuUI()
 
     ImGui::Spacing();
     ImGui::Text("AXIOM GAME");
-
     ImGui::Separator();
+
+    ImGui::TextDisabled("Gameplay Prototype");
+    ImGui::TextDisabled("Version %s", AXIOM_VERSION);
+    
     ImGui::Spacing();
 
     if (ImGui::Button(
@@ -718,6 +758,74 @@ void GameLayer::renderMainMenuUI()
 
     ImGui::Spacing();
 
+    ImGui::Text("Difficulty");
+
+    int difficultyIndex = 1;
+
+    switch (gameContext.difficulty)
+    {
+    case Difficulty::Easy:
+        difficultyIndex = 0;
+        break;
+
+    case Difficulty::Normal:
+        difficultyIndex = 1;
+        break;
+
+    case Difficulty::Hard:
+        difficultyIndex = 2;
+        break;
+    }
+
+    if (ImGui::RadioButton("Easy", difficultyIndex == 0))
+    {
+        gameContext.difficulty = Difficulty::Easy;
+    }
+
+    if (ImGui::RadioButton("Normal", difficultyIndex == 1))
+    {
+        gameContext.difficulty = Difficulty::Normal;
+    }
+
+    if (ImGui::RadioButton("Hard", difficultyIndex == 2))
+    {
+        gameContext.difficulty = Difficulty::Hard;
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    ImGui::Text("Selected:");
+
+    ImGui::SameLine();
+
+    switch (gameContext.difficulty)
+    {
+    case Difficulty::Easy:
+        ImGui::TextColored(
+            ImVec4(0.3f, 1.0f, 0.3f, 1.0f),
+            "Easy"
+        );
+        break;
+
+    case Difficulty::Normal:
+        ImGui::TextColored(
+            ImVec4(1.0f, 1.0f, 0.3f, 1.0f),
+            "Normal"
+        );
+        break;
+
+    case Difficulty::Hard:
+        ImGui::TextColored(
+            ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
+            "Hard"
+        );
+        break;
+    }
+
+
+    ImGui::Spacing();
+
     if (ImGui::Button(
         "Exit to Editor",
         ImVec2(280.0f, 40.0f)
@@ -725,6 +833,11 @@ void GameLayer::renderMainMenuUI()
     {
         exitToEditor();
     }
+
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::TextDisabled("Powered by Axiom Engine");
 
     ImGui::End();
 }
@@ -772,6 +885,8 @@ void GameLayer::updateGameplay(float dt)
 
     updateGameSystems(dt);
 
+    updateGameplayPresentation();
+
     handleGameStateTransitions();
 
     if (!player || player->isDestroyed())
@@ -807,6 +922,117 @@ void GameLayer::updateGameplay(float dt)
     scene->followCamera(player, dt);
 }
 
+void GameLayer::updateGameplayPresentation()
+{
+    if (!office || office->isDestroyed())
+    {
+        return;
+    }
+
+    if (!camera || camera->isDestroyed())
+    {
+        return;
+    }
+
+    const bool powerOut = gameContext.power <= 0.0f;
+    const bool cameraVisible =
+        gameContext.cameraOn && !powerOut;
+
+    office->setActive(!cameraVisible);
+    camera->setActive(cameraVisible);
+
+    if (cameraVisible)
+    {
+        auto* cameraSprite =
+            camera->getComponent<SpriteComponent>();
+
+        if (!cameraSprite)
+        {
+            return;
+        }
+
+        std::string cameraTextureID;
+
+        switch (gameContext.cameraView)
+        {
+        case CameraView::Camera1:
+            cameraTextureID =
+                gameContext.enemyState == EnemyState::Camera1
+                ? "camera_1_enemy"
+                : "camera_1_empty";
+            break;
+
+        case CameraView::Camera2:
+            cameraTextureID =
+                gameContext.enemyState == EnemyState::Camera2
+                ? "camera_2_enemy"
+                : "camera_2_empty";
+            break;
+
+        case CameraView::None:
+        default:
+            cameraTextureID = "camera_1_empty";
+            break;
+        }
+
+        if (cameraSprite->getTextureID() != cameraTextureID)
+        {
+            cameraSprite->setTexture(
+                cameraTextureID,
+                ResourceManager::getTexture(cameraTextureID)
+            );
+        }
+
+        return;
+    }
+
+    auto* sprite =
+        office->getComponent<SpriteComponent>();
+
+    if (!sprite)
+    {
+        return;
+    }
+
+    std::string textureID = "office";
+
+    if (powerOut)
+    {
+        textureID = "office_empty";
+    }
+    else if (gameContext.doorClosed)
+    {
+        textureID = "office_door_closed";
+    }
+    else
+    {
+        switch (gameContext.enemyState)
+        {
+        case EnemyState::OfficeFar:
+            textureID = "office_enemy_far";
+            break;
+
+        case EnemyState::OfficeClose:
+            textureID = "office_enemy_close";
+            break;
+
+        default:
+            textureID = "office";
+            break;
+        }
+
+        if (sprite->getTextureID() == textureID)
+        {
+            return;
+        }
+    }
+    
+    sprite->setTexture(
+        textureID,
+        ResourceManager::getTexture(textureID)
+    );
+}
+
 void GameLayer::initializeDefaultScene()
 {
     gameplayScene = std::make_shared<Scene>();
@@ -817,6 +1043,9 @@ void GameLayer::initializeDefaultScene()
 
     scene = gameplayScene;
     sceneManager.setActiveScene("Gameplay", scene);
+
+    office = createOfficeEntity();
+    camera = createCameraEntity();
 
     test = createTestEntity();
     player = createPlayerEntity();
@@ -919,6 +1148,58 @@ Entity* GameLayer::createPlayerEntity()
     return entity;
 }
 
+Entity* GameLayer::createOfficeEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Office");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 1280.0f, 720.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<SpriteComponent>(
+        "office",
+        ResourceManager::getTexture("office")
+    );
+
+    return entity;
+}
+
+Entity* GameLayer::createCameraEntity()
+{
+    if (!scene)
+    {
+        return nullptr;
+    }
+
+    Entity* entity =
+        scene->createEntity("Camera");
+
+    auto* transform =
+        entity->addComponent<TransformComponent>();
+
+    transform->position = { 0.0f, 0.0f };
+    transform->scale = { 1280.0f, 720.0f };
+    transform->rotation = 0.0f;
+
+    entity->addComponent<SpriteComponent>(
+        "camera_1_empty",
+        ResourceManager::getTexture("camera_1_empty")
+    );
+
+    entity->setActive(false);
+
+    return entity;
+}
+
 void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> newScene)
 {
     scene = newScene;
@@ -943,9 +1224,6 @@ void GameLayer::enterRuntime()
 
 void GameLayer::enterMenu()
 {
-    if (!m_Application->isPlaying())
-        return;
-
     setActiveScene("Menu", menuScene);
 }
 
@@ -1953,6 +2231,8 @@ void GameLayer::refreshCachedEntities()
 
     player = scene->findEntityByName("Player");
     test = scene->findEntityByName("Test");
+    office = scene->findEntityByName("Office");
+    camera = scene->findEntityByName("Camera");
 }
 
 void GameLayer::renderGameplayHUD()
@@ -1978,13 +2258,29 @@ void GameLayer::renderGameplayHUD()
     );
 
     ImGuiWindowFlags flags =
-        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_AlwaysAutoResize |
         ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_NoInputs;
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoSavedSettings;
 
-    ImGui::Begin("Gameplay HUD", nullptr, flags);
+    ImGui::SetNextWindowPos(
+        ImVec2(180.0f, 120.0f),
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowSize(
+        ImVec2(220.0f, 150.0f),
+        ImGuiCond_Always
+    );
+
+    ImGui::SetNextWindowBgAlpha(0.75f);
+
+    ImGui::Begin("Gameplay Status", nullptr, flags);
+
+    ImGui::Text("STATUS");
+    ImGui::Separator();
+    ImGui::Spacing();
 
     ImGui::Text(
         "Power: %.0f%%",
@@ -1993,7 +2289,7 @@ void GameLayer::renderGameplayHUD()
 
     ImGui::ProgressBar(
         gameContext.power / 100.0f,
-        ImVec2(200.0f, 0.0f)
+        ImVec2(-1.0f, 0.0f)
     );
 
     ImGui::Text(
@@ -2007,10 +2303,111 @@ void GameLayer::renderGameplayHUD()
         gameContext.doorClosed ? "Closed" : "Open"
     );
 
-    ImGui::Text(
-        "Camera: %s",
-        gameContext.cameraOn ? "On" : "Off"
+    ImGui::End();
+
+    ImGui::SetNextWindowPos(
+        ImVec2(810.0f, 120.0f),
+        ImGuiCond_Always
     );
+
+    ImGui::SetNextWindowBgAlpha(0.75f);
+
+    ImGui::Begin("Gameplay Controls", nullptr, flags);
+
+    ImGui::Text("CURRENT MODE");
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (gameContext.cameraOn)
+    {
+        switch (gameContext.cameraView)
+        {
+        case CameraView::Camera1:
+            ImGui::Text("Camera 1");
+            break;
+
+        case CameraView::Camera2:
+            ImGui::Text("Camera 2");
+            break;
+
+        default:
+            ImGui::Text("Camera");
+            break;
+        }
+    }
+    else
+    {
+        ImGui::Text("Office");
+    }
+    
+    ImGui::Separator();
+
+    ImGui::Text("CONTROLS");
+    ImGui::Spacing();
+
+    if (gameContext.cameraOn)
+    {
+        ImGui::Text("[1] Camera 1");
+        ImGui::Text("[2] Camera 2");
+        ImGui::Text("[C] Return to Office");
+    }
+    else
+    {
+        ImGui::Text("[E] Toggle Door");
+        ImGui::Text("[C] Open Cameras");
+    }
+
+    if (debugOverlay.isVisible())
+    {
+        ImGui::Separator();
+        ImGui::Text("DEBUG");
+        ImGui::Spacing();
+
+        ImGui::Text("Enemy:");
+
+        switch (gameContext.enemyState)
+        {
+        case EnemyState::Hidden:
+            ImGui::SameLine();
+            ImGui::Text("Hidden");
+            break;
+
+        case EnemyState::Camera2:
+            ImGui::SameLine();
+            ImGui::Text("Camera 2");
+            break;
+
+        case EnemyState::Camera1:
+            ImGui::SameLine();
+            ImGui::Text("Camera 1");
+            break;
+
+        case EnemyState::OfficeFar:
+            ImGui::SameLine();
+            ImGui::Text("Office Far");
+            break;
+
+        case EnemyState::OfficeClose:
+            ImGui::SameLine();
+            ImGui::Text("Office Close");
+            break;
+
+        case EnemyState::Attack:
+            ImGui::SameLine();
+            ImGui::Text("Attack");
+            break;
+
+        default:
+            ImGui::SameLine();
+            ImGui::Text("Unknown");
+            break;
+        }
+
+        ImGui::Text(
+            "Camera System: %s",
+            gameContext.cameraOn ? "On" : "Off"
+        );
+    }
 
     ImGui::End();
 }
@@ -2050,9 +2447,8 @@ void GameLayer::onRender()
     }
 
     handleViewportReset();
-
-    if (editorUI.isDebugOverlayVisible())
-        debugOverlay.render();
+    
+    debugOverlay.render();
 
     if (editorUI.isInspectorVisible())
         inspectorPanel.render();

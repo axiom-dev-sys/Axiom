@@ -59,6 +59,11 @@ runtime interaction, and development tools for 2D game creation.
   - Runtime Session Lifecycle
   - Play / Pause / Stop
   - Main Menu
+  - Difficulty Selection
+  - Gameplay Prototype
+  - Enemy AI
+  - Camera System
+  - Power Management
   - Gameplay HUD
   - Win / Game Over States
   - Runtime Scene Transitions
@@ -109,15 +114,16 @@ Build and run the project
 
 ## Current Status
 
-Axiom Engine 1.4.x completes the Game Framework stage.
+Axiom Engine 1.5.x completes the first playable gameplay prototype.
 
-The engine now combines the second generation editor with runtime
-systems, gameplay state management, an integrated HUD, scene transitions,
-and debugging tools.
+The engine now combines the second generation editor with a complete runtime
+workflow, gameplay systems, enemy AI, gameplay balancing, runtime UI,
+and menu-driven game flow.
 
-Axiom currently provides a complete foundation for 2D game development,
+Axiom currently provides a complete foundation for creating 2D games,
 including rendering, ECS, scene management, runtime architecture,
-serialization, debugging tools, and an integrated editor.
+resource management, gameplay systems, debugging tools,
+and an integrated editor.
 
-The next stage of development will focus on creating the first playable
-prototype using Axiom Engine.
+The next stage of development will focus on expanding gameplay features
+and preparing the engine for larger original projects.

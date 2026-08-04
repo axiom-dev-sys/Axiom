@@ -7,7 +7,29 @@ namespace Axiom {
         Idle,
         Watching,
         Approaching,
-        Attack
+        Attack,
+
+        Hidden,
+        Camera2,
+        Camera1,
+        OfficeFar,
+        OfficeClose
+    };
+
+    enum class OfficeState
+    {
+        Normal,
+        DoorClosed,
+        EnemyFar,
+        EnemyClose,
+        PowerOut
+    };
+
+    enum class CameraView
+    {
+        None,
+        Camera1,
+        Camera2
     };
 
     enum class Difficulty
@@ -24,7 +46,7 @@ namespace Axiom {
         float dt = 0.0f;
 
         float nightTime = 0.0f;
-        float nightDuration = 60.0f;
+        float nightDuration = 75.0f;
 
         bool cameraOn = false;
         bool doorClosed = false;
@@ -34,9 +56,11 @@ namespace Axiom {
 
         float power = 100.0f;
 
-        EnemyState enemyState = EnemyState::Idle;
+        EnemyState enemyState = EnemyState::Hidden;
 
         Difficulty difficulty = Difficulty::Normal;
+
+        CameraView cameraView = CameraView::Camera1;
     };
 
 }
