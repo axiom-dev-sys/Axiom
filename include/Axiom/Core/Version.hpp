@@ -1,3 +1,3 @@
 #pragma once
 
-#define AXIOM_VERSION "1.5.5"
+#define AXIOM_VERSION "1.5.6"

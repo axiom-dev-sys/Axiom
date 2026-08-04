@@ -193,6 +193,7 @@ void GameLayer::startRuntime()
 
     resetGameSession();
 
+    gameState = GameState::Menu;
     enterRuntime();
 }
 
@@ -1223,9 +1224,6 @@ void GameLayer::enterRuntime()
 
 void GameLayer::enterMenu()
 {
-    if (!m_Application->isPlaying())
-        return;
-
     setActiveScene("Menu", menuScene);
 }
 
