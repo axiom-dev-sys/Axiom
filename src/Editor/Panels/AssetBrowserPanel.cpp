@@ -1,5 +1,8 @@
 #include "Axiom/Editor/Panels/AssetBrowserPanel.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
+#include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Scene/Components/SpriteComponent.hpp"
+#include "Axiom/Scene/Scene.hpp"
 
 #include <imgui.h>
 
@@ -89,9 +92,45 @@ namespace Axiom {
 
         if (!selectedAsset.empty())
         {
+            Entity* selectedEntity =
+                editorContext
+                ? editorContext->getSelectedEntity()
+                : nullptr;
+
+            Scene* scene =
+                editorContext
+                ? editorContext->getScene()
+                : nullptr;
+
+            const bool canApply =
+                selectedEntity &&
+                scene &&
+                scene->containsEntity(selectedEntity) &&
+                !selectedEntity->isDestroyed() &&
+                selectedEntity->hasComponent<SpriteComponent>();
+
+            if (!canApply)
+            {
+                ImGui::BeginDisabled();
+            }
+
             if (ImGui::Button("Apply to Selected Entity"))
             {
-                applyAssetRequested = true;
+                auto* sprite =
+                    selectedEntity->getComponent<SpriteComponent>();
+
+                if (sprite)
+                {
+                    sprite->setTexture(
+                        selectedAsset,
+                        ResourceManager::getTexture(selectedAsset)
+                    );
+                }
+            }
+
+            if (!canApply)
+            {
+                ImGui::EndDisabled();
             }
         }
 
@@ -113,29 +152,9 @@ namespace Axiom {
         visible = !visible;
     }
 
-    void AssetBrowserPanel::addAsset(const std::string& name)
-    {
-        assets.push_back(name);
-    }
-
-    void AssetBrowserPanel::clear()
-    {
-        assets.clear();
-    }
-
     const std::string& AssetBrowserPanel::getSelectedAsset() const
     {
         return selectedAsset;
-    }
-
-    bool AssetBrowserPanel::isApplyAssetRequested() const
-    {
-        return applyAssetRequested;
-    }
-
-    void AssetBrowserPanel::resetApplyAssetRequest()
-    {
-        applyAssetRequested = false;
     }
 
     void AssetBrowserPanel::setEditorContext(EditorContext* context)

@@ -5,6 +5,7 @@
 #include "Axiom/Scene/Components/VelocityComponent.hpp"
 #include "Axiom/Scene/Components/ColliderComponent.hpp"
 #include "Axiom/Scene/Components/PlayerControllerComponent.hpp"
+#include "Axiom/Scene/Components/PlayerTag.hpp"
 
 #include <imgui.h>
 #include <cstring>
@@ -28,6 +29,21 @@ namespace Axiom {
             ImGui::End();
             return;
         }
+
+        const bool hasSprite =
+            selectedEntity->hasComponent<SpriteComponent>();
+
+        const bool hasVelocity =
+            selectedEntity->hasComponent<VelocityComponent>();
+
+        const bool hasCollider =
+            selectedEntity->hasComponent<ColliderComponent>();
+
+        const bool hasPlayerController =
+            selectedEntity->hasComponent<PlayerControllerComponent>();
+
+        const bool hasPlayerTag =
+            selectedEntity->hasComponent<PlayerTag>();
 
         ImGui::Text("Entity");
 
@@ -109,35 +125,40 @@ namespace Axiom {
                     &transform->position.x,
                     1.0f
                 );
-
+                
                 ImGui::DragFloat2(
                     "Scale",
                     &transform->scale.x,
                     1.0f
                 );
-
+                
                 ImGui::DragFloat(
                     "Rotation",
                     &transform->rotation,
                     1.0f
                 );
+                
+                if (ImGui::Button("Reset Position"))
+                {
+                    transform->position = { 0.0f, 0.0f };
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Reset Scale"))
+                {
+                    transform->scale = { 1.0f, 1.0f };
+                }
+
+                if (ImGui::Button("Reset Rotation"))
+                {
+                    transform->rotation = 0.0f;
+                }
+
             }
-
-            if (ImGui::Button("Reset Position"))
+            else
             {
-                transform->position = { 0.0f, 0.0f };
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Reset Scale"))
-            {
-                transform->scale = { 1.0f, 1.0f };
-            }
-
-            if (ImGui::Button("Reset Rotation"))
-            {
-                transform->rotation = 0.0f;
+                ImGui::TextDisabled("No TransformComponent");
             }
         }
 
@@ -373,31 +394,6 @@ namespace Axiom {
     void InspectorPanel::toggle()
     {
         visible = !visible;
-    }
-
-    void InspectorPanel::setHasSprite(bool value)
-    {
-        hasSprite = value;
-    }
-
-    void InspectorPanel::setHasVelocity(bool value)
-    {
-        hasVelocity = value;
-    }
-
-    void InspectorPanel::setHasCollider(bool value)
-    {
-        hasCollider = value;
-    }
-
-    void InspectorPanel::setHasPlayerController(bool value)
-    {
-        hasPlayerController = value;
-    }
-
-    void InspectorPanel::setHasPlayerTag(bool value)
-    {
-        hasPlayerTag = value;
     }
 
     void InspectorPanel::setEditorContext(EditorContext* context)

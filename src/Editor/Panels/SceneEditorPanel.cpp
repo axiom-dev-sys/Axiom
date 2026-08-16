@@ -1,5 +1,6 @@
 #include "Axiom/Editor/Panels/SceneEditorPanel.hpp"
 #include "Axiom/Scene/Entity.hpp"
+#include "Axiom/Scene/Scene.hpp"
 
 #include <imgui.h>
 #include <cstring>
@@ -12,6 +13,9 @@ namespace Axiom {
             return;
 
         ImGui::Begin("Scene Editor");
+
+        Scene* scene =
+            editorContext ? editorContext->getScene() : nullptr;
 
         ImGui::Text("Scene Information");
         ImGui::Separator();
@@ -32,7 +36,7 @@ namespace Axiom {
             sceneNameBuffer[sizeof(sceneNameBuffer) - 1] = '\0';
         }
 
-        ImGui::Text("Entities: %d", sceneEntityCount);
+        ImGui::Text("Entities: %d", scene ? static_cast<int>(scene->getEntityCount()) : 0);
         ImGui::Text("Mode: %s", sceneMode.c_str());
 
         if (ImGui::BeginCombo("Active Scene", sceneName.c_str()))
@@ -192,13 +196,9 @@ namespace Axiom {
         editorContext = context;
     }
 
-    void SceneEditorPanel::setSceneInfo(
-        const std::string& name,
-        int entityCount
-    )
+    void SceneEditorPanel::setSceneInfo(const std::string& name)
     {
         sceneName = name;
-        sceneEntityCount = entityCount;
     }
 
     void SceneEditorPanel::setSceneMode(const std::string& mode)

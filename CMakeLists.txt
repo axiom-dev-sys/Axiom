@@ -82,9 +82,13 @@ add_executable(Axiom
     src/Editor/Panels/PreferencesPanel.cpp
     src/Editor/Viewport/ViewportPanel.cpp
     src/Editor/Viewport/Framebuffer.cpp
+    src/Editor/Viewport/EditorCameraController.cpp
+    src/Editor/Viewport/EditorTransformController.cpp
+    src/Editor/Systems/EditorInteractionSystem.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
     src/Editor/EditorFontManager.cpp
+    src/Editor/EditorCommandController.cpp
     src/Runtime/RuntimeSession.cpp
 )
 

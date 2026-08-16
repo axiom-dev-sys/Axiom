@@ -87,10 +87,8 @@ void GameLayer::onUpdate(float dt)
     updateDebugRenderer();
     handleSceneSerialization();
     handleEditorTools();
-    updateInspectorInfo();
     updateEditorStatus(dt);
     updateGameplay(dt);
-
 }
 
 void GameLayer::handleInteractions()
@@ -273,7 +271,6 @@ void GameLayer::handleEditorTools()
     updateEditorPanels();
     handleSceneEditorRequests();
     handleHierarchyRequests();
-    handleAssetBrowserRequests();
     refreshCachedEntities();
 
     Entity* selectedEntity = editorContext.getSelectedEntity();
@@ -282,58 +279,6 @@ void GameLayer::handleEditorTools()
     {
         editorContext.clearSelection();
     }
-}
-
-void GameLayer::updateInspectorInfo()
-{
-    Entity* selectedEntity =
-        editorContext.getSelectedEntity();
-
-    if (!scene ||
-        !selectedEntity ||
-        !scene->containsEntity(selectedEntity))
-    {
-        editorContext.clearSelection();
-
-        inspectorPanel.setHasSprite(false);
-        inspectorPanel.setHasVelocity(false);
-        inspectorPanel.setHasCollider(false);
-        inspectorPanel.setHasPlayerController(false);
-        inspectorPanel.setHasPlayerTag(false);
-
-        return;
-    }
-
-    if (selectedEntity->isDestroyed())
-    {
-        inspectorPanel.setHasSprite(false);
-        inspectorPanel.setHasVelocity(false);
-        inspectorPanel.setHasCollider(false);
-        inspectorPanel.setHasPlayerController(false);
-        inspectorPanel.setHasPlayerTag(false);
-
-        return;
-    }
-
-    inspectorPanel.setHasSprite(
-        selectedEntity->hasComponent<SpriteComponent>()
-    );
-
-    inspectorPanel.setHasVelocity(
-        selectedEntity->hasComponent<VelocityComponent>()
-    );
-
-    inspectorPanel.setHasCollider(
-        selectedEntity->hasComponent<ColliderComponent>()
-    );
-
-    inspectorPanel.setHasPlayerController(
-        selectedEntity->hasComponent<PlayerControllerComponent>()
-    );
-
-    inspectorPanel.setHasPlayerTag(
-        selectedEntity->hasComponent<PlayerTag>()
-    );
 }
 
 void GameLayer::updateEditorStatus(float dt)
@@ -441,7 +386,7 @@ void GameLayer::updateEditorStatus(float dt)
         stateText,
         static_cast<int>(getEntityCount()),
         dt > 0.0f ? 1.0f / dt : 0.0f,
-        m_SnapEnabled
+        editorTransformController.isSnapEnabled()
     );
 
     sceneEditorPanel.setSceneMode(stateText);
@@ -1044,13 +989,15 @@ void GameLayer::initializeDefaultScene()
     scene = gameplayScene;
     sceneManager.setActiveScene("Gameplay", scene);
 
+    editorContext.setScene(scene.get());
+
     office = createOfficeEntity();
     camera = createCameraEntity();
 
     test = createTestEntity();
     player = createPlayerEntity();
 
-    editorScenes.push_back({ "Gameplay", gameplayScene });
+    sceneManager.addScene("Gameplay", gameplayScene);
 }
 
 Entity* GameLayer::createDefaultEntity(
@@ -1206,6 +1153,8 @@ void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> n
 
     sceneManager.setActiveScene(name, scene);
 
+    editorContext.setScene(scene.get());
+
     refreshSceneReferences();
 }
 
@@ -1239,27 +1188,13 @@ void GameLayer::exitToEditor()
 
 void GameLayer::resetEditorInteractionState()
 {
-    m_EntityDragging = false;
-    m_DraggedEntity = nullptr;
+    editorInteractionSystem.stopDragging();
 
-    m_ViewportPanning = false;
+    editorCameraController.reset();
 
-    m_LeftArrowPressedLastFrame = false;
-    m_RightArrowPressedLastFrame = false;
-    m_UpArrowPressedLastFrame = false;
-    m_DownArrowPressedLastFrame = false;
+    editorTransformController.resetInputState();
 
-    m_SnapKeyPressedLastFrame = false;
-    m_GridKeyPressedLastFrame = false;
-
-    m_DeleteKeyPressedLastFrame = false;
-
-    m_DuplicateKeyPressedLastFrame = false;
-
-    m_FocusKeyPressedLastFrame = false;
-
-    m_SaveKeyPressedLastFrame = false;
-    m_LoadKeyPressedLastFrame = false;
+    editorCommandController.resetInputState();
 }
 
 void GameLayer::handleViewportCamera(float dt)
@@ -1270,70 +1205,14 @@ void GameLayer::handleViewportCamera(float dt)
     if (!editorUI.isViewportVisible())
         return;
 
-    const bool ctrlPressed =
-        Input::isKeyDown(GLFW_KEY_LEFT_CONTROL) ||
-        Input::isKeyDown(GLFW_KEY_RIGHT_CONTROL);
+    if (!scene)
+        return;
 
-    if (viewportPanel.isFocused() &&
-        !ctrlPressed)
-    {
-        const float cameraSpeed = 400.0f;
-
-        if (Input::isKeyPressed(GLFW_KEY_W))
-            scene->camera.position.y += cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_S))
-            scene->camera.position.y -= cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_A))
-            scene->camera.position.x -= cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_D))
-            scene->camera.position.x += cameraSpeed * dt;
-    }
-
-    if (viewportPanel.isHovered())
-    {
-        if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE))
-        {
-            const double mouseX = Input::getMouseX();
-            const double mouseY = Input::getMouseY();
-
-            if (!m_ViewportPanning)
-            {
-                m_LastMouseX = mouseX;
-                m_LastMouseY = mouseY;
-                m_ViewportPanning = true;
-            }
-            else
-            {
-                const double deltaX =
-                    mouseX - m_LastMouseX;
-
-                const double deltaY =
-                    mouseY - m_LastMouseY;
-
-                scene->camera.position.x -=
-                    static_cast<float>(deltaX) *
-                    scene->camera.zoom;
-
-                scene->camera.position.y +=
-                    static_cast<float>(deltaY) *
-                    scene->camera.zoom;
-
-                m_LastMouseX = mouseX;
-                m_LastMouseY = mouseY;
-            }
-        }
-        else
-        {
-            m_ViewportPanning = false;
-        }
-    }
-    else
-    {
-        m_ViewportPanning = false;
-    }
+    editorCameraController.update(
+        viewportPanel,
+        *scene,
+        dt
+    );
 }
 
 void GameLayer::handleSceneEditingInput(float dt)
@@ -1346,29 +1225,8 @@ void GameLayer::handleSceneEditingInput(float dt)
         return;
     }
 
-    const bool snapKeyPressed =
-        Input::isKeyDown(GLFW_KEY_G);
-
-    if (snapKeyPressed &&
-        !m_SnapKeyPressedLastFrame)
-    {
-        m_SnapEnabled = !m_SnapEnabled;
-    }
-
-    m_SnapKeyPressedLastFrame =
-        snapKeyPressed;
-
-    const bool gridKeyPressed =
-        Input::isKeyDown(GLFW_KEY_H);
-
-    if (gridKeyPressed &&
-        !m_GridKeyPressedLastFrame)
-    {
-        m_GridVisible = !m_GridVisible;
-    }
-
-    m_GridKeyPressedLastFrame =
-        gridKeyPressed;
+    editorTransformController.updateSnapToggle();
+    editorTransformController.updateGridToggle();
 
     if (!editorUI.isViewportVisible() ||
         !viewportPanel.isFocused())
@@ -1376,200 +1234,40 @@ void GameLayer::handleSceneEditingInput(float dt)
         return;
     }
 
-    const bool deleteKeyPressed =
-        Input::isKeyDown(GLFW_KEY_DELETE);
+    editorInteractionSystem.updateDelete(
+        editorContext,
+        *scene
+    );
 
-    Entity* selectedEntity =
-        editorContext.getSelectedEntity();
-
-    if (deleteKeyPressed &&
-        !m_DeleteKeyPressedLastFrame &&
-        selectedEntity &&
-        scene->containsEntity(selectedEntity) &&
-        !selectedEntity->isDestroyed())
+    if (editorInteractionSystem.consumeDuplicateRequest())
     {
-        selectedEntity->destroy();
-
-        editorContext.clearSelection();
-
-        if (m_DraggedEntity == selectedEntity)
-        {
-            m_EntityDragging = false;
-            m_DraggedEntity = nullptr;
-        }
+        duplicateEntity(
+            editorContext.getSelectedEntity()
+        );
     }
 
-    m_DeleteKeyPressedLastFrame =
-        deleteKeyPressed;
-
-    const bool ctrlPressed =
-        Input::isKeyDown(GLFW_KEY_LEFT_CONTROL) ||
-        Input::isKeyDown(GLFW_KEY_RIGHT_CONTROL);
-
-    const bool duplicateKeyPressed =
-        Input::isKeyDown(GLFW_KEY_D);
-
-    const bool duplicateShortcutPressed =
-        ctrlPressed &&
-        duplicateKeyPressed;
-
-    if (duplicateShortcutPressed &&
-        !m_DuplicateKeyPressedLastFrame)
-    {
-        Entity* selectedEntity =
-            editorContext.getSelectedEntity();
-
-        duplicateEntity(selectedEntity);
-    }
-
-    m_DuplicateKeyPressedLastFrame =
-        duplicateShortcutPressed;
-
-    const bool saveKeyPressed =
-        Input::isKeyDown(GLFW_KEY_S);
-
-    const bool saveShortcutPressed =
-        ctrlPressed &&
-        saveKeyPressed;
-
-    if (saveShortcutPressed &&
-        !m_SaveKeyPressedLastFrame)
+    if (editorCommandController.consumeSaveRequest())
     {
         editorUI.requestSaveScene();
     }
 
-    m_SaveKeyPressedLastFrame =
-        saveShortcutPressed;
-
-    const bool loadKeyPressed =
-        Input::isKeyDown(GLFW_KEY_O);
-
-    const bool loadShortcutPressed =
-        ctrlPressed &&
-        loadKeyPressed;
-
-    if (loadShortcutPressed &&
-        !m_LoadKeyPressedLastFrame)
+    if (editorCommandController.consumeLoadRequest())
     {
         editorUI.requestLoadScene();
     }
 
-    m_LoadKeyPressedLastFrame =
-        loadShortcutPressed;
+    editorInteractionSystem.updateFocus(
+        editorContext,
+        *scene
+    );
 
-    if (!selectedEntity ||
-        !scene->containsEntity(selectedEntity) ||
-        selectedEntity->isDestroyed())
+    if (!editorInteractionSystem.isDragging())
     {
-        return;
-    }
-
-    const bool focusKeyPressed =
-        Input::isKeyDown(GLFW_KEY_F);
-
-    if (focusKeyPressed &&
-        !m_FocusKeyPressedLastFrame &&
-        selectedEntity &&
-        scene->containsEntity(selectedEntity) &&
-        !selectedEntity->isDestroyed())
-    {
-        auto* transform =
-            selectedEntity->getComponent<TransformComponent>();
-
-        if (transform)
-        {
-            scene->camera.position =
-                transform->position;
-        }
-    }
-
-    m_FocusKeyPressedLastFrame =
-        focusKeyPressed;
-
-    auto* transform =
-        selectedEntity->getComponent<TransformComponent>();
-
-    if (!transform ||
-        m_EntityDragging)
-    {
-        return;
-    }
-
-    if (m_SnapEnabled)
-    {
-        const bool leftPressed =
-            Input::isKeyDown(GLFW_KEY_LEFT);
-
-        const bool rightPressed =
-            Input::isKeyDown(GLFW_KEY_RIGHT);
-
-        const bool upPressed =
-            Input::isKeyDown(GLFW_KEY_UP);
-
-        const bool downPressed =
-            Input::isKeyDown(GLFW_KEY_DOWN);
-
-        transform->position.x =
-            std::round(
-                transform->position.x /
-                m_GridSize
-            ) * m_GridSize;
-
-        transform->position.y =
-            std::round(
-                transform->position.y /
-                m_GridSize
-            ) * m_GridSize;
-
-        if (leftPressed &&
-            !m_LeftArrowPressedLastFrame)
-        {
-            transform->position.x -= m_GridSize;
-        }
-
-        if (rightPressed &&
-            !m_RightArrowPressedLastFrame)
-        {
-            transform->position.x += m_GridSize;
-        }
-
-        if (upPressed &&
-            !m_UpArrowPressedLastFrame)
-        {
-            transform->position.y += m_GridSize;
-        }
-
-        if (downPressed &&
-            !m_DownArrowPressedLastFrame)
-        {
-            transform->position.y -= m_GridSize;
-        }
-
-        m_LeftArrowPressedLastFrame = leftPressed;
-        m_RightArrowPressedLastFrame = rightPressed;
-        m_UpArrowPressedLastFrame = upPressed;
-        m_DownArrowPressedLastFrame = downPressed;
-    }
-    else
-    {
-        m_LeftArrowPressedLastFrame = false;
-        m_RightArrowPressedLastFrame = false;
-        m_UpArrowPressedLastFrame = false;
-        m_DownArrowPressedLastFrame = false;
-
-        const float moveSpeed = 200.0f;
-
-        if (Input::isKeyPressed(GLFW_KEY_LEFT))
-            transform->position.x -= moveSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_RIGHT))
-            transform->position.x += moveSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_UP))
-            transform->position.y += moveSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_DOWN))
-            transform->position.y -= moveSpeed * dt;
+        editorTransformController.update(
+            editorContext,
+            *scene,
+            dt
+        );
     }
 }
 
@@ -1581,98 +1279,14 @@ void GameLayer::handleViewportSelection()
     if (!editorUI.isViewportVisible())
         return;
 
-    if (!viewportPanel.isLeftMouseClicked())
+    if (!scene)
         return;
 
-    const ImVec2 mousePosition =
-        ImGui::GetMousePos();
-
-    const ImVec2 boundsMin =
-        viewportPanel.getBoundsMin();
-
-    const ImVec2 viewportSize =
-        viewportPanel.getSize();
-
-    if (viewportSize.x <= 0.0f ||
-        viewportSize.y <= 0.0f)
-    {
-        return;
-    }
-
-    const float localX =
-        mousePosition.x - boundsMin.x;
-
-    const float localY =
-        mousePosition.y - boundsMin.y;
-
-    const float normalizedX =
-        localX / viewportSize.x;
-
-    const float normalizedY =
-        localY / viewportSize.y;
-
-    const float worldX =
-        scene->camera.position.x +
-        (normalizedX * 2.0f - 1.0f) *
-        640.0f *
-        scene->camera.zoom;
-
-    const float worldY =
-        scene->camera.position.y +
-        (1.0f - normalizedY * 2.0f) *
-        360.0f *
-        scene->camera.zoom;
-
-    Entity* selectedEntity = nullptr;
-
-    scene->forEach([&](Entity* entity)
-    {
-        auto* transform =
-            entity->getComponent<TransformComponent>();
-
-        if (!transform)
-            return;
-
-        glm::vec2 size =
-            transform->scale;
-
-        if (auto* collider =
-            entity->getComponent<ColliderComponent>())
-        {
-            size = collider->size;
-        }
-
-        const glm::vec2 halfSize =
-            size * 0.5f;
-
-        const bool inside =
-            worldX >= transform->position.x - halfSize.x &&
-            worldX <= transform->position.x + halfSize.x &&
-            worldY >= transform->position.y - halfSize.y &&
-            worldY <= transform->position.y + halfSize.y;
-
-        if (inside)
-        {
-            selectedEntity = entity;
-        }
-    });
-
-    if (selectedEntity)
-    {
-        editorContext.setSelectedEntity(
-            selectedEntity
-        );
-
-        m_EntityDragging = true;
-        m_DraggedEntity = selectedEntity;
-    }
-    else
-    {
-        editorContext.clearSelection();
-
-        m_EntityDragging = false;
-        m_DraggedEntity = nullptr;
-    }
+    editorInteractionSystem.updateSelection(
+        editorContext,
+        viewportPanel,
+        *scene
+    );
 }
 
 void GameLayer::handleEntityDragging()
@@ -1680,90 +1294,13 @@ void GameLayer::handleEntityDragging()
     if (m_Application->getMode() != EngineMode::Edit)
         return;
 
-    if (!m_EntityDragging)
+    if (!scene)
         return;
 
-    const bool leftMouseDown =
-        ImGui::IsMouseDown(
-            ImGuiMouseButton_Left
-        );
-
-    if (!leftMouseDown)
-    {
-        m_EntityDragging = false;
-        m_DraggedEntity = nullptr;
-        return;
-    }
-
-    if (!m_DraggedEntity ||
-        !scene->containsEntity(m_DraggedEntity) ||
-        m_DraggedEntity->isDestroyed())
-    {
-        m_EntityDragging = false;
-        m_DraggedEntity = nullptr;
-        return;
-    }
-
-    const ImVec2 mouseDelta =
-        ImGui::GetIO().MouseDelta;
-
-    const ImVec2 viewportSize =
-        viewportPanel.getSize();
-
-    auto* transform =
-        m_DraggedEntity
-        ->getComponent<TransformComponent>();
-
-    if (!transform ||
-        viewportSize.x <= 0.0f ||
-        viewportSize.y <= 0.0f)
-    {
-        return;
-    }
-
-    const float worldPerPixelX =
-        1280.0f *
-        scene->camera.zoom /
-        viewportSize.x;
-
-    const float worldPerPixelY =
-        720.0f *
-        scene->camera.zoom /
-        viewportSize.y;
-
-    transform->position.x +=
-        mouseDelta.x *
-        worldPerPixelX;
-
-    transform->position.y -=
-        mouseDelta.y *
-        worldPerPixelY;
-}
-
-void GameLayer::handleViewportZoom()
-{
-    if (m_Application->getMode() != EngineMode::Edit)
-        return;
-
-    if (!editorUI.isViewportVisible() ||
-        !viewportPanel.isHovered())
-    {
-        return;
-    }
-    
-    const float wheel =
-        ImGui::GetIO().MouseWheel;
-    
-    if (wheel != 0.0f)
-    {
-        scene->camera.zoom -= wheel * 0.1f;
-        
-        scene->camera.zoom = std::clamp(
-            scene->camera.zoom,
-            0.1f,
-            5.0f
-        );
-    }
+    editorInteractionSystem.updateDragging(
+        viewportPanel,
+        *scene
+    );
 }
 
 void GameLayer::handleEditorShortcuts()
@@ -1853,23 +1390,26 @@ void GameLayer::updateDebugRenderer()
     if (!editorUI.isDebugRendererVisible())
         return;
 
-    if (m_GridVisible)
+    if (editorTransformController.isGridVisible())
     {
-        const float m_GridExtent = 2048.0f;
+        const float gridExtent = 2048.0f;
 
-        for (float x = -m_GridExtent; x <= m_GridExtent; x += m_GridSize)
+        const float gridSize =
+            editorTransformController.getGridSize();
+
+        for (float x = -gridExtent; x <= gridExtent; x += gridSize)
         {
             debugRenderer.drawLine(
-                { x, -m_GridExtent },
-                { x,  m_GridExtent }
+                { x, -gridExtent },
+                { x,  gridExtent }
             );
         }
 
-        for (float y = -m_GridExtent; y <= m_GridExtent; y += m_GridSize)
+        for (float y = -gridExtent; y <= gridExtent; y += gridSize)
         {
             debugRenderer.drawLine(
-                { -m_GridExtent, y },
-                { m_GridExtent,  y }
+                { -gridExtent, y },
+                { gridExtent,  y }
             );
         }
     }
@@ -1938,15 +1478,6 @@ void GameLayer::updateDebugRenderer()
         outerSize * 0.5f,
         outerSize
     );
-}
-
-void GameLayer::handleViewportReset()
-{
-    if (viewportPanel.consumeResetCameraRequest())
-    {
-        scene->camera.position = { 0.0f, 0.0f };
-        scene->camera.zoom = 1.0f;
-    }
 }
 
 Entity* GameLayer::duplicateEntity(Entity* source)
@@ -2027,32 +1558,18 @@ void GameLayer::updateEditorPanels()
     inspectorPanel.setEditorContext(&editorContext);
     sceneEditorPanel.setEditorContext(&editorContext);
     assetBrowserPanel.setEditorContext(&editorContext);
+    viewportPanel.setEditorContext(&editorContext);
 
     sceneEditorPanel.setSceneInfo(
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(scene->getEntityCount())
+        sceneManager.getActiveSceneName()
     );
 
     sceneEditorPanel.clearSceneNames();
 
-    for (const auto& sceneInfo : editorScenes)
+    for (const auto& sceneInfo : sceneManager.getScenes())
     {
         sceneEditorPanel.addSceneName(sceneInfo.first);
     }
-
-    hierarchyPanel.clear();
-
-    scene->forEach([&](Entity* entity)
-        {
-            hierarchyPanel.addEntity(entity);
-        });
-
-    assetBrowserPanel.clear();
-
-    assetBrowserPanel.addAsset("player");
-    assetBrowserPanel.addAsset("test");
-    assetBrowserPanel.addAsset("office");
-    assetBrowserPanel.addAsset("fallback");
 }
 
 void GameLayer::handleSceneEditorRequests()
@@ -2071,9 +1588,9 @@ void GameLayer::handleSceneEditorRequests()
         auto newScene = std::make_shared<Scene>();
 
         std::string name =
-            "New Scene " + std::to_string(editorScenes.size() + 1);
+            "New Scene " + std::to_string(sceneManager.getScenes().size() + 1);
 
-        editorScenes.push_back({ name, newScene });
+        sceneManager.addScene(name, newScene);
 
         setActiveScene(name, newScene);
 
@@ -2087,13 +1604,12 @@ void GameLayer::handleSceneEditorRequests()
         const std::string& name =
             sceneEditorPanel.getRequestedSceneSwitchName();
 
-        for (const auto& sceneInfo : editorScenes)
+        auto targetScene =
+            sceneManager.getScene(name);
+
+        if (targetScene)
         {
-            if (sceneInfo.first == name)
-            {
-                setActiveScene(sceneInfo.first, sceneInfo.second);
-                break;
-            }
+            setActiveScene(name, targetScene);
         }
 
         sceneEditorPanel.resetSwitchSceneRequest();
@@ -2101,28 +1617,29 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isDeleteSceneRequested())
     {
-        if (editorScenes.size() > 1)
+        const auto& scenes =
+            sceneManager.getScenes();
+
+        if (scenes.size() > 1)
         {
             const std::string activeName =
                 sceneManager.getActiveSceneName();
 
-            editorScenes.erase(
-                std::remove_if(
-                    editorScenes.begin(),
-                    editorScenes.end(),
-                    [&](const auto& sceneInfo)
-                    {
-                        return sceneInfo.first == activeName;
-                    }
-                ),
-                editorScenes.end()
-            );
+            sceneManager.removeScene(activeName);
 
-            const auto& nextScene = editorScenes.front();
+            const auto& remainingScenes =
+                sceneManager.getScenes();
 
-            setActiveScene(nextScene.first, nextScene.second);
+            if (!remainingScenes.empty())
+            {
+                const auto& nextScene =
+                    remainingScenes.front();
 
-            editorContext.clearSelection();
+                setActiveScene(
+                    nextScene.first,
+                    nextScene.second
+                );
+            }
         }
 
         sceneEditorPanel.resetDeleteSceneRequest();
@@ -2193,36 +1710,6 @@ void GameLayer::handleHierarchyRequests()
 
         hierarchyPanel.resetFocusEntityRequest();
     }
-}
-
-void GameLayer::handleAssetBrowserRequests()
-{
-    if (!assetBrowserPanel.isApplyAssetRequested())
-        return;
-
-    Entity* selectedEntity =
-        editorContext.getSelectedEntity();
-
-    if (selectedEntity &&
-        scene->containsEntity(selectedEntity) &&
-        !selectedEntity->isDestroyed())
-    {
-        auto* sprite =
-            selectedEntity->getComponent<SpriteComponent>();
-
-        if (sprite)
-        {
-            const std::string& asset =
-                assetBrowserPanel.getSelectedAsset();
-
-            sprite->setTexture(
-                asset,
-                ResourceManager::getTexture(asset)
-            );
-        }
-    }
-
-    assetBrowserPanel.resetApplyAssetRequest();
 }
 
 void GameLayer::refreshCachedEntities()
@@ -2417,8 +1904,6 @@ void GameLayer::onRender()
     if (!scene)
         return;
 
-    handleViewportZoom();
-
     viewportPanel.beginRender();
 
     scene->onRender();
@@ -2440,13 +1925,23 @@ void GameLayer::onRender()
     {
         viewportPanel.render();
 
+        editorCameraController.updateZoom(
+            viewportPanel,
+            *scene
+        );
+
+        if (viewportPanel.consumeResetCameraRequest())
+        {
+            editorCameraController.resetCamera(
+                *scene
+            );
+        }
+
         renderGameplayHUD();
 
         handleViewportSelection();
         handleEntityDragging();
     }
-
-    handleViewportReset();
     
     debugOverlay.render();
 

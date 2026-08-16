@@ -32,7 +32,7 @@ namespace Axiom {
 
         void setEditorContext(EditorContext* context);
 
-        void setSceneInfo(const std::string& name, int entityCount);
+        void setSceneInfo(const std::string& name);
 
         void setSceneMode(const std::string& mode);
 
@@ -65,7 +65,6 @@ namespace Axiom {
         bool loadSceneRequested = false;
 
         std::string sceneName = "Unknown";
-        int sceneEntityCount = 0;
 
         std::string sceneMode = "Unknown";
 

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/Viewport/Framebuffer.hpp"
 
 #include <memory>
 #include <imgui.h>
+#include <glm/glm.hpp>
 
 namespace Axiom {
 
@@ -17,6 +19,8 @@ namespace Axiom {
         bool isHovered() const;
         ViewportPanel();
 
+        bool getMouseWorldPosition(glm::vec2& worldPosition) const;
+
         void beginRender();
         void endRender();
 
@@ -26,6 +30,8 @@ namespace Axiom {
 
         const ImVec2& getBoundsMin() const;
         const ImVec2& getBoundsMax() const;
+
+        void setEditorContext(EditorContext* context);
 
     private:
         ImVec2 m_Size{ 0.0f, 0.0f };
@@ -44,6 +50,8 @@ namespace Axiom {
 
         ImVec2 m_BoundsMin{ 0.0f, 0.0f };
         ImVec2 m_BoundsMax{ 0.0f, 0.0f };
+
+        EditorContext* m_EditorContext = nullptr;
     };
 
 }
