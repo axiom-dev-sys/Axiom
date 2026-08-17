@@ -19,6 +19,7 @@
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/EditorUI.hpp"
 #include "Axiom/Editor/EditorCommandController.hpp"
+#include "Axiom/Editor/EditorEntityOperations.hpp"
 #include "Axiom/Editor/Panels/PreferencesPanel.hpp"
 #include "Axiom/Editor/Viewport/ViewportPanel.hpp"
 #include "Axiom/Editor/Viewport/EditorCameraController.hpp"
@@ -65,13 +66,10 @@ private:
 
     void initializeDefaultScene();
 
-    Entity* createDefaultEntity(const std::string& name);
     Entity* createPlayerEntity();
     Entity* createTestEntity();
     Entity* createOfficeEntity();
     Entity* createCameraEntity();
-    Entity* duplicateEntity(Entity* source);
-    Entity* findPlayer() const;
 
     void handleInteractions();
     void refreshSceneReferences();
@@ -135,6 +133,7 @@ private:
     PreferencesPanel preferencesPanel;
     EditorCameraController editorCameraController;
     EditorInteractionSystem editorInteractionSystem;
+    EditorEntityOperations editorEntityOperations;
     EditorTransformController editorTransformController;
     EditorCommandController editorCommandController;
     GameState gameState = GameState::Gameplay;

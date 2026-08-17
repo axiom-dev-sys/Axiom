@@ -2,7 +2,6 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
-#include "Axiom/Renderer/Renderer.hpp"
 #include "Axiom/Scene/SceneSerializer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp" 
@@ -18,7 +17,6 @@
 #include <imgui.h>
 #include <cmath>
 #include <string>
-#include <algorithm>
 
 namespace Axiom {
 
@@ -131,6 +129,8 @@ void GameLayer::refreshSceneReferences()
     {
         player = nullptr;
         test = nullptr;
+        office = nullptr;
+        camera = nullptr;
         return;
     }
 
@@ -273,12 +273,7 @@ void GameLayer::handleEditorTools()
     handleHierarchyRequests();
     refreshCachedEntities();
 
-    Entity* selectedEntity = editorContext.getSelectedEntity();
-
-    if (selectedEntity && selectedEntity->isDestroyed())
-    {
-        editorContext.clearSelection();
-    }
+    editorContext.validateSelection();
 }
 
 void GameLayer::updateEditorStatus(float dt)
@@ -451,16 +446,6 @@ void GameLayer::updateGameSystems(float dt)
         powerSystem.update(gameContext);
         enemySystem.update(gameContext);
     }
-}
-
-Entity* GameLayer::findPlayer() const
-{
-    if (!scene)
-    {
-        return nullptr;
-    }
-
-    return scene->findEntityByName("Player");
 }
 
 void GameLayer::handleGameStateTransitions()
@@ -1000,33 +985,6 @@ void GameLayer::initializeDefaultScene()
     sceneManager.addScene("Gameplay", gameplayScene);
 }
 
-Entity* GameLayer::createDefaultEntity(
-    const std::string& name
-)
-{
-    if (!scene)
-    {
-        return nullptr;
-    }
-
-    Entity* entity =
-        scene->createEntity(name);
-
-    auto* transform =
-        entity->addComponent<TransformComponent>();
-
-    transform->position = { 0.0f, 0.0f };
-    transform->scale = { 128.0f, 128.0f };
-    transform->rotation = 0.0f;
-
-    entity->addComponent<SpriteComponent>(
-        "test",
-        ResourceManager::getTexture("test")
-    );
-
-    return entity;
-}
-
 Entity* GameLayer::createTestEntity()
 {
     if (!scene)
@@ -1153,6 +1111,11 @@ void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> n
 
     sceneManager.setActiveScene(name, scene);
 
+    if (m_Application->getMode() == EngineMode::Edit)
+    {
+        editorScene = scene;
+    }
+
     editorContext.setScene(scene.get());
 
     refreshSceneReferences();
@@ -1241,8 +1204,10 @@ void GameLayer::handleSceneEditingInput(float dt)
 
     if (editorInteractionSystem.consumeDuplicateRequest())
     {
-        duplicateEntity(
-            editorContext.getSelectedEntity()
+        editorEntityOperations.duplicateEntity(
+            editorContext.getSelectedEntity(),
+            *scene,
+            editorContext
         );
     }
 
@@ -1387,6 +1352,9 @@ void GameLayer::updateDebugRenderer()
 {
     debugRenderer.clear();
 
+    if (!scene)
+        return;
+
     if (!editorUI.isDebugRendererVisible())
         return;
 
@@ -1480,78 +1448,6 @@ void GameLayer::updateDebugRenderer()
     );
 }
 
-Entity* GameLayer::duplicateEntity(Entity* source)
-{
-    if (!source ||
-        source->isDestroyed() ||
-        !scene->containsEntity(source))
-    {
-        return nullptr;
-    }
-
-    Entity* copy =
-        scene->createEntity(
-            source->getName() + " Copy"
-        );
-
-    if (auto* sourceTransform =
-        source->getComponent<TransformComponent>())
-    {
-        auto* transform =
-            copy->addComponent<TransformComponent>();
-
-        *transform = *sourceTransform;
-
-        transform->position.x += 32.0f;
-        transform->position.y += 32.0f;
-    }
-
-    if (auto* sourceSprite =
-        source->getComponent<SpriteComponent>())
-    {
-        copy->addComponent<SpriteComponent>(
-            sourceSprite->getTextureID(),
-            sourceSprite->getTexture()
-        );
-    }
-
-    if (auto* sourceVelocity =
-        source->getComponent<VelocityComponent>())
-    {
-        auto* velocity =
-            copy->addComponent<VelocityComponent>();
-
-        *velocity = *sourceVelocity;
-    }
-
-    if (auto* sourceCollider =
-        source->getComponent<ColliderComponent>())
-    {
-        auto* collider =
-            copy->addComponent<ColliderComponent>();
-
-        *collider = *sourceCollider;
-    }
-
-    if (auto* sourceController =
-        source->getComponent<PlayerControllerComponent>())
-    {
-        auto* controller =
-            copy->addComponent<PlayerControllerComponent>();
-
-        *controller = *sourceController;
-    }
-
-    if (source->hasComponent<PlayerTag>())
-    {
-        copy->addComponent<PlayerTag>();
-    }
-
-    editorContext.setSelectedEntity(copy);
-
-    return copy;
-}
-
 void GameLayer::updateEditorPanels()
 {
     hierarchyPanel.setEditorContext(&editorContext);
@@ -1560,16 +1456,7 @@ void GameLayer::updateEditorPanels()
     assetBrowserPanel.setEditorContext(&editorContext);
     viewportPanel.setEditorContext(&editorContext);
 
-    sceneEditorPanel.setSceneInfo(
-        sceneManager.getActiveSceneName()
-    );
-
-    sceneEditorPanel.clearSceneNames();
-
-    for (const auto& sceneInfo : sceneManager.getScenes())
-    {
-        sceneEditorPanel.addSceneName(sceneInfo.first);
-    }
+    sceneEditorPanel.setSceneManager(&sceneManager);
 }
 
 void GameLayer::handleSceneEditorRequests()
@@ -1585,16 +1472,19 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isNewSceneRequested())
     {
-        auto newScene = std::make_shared<Scene>();
-
         std::string name =
             "New Scene " + std::to_string(sceneManager.getScenes().size() + 1);
 
-        sceneManager.addScene(name, newScene);
+        auto newScene =
+            sceneManager.createScene(name);
 
-        setActiveScene(name, newScene);
-
-        editorContext.clearSelection();
+        if (newScene)
+        {
+            setActiveScene(
+                name,
+                newScene
+            );
+        }
 
         sceneEditorPanel.resetNewSceneRequest();
     }
@@ -1604,12 +1494,12 @@ void GameLayer::handleSceneEditorRequests()
         const std::string& name =
             sceneEditorPanel.getRequestedSceneSwitchName();
 
-        auto targetScene =
-            sceneManager.getScene(name);
-
-        if (targetScene)
+        if (sceneManager.switchScene(name))
         {
-            setActiveScene(name, targetScene);
+            setActiveScene(
+                sceneManager.getActiveSceneName(),
+                sceneManager.getActiveScene()
+            );
         }
 
         sceneEditorPanel.resetSwitchSceneRequest();
@@ -1617,29 +1507,19 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isDeleteSceneRequested())
     {
-        const auto& scenes =
-            sceneManager.getScenes();
+        std::string nextSceneName;
 
-        if (scenes.size() > 1)
+        auto nextScene =
+            sceneManager.removeActiveScene(
+                nextSceneName
+            );
+
+        if (nextScene)
         {
-            const std::string activeName =
-                sceneManager.getActiveSceneName();
-
-            sceneManager.removeScene(activeName);
-
-            const auto& remainingScenes =
-                sceneManager.getScenes();
-
-            if (!remainingScenes.empty())
-            {
-                const auto& nextScene =
-                    remainingScenes.front();
-
-                setActiveScene(
-                    nextScene.first,
-                    nextScene.second
-                );
-            }
+            setActiveScene(
+                nextSceneName,
+                nextScene
+            );
         }
 
         sceneEditorPanel.resetDeleteSceneRequest();
@@ -1647,25 +1527,21 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isCreateEntityRequested())
     {
-        Entity* entity = createDefaultEntity("New Entity");
-
-        if (entity)
-        {
-            editorContext.setSelectedEntity(entity);
-        }
+        editorEntityOperations.createEntity(
+            *scene,
+            editorContext
+        );
 
         sceneEditorPanel.resetCreateEntityRequest();
     }
 
     if (sceneEditorPanel.isDestroyEntityRequested())
     {
-        Entity* selectedEntity = editorContext.getSelectedEntity();
-
-        if (selectedEntity && !selectedEntity->isDestroyed())
-        {
-            selectedEntity->destroy();
-            editorContext.clearSelection();
-        }
+        editorEntityOperations.destroyEntity(
+            editorContext.getSelectedEntity(),
+            *scene,
+            editorContext
+        );
 
         sceneEditorPanel.resetDestroyEntityRequest();
     }
@@ -1675,19 +1551,20 @@ void GameLayer::handleHierarchyRequests()
 {
     if (hierarchyPanel.isCreateEntityRequested())
     {
-        Entity* entity = createDefaultEntity("New Entity");
-
-        if (entity)
-        {
-            editorContext.setSelectedEntity(entity);
-        }
+        editorEntityOperations.createEntity(
+            *scene,
+            editorContext
+        );
 
         hierarchyPanel.resetCreateEntityRequest();
     }
 
     if (Entity* source = hierarchyPanel.getDuplicateEntity())
     {
-        duplicateEntity(source);
+        editorEntityOperations.duplicateEntity(source,
+            *scene,
+            editorContext
+        );
 
         hierarchyPanel.resetDuplicateEntityRequest();
     }
@@ -1695,18 +1572,10 @@ void GameLayer::handleHierarchyRequests()
     if (Entity* target =
         hierarchyPanel.getFocusEntity())
     {
-        if (!target->isDestroyed() &&
-            scene->containsEntity(target))
-        {
-            auto* transform =
-                target->getComponent<TransformComponent>();
-
-            if (transform)
-            {
-                scene->camera.position =
-                    transform->position;
-            }
-        }
+        editorInteractionSystem.focusEntity(
+            target,
+            *scene
+        );
 
         hierarchyPanel.resetFocusEntityRequest();
     }
@@ -1714,6 +1583,9 @@ void GameLayer::handleHierarchyRequests()
 
 void GameLayer::refreshCachedEntities()
 {
+    if (!scene)
+        return;
+
     scene->cleanupDestroyedEntities();
 
     player = scene->findEntityByName("Player");

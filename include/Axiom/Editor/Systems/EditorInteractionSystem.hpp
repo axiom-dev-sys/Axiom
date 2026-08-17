@@ -31,6 +31,11 @@ namespace Axiom {
             Scene& scene
         );
 
+        void focusEntity(
+            Entity* entity,
+            Scene& scene
+        );
+
         void beginDragging(Entity* entity);
         void stopDragging();
 

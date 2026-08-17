@@ -4,9 +4,10 @@
 #include "Axiom/Editor/EditorContext.hpp"
 
 #include <string>
-#include <vector>
 
 namespace Axiom {
+
+    class SceneManager;
 
     class SceneEditorPanel
     {
@@ -32,9 +33,9 @@ namespace Axiom {
 
         void setEditorContext(EditorContext* context);
 
-        void setSceneInfo(const std::string& name);
-
         void setSceneMode(const std::string& mode);
+
+        void setSceneManager(SceneManager* manager);
 
         bool isRenameSceneRequested() const;
         void resetRenameSceneRequest();
@@ -42,9 +43,6 @@ namespace Axiom {
 
         bool isNewSceneRequested() const;
         void resetNewSceneRequest();
-
-        void addSceneName(const std::string& name);
-        void clearSceneNames();
 
         bool isSwitchSceneRequested() const;
         void resetSwitchSceneRequest();
@@ -64,9 +62,9 @@ namespace Axiom {
         bool saveSceneRequested = false;
         bool loadSceneRequested = false;
 
-        std::string sceneName = "Unknown";
-
         std::string sceneMode = "Unknown";
+
+        SceneManager* sceneManager = nullptr;
 
         char sceneNameBuffer[256] = {};
         bool editingSceneName = false;
@@ -75,8 +73,6 @@ namespace Axiom {
         std::string requestedSceneName;
 
         bool newSceneRequested = false;
-
-        std::vector<std::string> sceneNames;
 
         bool switchSceneRequested = false;
         std::string requestedSceneSwitchName;

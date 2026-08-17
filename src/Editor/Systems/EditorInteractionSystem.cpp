@@ -216,28 +216,38 @@ namespace Axiom {
         const bool focusKeyPressed =
             Input::isKeyDown(GLFW_KEY_F);
 
-        Entity* selectedEntity =
-            context.getSelectedEntity();
-
         if (focusKeyPressed &&
-            !m_FocusKeyPressedLastFrame &&
-            selectedEntity &&
-            scene.containsEntity(selectedEntity) &&
-            !selectedEntity->isDestroyed())
+            !m_FocusKeyPressedLastFrame)
         {
-            auto* transform =
-                selectedEntity
-                ->getComponent<TransformComponent>();
-
-            if (transform)
-            {
-                scene.camera.position =
-                    transform->position;
-            }
+            focusEntity(
+                context.getSelectedEntity(),
+                scene
+            );
         }
 
         m_FocusKeyPressedLastFrame =
             focusKeyPressed;
+    }
+
+    void EditorInteractionSystem::focusEntity(
+        Entity* entity,
+        Scene& scene)
+    {
+        if (!entity ||
+            entity->isDestroyed() ||
+            !scene.containsEntity(entity))
+        {
+            return;
+        }
+
+        auto* transform =
+            entity->getComponent<TransformComponent>();
+
+        if (!transform)
+            return;
+
+        scene.camera.position =
+            transform->position;
     }
 
 }

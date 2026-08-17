@@ -1,6 +1,7 @@
 #include "Axiom/Editor/Panels/SceneEditorPanel.hpp"
 #include "Axiom/Scene/Entity.hpp"
 #include "Axiom/Scene/Scene.hpp"
+#include "Axiom/Scene/SceneManager.hpp"
 
 #include <imgui.h>
 #include <cstring>
@@ -11,6 +12,11 @@ namespace Axiom {
     {
         if (!visible)
             return;
+
+        const std::string activeSceneName =
+            sceneManager
+            ? sceneManager->getActiveSceneName()
+            : "Unknown";
 
         ImGui::Begin("Scene Editor");
 
@@ -29,7 +35,7 @@ namespace Axiom {
 
             std::strncpy(
                 sceneNameBuffer,
-                sceneName.c_str(),
+                activeSceneName.c_str(),
                 sizeof(sceneNameBuffer)
             );
 
@@ -39,25 +45,32 @@ namespace Axiom {
         ImGui::Text("Entities: %d", scene ? static_cast<int>(scene->getEntityCount()) : 0);
         ImGui::Text("Mode: %s", sceneMode.c_str());
 
-        if (ImGui::BeginCombo("Active Scene", sceneName.c_str()))
+        if (sceneManager)
         {
-            for (const std::string& name : sceneNames)
+            if (ImGui::BeginCombo("Active Scene", activeSceneName.c_str()))
             {
-                bool selected = (name == sceneName);
-
-                if (ImGui::Selectable(name.c_str(), selected))
+                for (const auto& sceneInfo : sceneManager->getScenes())
                 {
-                    requestedSceneSwitchName = name;
-                    switchSceneRequested = true;
+                    const std::string& name =
+                        sceneInfo.first;
+
+                    const bool selected =
+                        name == activeSceneName;
+
+                    if (ImGui::Selectable(name.c_str(), selected))
+                    {
+                        requestedSceneSwitchName = name;
+                        switchSceneRequested = true;
+                    }
+
+                    if (selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
                 }
 
-                if (selected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
+                ImGui::EndCombo();
             }
-
-            ImGui::EndCombo();
         }
 
         ImGui::Separator();
@@ -130,7 +143,7 @@ namespace Axiom {
         }
         else
         {
-            ImGui::Text("%s", sceneName.c_str());
+            ImGui::Text("%s", activeSceneName.c_str());
         }
 
         ImGui::End();
@@ -196,9 +209,10 @@ namespace Axiom {
         editorContext = context;
     }
 
-    void SceneEditorPanel::setSceneInfo(const std::string& name)
+    void SceneEditorPanel::setSceneManager(
+        SceneManager* manager)
     {
-        sceneName = name;
+        sceneManager = manager;
     }
 
     void SceneEditorPanel::setSceneMode(const std::string& mode)
@@ -230,16 +244,6 @@ namespace Axiom {
     void SceneEditorPanel::resetNewSceneRequest()
     {
         newSceneRequested = false;
-    }
-
-    void SceneEditorPanel::addSceneName(const std::string& name)
-    {
-        sceneNames.push_back(name);
-    }
-
-    void SceneEditorPanel::clearSceneNames()
-    {
-        sceneNames.clear();
     }
 
     bool SceneEditorPanel::isSwitchSceneRequested() const

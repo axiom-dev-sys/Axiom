@@ -1,5 +1,6 @@
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Scene/Scene.hpp"
+#include "Axiom/Scene/Entity.hpp"
 
 namespace Axiom {
 
@@ -29,6 +30,17 @@ namespace Axiom {
     void EditorContext::clearSelection()
     {
         selectedEntity = nullptr;
+    }
+
+    void EditorContext::validateSelection()
+    {
+        if (!selectedEntity)
+            return;
+
+        if (selectedEntity->isDestroyed())
+        {
+            clearSelection();
+        }
     }
 
 }

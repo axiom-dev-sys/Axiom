@@ -16,6 +16,8 @@ namespace Axiom {
         void setSelectedEntity(Entity* entity);
         void clearSelection();
 
+        void validateSelection();
+
     private:
         Scene* currentScene = nullptr;
         Entity* selectedEntity = nullptr;

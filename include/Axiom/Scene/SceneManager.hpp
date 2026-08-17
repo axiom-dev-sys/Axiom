@@ -12,6 +12,10 @@ namespace Axiom {
     class SceneManager
     {
     public:
+        std::shared_ptr<Scene> createScene(
+            const std::string& name
+        );
+
         void addScene(
             const std::string& name,
             std::shared_ptr<Scene> scene
@@ -37,7 +41,15 @@ namespace Axiom {
 
         bool removeScene(const std::string& name);
 
+        std::shared_ptr<Scene> removeActiveScene(
+            std::string& nextSceneName
+        );
+
         void renameActiveScene(const std::string& name);
+
+        bool switchScene(
+            const std::string& name
+        );
 
     private:
         std::vector<

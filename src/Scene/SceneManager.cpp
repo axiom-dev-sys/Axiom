@@ -5,6 +5,20 @@
 
 namespace Axiom {
 
+    std::shared_ptr<Scene> SceneManager::createScene(
+        const std::string& name)
+    {
+        if (name.empty())
+            return nullptr;
+
+        auto scene =
+            std::make_shared<Scene>();
+
+        addScene(name, scene);
+
+        return scene;
+    }
+
     void SceneManager::addScene(
         const std::string& name,
         std::shared_ptr<Scene> scene)
@@ -87,12 +101,76 @@ namespace Axiom {
         return true;
     }
 
+    std::shared_ptr<Scene> SceneManager::removeActiveScene(
+        std::string& nextSceneName)
+    {
+        nextSceneName.clear();
+
+        if (m_Scenes.size() <= 1)
+            return nullptr;
+
+        const std::string activeName =
+            m_ActiveSceneName;
+
+        if (!removeScene(activeName))
+            return nullptr;
+
+        if (m_Scenes.empty())
+        {
+            clearActiveScene();
+            return nullptr;
+        }
+
+        const auto& nextScene =
+            m_Scenes.front();
+
+        nextSceneName =
+            nextScene.first;
+
+        m_ActiveSceneName =
+            nextScene.first;
+
+        m_ActiveScene =
+            nextScene.second;
+
+        return m_ActiveScene;
+    }
+
     void SceneManager::renameActiveScene(const std::string& name)
     {
         if (name.empty())
             return;
 
+        const std::string oldName =
+            m_ActiveSceneName;
+
+        for (auto& sceneInfo : m_Scenes)
+        {
+            if (sceneInfo.first == oldName)
+            {
+                sceneInfo.first = name;
+                break;
+            }
+        }
+
         m_ActiveSceneName = name;
+    }
+
+    bool SceneManager::switchScene(
+        const std::string& name)
+    {
+        auto targetScene =
+            getScene(name);
+
+        if (!targetScene)
+            return false;
+
+        setActiveScene(
+            name,
+            targetScene
+        );
+
+        return true;
     }
 
 }
