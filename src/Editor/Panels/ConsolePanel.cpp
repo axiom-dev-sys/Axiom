@@ -1,4 +1,5 @@
 #include "Axiom/Editor/Panels/ConsolePanel.hpp"
+#include "Axiom/Core/Log.hpp"
 
 #include <imgui.h>
 
@@ -10,6 +11,9 @@ namespace Axiom {
             return;
 
         ImGui::Begin("Console");
+
+        const auto& logs =
+            Log::getMessages();
 
         ImGui::Text("Messages: %d", static_cast<int>(logs.size()));
 
@@ -71,7 +75,7 @@ namespace Axiom {
             else if (log.find("[WARNING]") != std::string::npos)
             {
                 ImGui::TextColored(
-                    ImVec4(1.0f, 85.0f, 0.2f, 1.0f),
+                    ImVec4(1.0f, 0.85f, 0.2f, 1.0f),
                     "%s",
                     log.c_str()
                 );
@@ -90,11 +94,6 @@ namespace Axiom {
             }
         }
 
-        for (const auto& log : logs)
-        {
-            ImGui::Text("%s", log.c_str());
-        }
-
         if (autoScroll && scrollToBottom)
         {
             ImGui::SetScrollHereY(1.0f);
@@ -106,13 +105,13 @@ namespace Axiom {
 
     void ConsolePanel::addLog(const std::string& message)
     {
-        logs.push_back(message);
+        Log::info(message);
         scrollToBottom = true;
     }
 
     void ConsolePanel::clear()
     {
-        logs.clear();
+        Log::clear();
     }
 
     void ConsolePanel::setVisible(bool value)

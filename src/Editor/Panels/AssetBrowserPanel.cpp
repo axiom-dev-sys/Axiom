@@ -4,6 +4,8 @@
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Scene.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <imgui.h>
 
 namespace Axiom {
@@ -42,6 +44,38 @@ namespace Axiom {
         {
             for (const std::string& textureID : textureIDs)
             {
+                if (searchBuffer[0] != '\0')
+                {
+                    std::string textureName = textureID;
+                    std::string searchText = searchBuffer;
+
+                    std::transform(
+                        textureName.begin(),
+                        textureName.end(),
+                        textureName.begin(),
+                        [](unsigned char c)
+                        {
+                            return static_cast<char>(std::tolower(c));
+                        }
+                    );
+
+                    std::transform(
+                        searchText.begin(),
+                        searchText.end(),
+                        searchText.begin(),
+                        [](unsigned char c)
+                        {
+                            return static_cast<char>(std::tolower(c));
+                        }
+                    );
+
+                    if (textureName.find(searchText) ==
+                        std::string::npos)
+                    {
+                        continue;
+                    }
+                }
+
                 const bool selected =
                     selectedAsset == textureID;
 
@@ -83,12 +117,27 @@ namespace Axiom {
             ImGui::Text("Type: %s", getAssetType(selectedAsset).c_str());
         }
 
-        ImGui::Text(
-            "Loaded: %s",
-            isAssetLoaded(selectedAsset)
-            ? "Yes"
-            : "No"
-        );
+        if (selectedAsset.empty())
+        {
+            ImGui::Text("Registered: No");
+            ImGui::Text("Loaded: No");
+        }
+        else
+        {
+            ImGui::Text(
+                "Registered: %s",
+                AssetRegistry::isTextureRegistered(selectedAsset)
+                ? "Yes"
+                : "No"
+            );
+
+            ImGui::Text(
+                "Loaded: %s",
+                isAssetLoaded(selectedAsset)
+                ? "Yes"
+                : "No"
+            );
+        }
 
         if (!selectedAsset.empty())
         {
@@ -116,16 +165,7 @@ namespace Axiom {
 
             if (ImGui::Button("Apply to Selected Entity"))
             {
-                auto* sprite =
-                    selectedEntity->getComponent<SpriteComponent>();
-
-                if (sprite)
-                {
-                    sprite->setTexture(
-                        selectedAsset,
-                        ResourceManager::getTexture(selectedAsset)
-                    );
-                }
+                applyAssetRequested = true;
             }
 
             if (!canApply)
@@ -169,7 +209,20 @@ namespace Axiom {
 
     bool AssetBrowserPanel::isAssetLoaded(const std::string& name) const
     {
-        return !name.empty();
+        if (name.empty())
+            return false;
+
+        return ResourceManager::isTextureLoaded(name);
+    }
+
+    bool AssetBrowserPanel::isApplyAssetRequested() const
+    {
+        return applyAssetRequested;
+    }
+
+    void AssetBrowserPanel::resetApplyAssetRequest()
+    {
+        applyAssetRequested = false;
     }
 
 }

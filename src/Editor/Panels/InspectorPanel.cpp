@@ -104,12 +104,7 @@ namespace Axiom {
         {
             if (ImGui::Button("Destroy Entity"))
             {
-                selectedEntity->destroy();
-
-                if (editorContext)
-                {
-                    editorContext->clearSelection();
-                }
+                destroyEntityRequested = true;
             }
         }
 
@@ -206,10 +201,7 @@ namespace Axiom {
 
                     if (ImGui::MenuItem("SpriteComponent"))
                     {
-                        selectedEntity->addComponent<SpriteComponent>(
-                            "test",
-                            ResourceManager::getTexture("test")
-                        );
+                        addSpriteRequested = true;
                     }
                 }
 
@@ -219,7 +211,7 @@ namespace Axiom {
 
                     if (ImGui::MenuItem("VelocityComponent"))
                     {
-                        selectedEntity->addComponent<VelocityComponent>();
+                        addVelocityRequested = true;
                     }
                 }
 
@@ -229,12 +221,7 @@ namespace Axiom {
 
                     if (ImGui::MenuItem("ColliderComponent"))
                     {
-                        auto* collider =
-                            selectedEntity->addComponent<ColliderComponent>();
-
-                        collider->size = { 128.0f, 128.0f };
-                        collider->offset = { 0.0f, 0.0f };
-                        collider->isTrigger = false;
+                        addColliderRequested = true;
                     }
                 }
 
@@ -254,7 +241,7 @@ namespace Axiom {
                 {
                     if (ImGui::Button("Remove SpriteComponent"))
                     {
-                        selectedEntity->removeComponent<SpriteComponent>();
+                        removeSpriteRequested = true;
                     }
 
                     auto* sprite =
@@ -266,30 +253,6 @@ namespace Axiom {
                             "Texture: %s",
                             sprite->getTextureID().c_str()
                         );
-
-                        if (ImGui::Button("Set Player Texture"))
-                        {
-                            sprite->setTexture(
-                                "player",
-                                ResourceManager::getTexture("player")
-                            );
-                        }
-
-                        if (ImGui::Button("Set Test Texture"))
-                        {
-                            sprite->setTexture(
-                                "test",
-                                ResourceManager::getTexture("test")
-                            );
-                        }
-
-                        if (ImGui::Button("Set Office Texture"))
-                        {
-                            sprite->setTexture(
-                                "office",
-                                ResourceManager::getTexture("office")
-                            );
-                        }
                     }
                 }
             }
@@ -302,7 +265,7 @@ namespace Axiom {
                 {
                     if (ImGui::Button("Remove VelocityComponent"))
                     {
-                        selectedEntity->removeComponent<VelocityComponent>();
+                        removeVelocityRequested = true;
                     }
                     
                     auto* velocity =
@@ -327,7 +290,7 @@ namespace Axiom {
                 {
                     if (ImGui::Button("Remove ColliderComponent"))
                     {
-                        selectedEntity->removeComponent<ColliderComponent>();
+                        removeColliderRequested = true;
                     }
                     
                     auto* collider =
@@ -394,6 +357,76 @@ namespace Axiom {
     void InspectorPanel::toggle()
     {
         visible = !visible;
+    }
+
+    bool InspectorPanel::isDestroyEntityRequested() const
+    {
+        return destroyEntityRequested;
+    }
+
+    void InspectorPanel::resetDestroyEntityRequest()
+    {
+        destroyEntityRequested = false;
+    }
+
+    bool InspectorPanel::isAddVelocityRequested() const
+    {
+        return addVelocityRequested;
+    }
+
+    void InspectorPanel::resetAddVelocityRequest()
+    {
+        addVelocityRequested = false;
+    }
+
+    bool InspectorPanel::isRemoveVelocityRequested() const
+    {
+        return removeVelocityRequested;
+    }
+
+    void InspectorPanel::resetRemoveVelocityRequest()
+    {
+        removeVelocityRequested = false;
+    }
+
+    bool InspectorPanel::isAddColliderRequested() const
+    {
+        return addColliderRequested;
+    }
+
+    void InspectorPanel::resetAddColliderRequest()
+    {
+        addColliderRequested = false;
+    }
+
+    bool InspectorPanel::isRemoveColliderRequested() const
+    {
+        return removeColliderRequested;
+    }
+
+    void InspectorPanel::resetRemoveColliderRequest()
+    {
+        removeColliderRequested = false;
+    }
+
+    bool InspectorPanel::isAddSpriteRequested() const
+    {
+        return addSpriteRequested;
+    }
+
+    void InspectorPanel::resetAddSpriteRequest()
+    {
+        addSpriteRequested = false;
+    }
+
+    bool InspectorPanel::isRemoveSpriteRequested() const
+    {
+        return removeSpriteRequested;
+    }
+
+    void InspectorPanel::resetRemoveSpriteRequest()
+    {
+        removeSpriteRequested = false;
     }
 
     void InspectorPanel::setEditorContext(EditorContext* context)

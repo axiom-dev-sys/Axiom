@@ -24,10 +24,15 @@ namespace Axiom {
 
         bool isAssetLoaded(const std::string& name) const;
 
+        bool isApplyAssetRequested() const;
+        void resetApplyAssetRequest();
+
     private:
         bool visible = true;
 
         std::string selectedAsset;
+
+        bool applyAssetRequested = false;
 
         char searchBuffer[128] = {};
 

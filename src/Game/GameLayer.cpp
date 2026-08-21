@@ -2,6 +2,7 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
+#include "Axiom/Core/Log.hpp"
 #include "Axiom/Scene/SceneSerializer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp" 
@@ -25,9 +26,9 @@ GameLayer::GameLayer(Application* application)
 {
     initializeDefaultScene();
 
-    consolePanel.addLog("[INFO] Axiom editor started");
-    consolePanel.addLog("[INFO] Gameplay scene loaded");
-    consolePanel.addLog("[INFO] ResourceManager initialized");
+    Log::info("Axiom editor started");
+    Log::info("Gameplay scene loaded");
+    Log::info("ResourceManager initialized");
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -242,7 +243,7 @@ void GameLayer::handleSceneSerialization()
         sceneEditorPanel.resetSaveSceneRequest();
         editorUI.resetSaveSceneRequest();
 
-        consolePanel.addLog("[INFO] Scene saved");
+        Log::info("Scene saved");
     }
 
     if (sceneEditorPanel.isLoadSceneRequested() ||
@@ -262,15 +263,98 @@ void GameLayer::handleSceneSerialization()
         sceneEditorPanel.resetLoadSceneRequest();
         editorUI.resetLoadSceneRequest();
 
-        consolePanel.addLog("[INFO] Scene loaded");
+        Log::info("Scene loaded");
     }
 }
 
 void GameLayer::handleEditorTools()
 {
     updateEditorPanels();
+
     handleSceneEditorRequests();
     handleHierarchyRequests();
+    
+    if (inspectorPanel.isDestroyEntityRequested())
+    {
+        editorEntityOperations.destroyEntity(
+            editorContext.getSelectedEntity(),
+            *scene,
+            editorContext
+        );
+
+        inspectorPanel.resetDestroyEntityRequest();
+    }
+
+    if (inspectorPanel.isAddVelocityRequested())
+    {
+        editorComponentOperations.addVelocityComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        inspectorPanel.resetAddVelocityRequest();
+    }
+
+    if (inspectorPanel.isRemoveVelocityRequested())
+    {
+        editorComponentOperations.removeVelocityComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        inspectorPanel.resetRemoveVelocityRequest();
+    }
+
+    if (inspectorPanel.isAddColliderRequested())
+    {
+        editorComponentOperations.addColliderComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        inspectorPanel.resetAddColliderRequest();
+    }
+
+    if (inspectorPanel.isRemoveColliderRequested())
+    {
+        editorComponentOperations.removeColliderComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        inspectorPanel.resetRemoveColliderRequest();
+    }
+
+    if (inspectorPanel.isAddSpriteRequested())
+    {
+        editorComponentOperations.addSpriteComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        inspectorPanel.resetAddSpriteRequest();
+    }
+
+    if (inspectorPanel.isRemoveSpriteRequested())
+    {
+        editorComponentOperations.removeSpriteComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        inspectorPanel.resetRemoveSpriteRequest();
+    }
+
+    if (assetBrowserPanel.isApplyAssetRequested())
+    {
+        const std::string& assetID =
+            assetBrowserPanel.getSelectedAsset();
+
+        if (!assetID.empty())
+        {
+            editorComponentOperations.setSpriteTexture(
+                editorContext.getSelectedEntity(),
+                assetID
+            );
+        }
+
+        assetBrowserPanel.resetApplyAssetRequest();
+    }
+
     refreshCachedEntities();
 
     editorContext.validateSelection();
@@ -278,26 +362,6 @@ void GameLayer::handleEditorTools()
 
 void GameLayer::updateEditorStatus(float dt)
 {
-    int spriteCount = 0;
-    int colliderCount = 0;
-    int velocityCount = 0;
-    int playerControllerCount = 0;
-
-    scene->forEach([&](Entity* entity)
-        {
-            if (entity->hasComponent<SpriteComponent>())
-                spriteCount++;
-
-            if (entity->hasComponent<ColliderComponent>())
-                colliderCount++;
-
-            if (entity->hasComponent<VelocityComponent>())
-                velocityCount++;
-
-            if (entity->hasComponent<PlayerControllerComponent>())
-                playerControllerCount++;
-        });
-
     debugOverlay.setSceneInfo(
         sceneManager.getActiveSceneName(),
         getEntityCount()
@@ -358,17 +422,7 @@ void GameLayer::updateEditorStatus(float dt)
     statisticsPanel.setStats(
         dt > 0.0f ? 1.0f / dt : 0.0f,
         dt,
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(getEntityCount()),
-        scene->camera.position,
-        scene->camera.zoom,
         getPlayerPosition(),
-        spriteCount,
-        colliderCount,
-        velocityCount,
-        playerControllerCount,
-        AssetRegistry::getRegisteredTextureCount(),
-        ResourceManager::getLoadedTextureCount(),
         stateText,
         1280,
         720
@@ -453,13 +507,13 @@ void GameLayer::handleGameStateTransitions()
     if (gameContext.win)
     {
         gameState = GameState::Win;
-        consolePanel.addLog("[INFO] YOU WIN");
+        Log::info("YOU WIN");
     }
 
     if (gameContext.gameOver)
     {
         gameState = GameState::GameOver;
-        consolePanel.addLog("[INFO] GAME OVER");
+        Log::info("GAME OVER");
     }
 }
 
@@ -1455,6 +1509,14 @@ void GameLayer::updateEditorPanels()
     sceneEditorPanel.setEditorContext(&editorContext);
     assetBrowserPanel.setEditorContext(&editorContext);
     viewportPanel.setEditorContext(&editorContext);
+
+    statisticsPanel.setEditorContext(
+        &editorContext
+    );
+
+    statisticsPanel.setSceneManager(
+        &sceneManager
+    );
 
     sceneEditorPanel.setSceneManager(&sceneManager);
 }

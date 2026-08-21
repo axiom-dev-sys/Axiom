@@ -73,4 +73,11 @@ namespace Axiom {
         return ids;
     }
 
+    bool AssetRegistry::isTextureRegistered(
+        const std::string& id)
+    {
+        return s_Textures.find(id) !=
+            s_Textures.end();
+    }
+
 }

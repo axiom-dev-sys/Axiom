@@ -7,6 +7,8 @@
 
 namespace Axiom {
 
+    std::vector<std::string> Log::s_Messages;
+
     static std::string getCurrentTime()
     {
         auto now = std::chrono::system_clock::now();
@@ -29,19 +31,43 @@ namespace Axiom {
 
     void Log::message(Level level, const std::string& msg)
     {
+        std::string levelText;
+
         switch (level)
         {
         case Level::Info:
-            std::cout << "[" << getCurrentTime() << "] " << "[INFO] "  << msg << std::endl;
+            levelText = "[INFO]";
             break;
 
         case Level::Warn:
-            std::cout << "[" << getCurrentTime() << "] " << "[WARNING] " << msg << std::endl;
+            levelText = "[WARNING]";
             break;
 
         case Level::Error:
-            std::cerr << "[" << getCurrentTime() << "] " << "[ERROR] " << msg << std::endl;
+            levelText = "[ERROR]";
             break;
+        }
+
+        const std::string formattedMessage =
+            "[" + getCurrentTime() + "] " +
+            levelText + " " +
+            msg;
+
+        s_Messages.push_back(
+            formattedMessage
+        );
+
+        if (level == Level::Error)
+        {
+            std::cerr
+                << formattedMessage
+                << std::endl;
+        }
+        else
+        {
+            std::cout
+                << formattedMessage
+                << std::endl;
         }
     }
 
@@ -58,6 +84,17 @@ namespace Axiom {
     void Log::error(const std::string& msg)
     {
         message(Level::Error, msg);
+    }
+
+    const std::vector<std::string>&
+        Log::getMessages()
+    {
+        return s_Messages;
+    }
+
+    void Log::clear()
+    {
+        s_Messages.clear();
     }
 
 }

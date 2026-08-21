@@ -90,6 +90,7 @@ add_executable(Axiom
     src/Editor/EditorFontManager.cpp
     src/Editor/EditorCommandController.cpp
     src/Editor/EditorEntityOperations.cpp
+    src/Editor/EditorComponentOperations.cpp
     src/Runtime/RuntimeSession.cpp
 )
 
