@@ -3,6 +3,7 @@
 #include "Axiom/Scene/Scene.hpp"
 #include "Axiom/Scene/SceneManager.hpp"
 
+#include <ImGuiFileDialog.h>
 #include <imgui.h>
 #include <cstring>
 
@@ -96,14 +97,60 @@ namespace Axiom {
             deleteSceneRequested = true;
         }
 
-        if (ImGui::Button("Save Scene"))
+        if (ImGui::Button("Save Scene As..."))
         {
-            saveSceneRequested = true;
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "SaveSceneDialog",
+                "Save Scene As",
+                ".scene",
+                config
+            );
         }
 
-        if (ImGui::Button("Load Scene"))
+        if (ImGui::Button("Load Scene..."))
         {
-            loadSceneRequested = true;
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "LoadSceneDialog",
+                "Load Scene",
+                ".scene",
+                config
+            );
+        }
+
+        if (ImGuiFileDialog::Instance()->Display(
+            "SaveSceneDialog"))
+        {
+            if (ImGuiFileDialog::Instance()->IsOk())
+            {
+                requestedSaveScenePath =
+                    ImGuiFileDialog::Instance()
+                    ->GetFilePathName();
+
+                saveSceneRequested = true;
+            }
+
+            ImGuiFileDialog::Instance()->Close();
+        }
+
+        if (ImGuiFileDialog::Instance()->Display(
+            "LoadSceneDialog"))
+        {
+            if (ImGuiFileDialog::Instance()->IsOk())
+            {
+                requestedLoadScenePath =
+                    ImGuiFileDialog::Instance()
+                    ->GetFilePathName();
+
+                loadSceneRequested = true;
+            }
+
+            ImGuiFileDialog::Instance()->Close();
         }
 
         ImGui::Separator();
@@ -192,6 +239,12 @@ namespace Axiom {
     void SceneEditorPanel::resetSaveSceneRequest()
     {
         saveSceneRequested = false;
+        requestedSaveScenePath.clear();
+    }
+
+    const std::string& SceneEditorPanel::getRequestedSaveScenePath() const
+    {
+        return requestedSaveScenePath;
     }
 
     bool SceneEditorPanel::isLoadSceneRequested() const
@@ -202,6 +255,12 @@ namespace Axiom {
     void SceneEditorPanel::resetLoadSceneRequest()
     {
         loadSceneRequested = false;
+        requestedLoadScenePath.clear();
+    }
+
+    const std::string& SceneEditorPanel::getRequestedLoadScenePath() const
+    {
+        return requestedLoadScenePath;
     }
 
     void SceneEditorPanel::setEditorContext(EditorContext* context)

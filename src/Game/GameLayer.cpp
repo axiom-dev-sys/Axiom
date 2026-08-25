@@ -228,8 +228,25 @@ void GameLayer::resetGameSession()
 
 void GameLayer::handleSceneSerialization()
 {
-    if (sceneEditorPanel.isSaveSceneRequested() ||
-        editorUI.isSaveSceneRequested())
+    if (sceneEditorPanel.isSaveSceneRequested())
+    {
+        const std::string& path =
+            sceneEditorPanel.getRequestedSaveScenePath();
+
+        if (!path.empty())
+        {
+            SceneSerializer::save(
+                *scene,
+                path
+            );
+
+            Log::info("Scene saved");
+        }
+
+        sceneEditorPanel.resetSaveSceneRequest();
+    }
+    
+    if (editorUI.isSaveSceneRequested())
     {
         SceneSerializer::save(
             *scene,
@@ -240,15 +257,35 @@ void GameLayer::handleSceneSerialization()
             )
         );
 
-        sceneEditorPanel.resetSaveSceneRequest();
         editorUI.resetSaveSceneRequest();
 
         Log::info("Scene saved");
     }
 
-    if (sceneEditorPanel.isLoadSceneRequested() ||
-        editorUI.isLoadSceneRequested())
+    if (sceneEditorPanel.isLoadSceneRequested())
     {
+        const std::string& path =
+            sceneEditorPanel.getRequestedLoadScenePath();
+
+        if (!path.empty())
+        {
+            editorContext.clearSelection();
+
+            SceneSerializer::load(
+                *scene,
+                path
+            );
+        }
+
+        sceneEditorPanel.resetLoadSceneRequest();
+
+        Log::info("Scene loaded");
+    }
+    
+    if (editorUI.isLoadSceneRequested())
+    {
+        editorContext.clearSelection();
+
         SceneSerializer::load(
             *scene,
             Paths::getSave(
@@ -258,9 +295,6 @@ void GameLayer::handleSceneSerialization()
             )
         );
 
-        refreshSceneReferences();
-
-        sceneEditorPanel.resetLoadSceneRequest();
         editorUI.resetLoadSceneRequest();
 
         Log::info("Scene loaded");

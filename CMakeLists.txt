@@ -91,12 +91,14 @@ add_executable(Axiom
     src/Editor/EditorCommandController.cpp
     src/Editor/EditorEntityOperations.cpp
     src/Editor/EditorComponentOperations.cpp
+    external/ImGuiFileDialog/ImGuiFileDialog.cpp
     src/Runtime/RuntimeSession.cpp
 )
 
 target_include_directories(Axiom PUBLIC
 ${CMAKE_SOURCE_DIR}/include
 ${CMAKE_SOURCE_DIR}/src
+${CMAKE_SOURCE_DIR}/external/ImGuiFileDialog
 )
 
 target_link_libraries(Axiom glfw glad glm::glm imgui)
