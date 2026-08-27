@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui.h>
+
 #include <string>
 
 namespace Axiom {
@@ -77,6 +79,13 @@ namespace Axiom {
         bool showViewport = true;
 
         bool snapEnabled = false;
+
+        void renderDockSpace();
+
+        void setupDefaultDockLayout(ImGuiID dockspaceID);
+
+        bool m_DockLayoutInitialized = false;
+        bool m_ResetDockLayoutRequested = false;
     };
 
 }

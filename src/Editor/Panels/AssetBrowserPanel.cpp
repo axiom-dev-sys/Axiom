@@ -17,6 +17,16 @@ namespace Axiom {
 
         ImGui::Begin("Asset Browser");
 
+        const float footerHeight =
+            ImGui::GetFrameHeightWithSpacing() + 32.0f;
+
+        ImGui::BeginChild(
+            "AssetBrowserContent",
+            ImVec2(0.0f, -footerHeight),
+            false,
+            ImGuiWindowFlags_AlwaysVerticalScrollbar
+        );
+
         ImGui::Text("Assets");
         ImGui::Text("Count: %d", AssetRegistry::getRegisteredTextureCount());
 
@@ -139,41 +149,43 @@ namespace Axiom {
             );
         }
 
-        if (!selectedAsset.empty())
+        ImGui::EndChild();
+
+        ImGui::Dummy(ImVec2(0.0f, 4.0f));
+        
+        Entity* selectedEntity =
+            editorContext
+            ? editorContext->getSelectedEntity()
+            : nullptr;
+        
+        Scene* scene =
+            editorContext
+            ? editorContext->getScene()
+            : nullptr;
+        
+        const bool canApply =
+            !selectedAsset.empty() &&
+            selectedEntity &&
+            scene &&
+            scene->containsEntity(selectedEntity) &&
+            !selectedEntity->isDestroyed() &&
+            selectedEntity->hasComponent<SpriteComponent>();
+        
+        if (!canApply)
         {
-            Entity* selectedEntity =
-                editorContext
-                ? editorContext->getSelectedEntity()
-                : nullptr;
-
-            Scene* scene =
-                editorContext
-                ? editorContext->getScene()
-                : nullptr;
-
-            const bool canApply =
-                selectedEntity &&
-                scene &&
-                scene->containsEntity(selectedEntity) &&
-                !selectedEntity->isDestroyed() &&
-                selectedEntity->hasComponent<SpriteComponent>();
-
-            if (!canApply)
-            {
-                ImGui::BeginDisabled();
-            }
-
-            if (ImGui::Button("Apply to Selected Entity"))
-            {
-                applyAssetRequested = true;
-            }
-
-            if (!canApply)
-            {
-                ImGui::EndDisabled();
-            }
+            ImGui::BeginDisabled();
         }
-
+        
+        if (ImGui::Button("Apply to Selected Entity", ImVec2(-1.0f, 0.0f)))
+        {
+            applyAssetRequested = true;
+        }
+        
+        if (!canApply)
+        {
+            ImGui::EndDisabled();
+        }
+        
         ImGui::End();
     }
 

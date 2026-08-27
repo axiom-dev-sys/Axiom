@@ -23,6 +23,11 @@ namespace Axiom {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+        io.IniFilename = "imgui.ini";
+
         EditorFontManager::loadDefaultFont();
 
         ImGui::StyleColorsDark();
