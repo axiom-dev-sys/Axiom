@@ -91,6 +91,7 @@ add_executable(Axiom
     src/Editor/EditorCommandController.cpp
     src/Editor/EditorEntityOperations.cpp
     src/Editor/EditorComponentOperations.cpp
+    src/Editor/EditorDocumentState.cpp
     external/ImGuiFileDialog/ImGuiFileDialog.cpp
     src/Runtime/RuntimeSession.cpp
 )

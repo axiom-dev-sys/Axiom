@@ -21,6 +21,7 @@
 #include "Axiom/Editor/EditorCommandController.hpp"
 #include "Axiom/Editor/EditorEntityOperations.hpp"
 #include "Axiom/Editor/EditorComponentOperations.hpp"
+#include "Axiom/Editor/EditorDocumentState.hpp"
 #include "Axiom/Editor/Panels/PreferencesPanel.hpp"
 #include "Axiom/Editor/Viewport/ViewportPanel.hpp"
 #include "Axiom/Editor/Viewport/EditorCameraController.hpp"
@@ -136,6 +137,7 @@ private:
     EditorInteractionSystem editorInteractionSystem;
     EditorEntityOperations editorEntityOperations;
     EditorComponentOperations editorComponentOperations;
+    EditorDocumentState editorDocumentState;
     EditorTransformController editorTransformController;
     EditorCommandController editorCommandController;
     GameState gameState = GameState::Gameplay;

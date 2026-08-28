@@ -162,7 +162,7 @@ namespace Axiom {
                 ImGui::SameLine(180);
                 ImGui::Text("Scene: %s", sceneName.c_str());
 
-                ImGui::SameLine(420);
+                ImGui::SameLine(450);
 
                 if (gameState == "Play")
                 {

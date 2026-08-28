@@ -18,6 +18,7 @@
 #include <imgui.h>
 #include <cmath>
 #include <string>
+#include <filesystem>
 
 namespace Axiom {
 
@@ -240,6 +241,9 @@ void GameLayer::handleSceneSerialization()
                 path
             );
 
+            editorDocumentState.setScenePath(path);
+            editorDocumentState.markSaved();
+
             Log::info("Scene saved");
         }
 
@@ -248,14 +252,29 @@ void GameLayer::handleSceneSerialization()
     
     if (editorUI.isSaveSceneRequested())
     {
-        SceneSerializer::save(
-            *scene,
-            Paths::getSave(
+        std::string savePath;
+
+        if (editorDocumentState.hasScenePath())
+        {
+            savePath = editorDocumentState.getScenePath();
+        }
+        else
+        {
+            savePath = Paths::getSave(
                 makeSceneSaveFileName(
                     sceneManager.getActiveSceneName()
                 )
-            )
+            );
+
+            editorDocumentState.setScenePath(savePath);
+        }
+
+        SceneSerializer::save(
+            *scene,
+            savePath
         );
+
+        editorDocumentState.markSaved();
 
         editorUI.resetSaveSceneRequest();
 
@@ -275,6 +294,9 @@ void GameLayer::handleSceneSerialization()
                 *scene,
                 path
             );
+
+            editorDocumentState.setScenePath(path);
+            editorDocumentState.markSaved();
         }
 
         sceneEditorPanel.resetLoadSceneRequest();
@@ -316,6 +338,8 @@ void GameLayer::handleEditorTools()
             editorContext
         );
 
+        editorDocumentState.markDirty();
+
         inspectorPanel.resetDestroyEntityRequest();
     }
 
@@ -324,6 +348,8 @@ void GameLayer::handleEditorTools()
         editorComponentOperations.addVelocityComponent(
             editorContext.getSelectedEntity()
         );
+
+        editorDocumentState.markDirty();
 
         inspectorPanel.resetAddVelocityRequest();
     }
@@ -334,6 +360,8 @@ void GameLayer::handleEditorTools()
             editorContext.getSelectedEntity()
         );
 
+        editorDocumentState.markDirty();
+
         inspectorPanel.resetRemoveVelocityRequest();
     }
 
@@ -342,6 +370,8 @@ void GameLayer::handleEditorTools()
         editorComponentOperations.addColliderComponent(
             editorContext.getSelectedEntity()
         );
+
+        editorDocumentState.markDirty();
 
         inspectorPanel.resetAddColliderRequest();
     }
@@ -352,6 +382,8 @@ void GameLayer::handleEditorTools()
             editorContext.getSelectedEntity()
         );
 
+        editorDocumentState.markDirty();
+
         inspectorPanel.resetRemoveColliderRequest();
     }
 
@@ -361,6 +393,8 @@ void GameLayer::handleEditorTools()
             editorContext.getSelectedEntity()
         );
 
+        editorDocumentState.markDirty();
+
         inspectorPanel.resetAddSpriteRequest();
     }
 
@@ -369,6 +403,8 @@ void GameLayer::handleEditorTools()
         editorComponentOperations.removeSpriteComponent(
             editorContext.getSelectedEntity()
         );
+
+        editorDocumentState.markDirty();
 
         inspectorPanel.resetRemoveSpriteRequest();
     }
@@ -384,6 +420,8 @@ void GameLayer::handleEditorTools()
                 editorContext.getSelectedEntity(),
                 assetID
             );
+
+            editorDocumentState.markDirty();
         }
 
         assetBrowserPanel.resetApplyAssetRequest();
@@ -464,8 +502,29 @@ void GameLayer::updateEditorStatus(float dt)
 
     debugOverlay.setGameState(stateText);
 
+    std::string displaySceneName =
+        sceneManager.getActiveSceneName();
+
+    if (editorDocumentState.isDirty())
+    {
+        displaySceneName += " *";
+    }
+
+    if (editorDocumentState.hasScenePath())
+    {
+        displaySceneName += " | ";
+        displaySceneName +=
+            std::filesystem::path(
+                editorDocumentState.getScenePath()
+            ).filename().string();
+    }
+    else
+    {
+        displaySceneName += " | Unsaved";
+    }
+
     editorUI.setStatusInfo(
-        sceneManager.getActiveSceneName(),
+        displaySceneName,
         stateText,
         static_cast<int>(getEntityCount()),
         dt > 0.0f ? 1.0f / dt : 0.0f,
@@ -1316,11 +1375,45 @@ void GameLayer::handleSceneEditingInput(float dt)
 
     if (!editorInteractionSystem.isDragging())
     {
+        Entity* selectedEntity =
+            editorContext.getSelectedEntity();
+
+        TransformComponent* transform =
+            selectedEntity
+            ? selectedEntity->getComponent<TransformComponent>()
+            : nullptr;
+
+        glm::vec2 oldPosition;
+        glm::vec2 oldScale;
+        float oldRotation = 0.0f;
+
+        if (transform)
+        {
+            oldPosition = transform->position;
+            oldScale = transform->scale;
+            oldRotation = transform->rotation;
+        }
+
         editorTransformController.update(
             editorContext,
             *scene,
             dt
         );
+
+        if (transform)
+        {
+            const bool changed =
+                transform->position.x != oldPosition.x ||
+                transform->position.y != oldPosition.y ||
+                transform->scale.x != oldScale.x ||
+                transform->scale.y != oldScale.y ||
+                transform->rotation != oldRotation;
+
+            if (changed)
+            {
+                editorDocumentState.markDirty();
+            }
+        }
     }
 }
 
@@ -1350,10 +1443,37 @@ void GameLayer::handleEntityDragging()
     if (!scene)
         return;
 
+    Entity* selectedEntity =
+        editorContext.getSelectedEntity();
+
+    TransformComponent* transform =
+        selectedEntity
+        ? selectedEntity->getComponent<TransformComponent>()
+        : nullptr;
+
+    glm::vec2 oldPosition;
+
+    if (transform)
+    {
+        oldPosition = transform->position;
+    }
+
     editorInteractionSystem.updateDragging(
         viewportPanel,
         *scene
     );
+
+    if (transform)
+    {
+        const bool changed =
+            transform->position.x != oldPosition.x ||
+            transform->position.y != oldPosition.y;
+
+        if (changed)
+        {
+            editorDocumentState.markDirty();
+        }
+    }
 }
 
 void GameLayer::handleEditorShortcuts()
@@ -1580,6 +1700,8 @@ void GameLayer::handleSceneEditorRequests()
                 name,
                 newScene
             );
+
+            editorDocumentState.reset();
         }
 
         sceneEditorPanel.resetNewSceneRequest();
@@ -1596,6 +1718,8 @@ void GameLayer::handleSceneEditorRequests()
                 sceneManager.getActiveSceneName(),
                 sceneManager.getActiveScene()
             );
+
+            editorDocumentState.reset();
         }
 
         sceneEditorPanel.resetSwitchSceneRequest();
@@ -1616,6 +1740,8 @@ void GameLayer::handleSceneEditorRequests()
                 nextSceneName,
                 nextScene
             );
+
+            editorDocumentState.reset();
         }
 
         sceneEditorPanel.resetDeleteSceneRequest();
@@ -1628,6 +1754,8 @@ void GameLayer::handleSceneEditorRequests()
             editorContext
         );
 
+        editorDocumentState.markDirty();
+
         sceneEditorPanel.resetCreateEntityRequest();
     }
 
@@ -1638,6 +1766,8 @@ void GameLayer::handleSceneEditorRequests()
             *scene,
             editorContext
         );
+
+        editorDocumentState.markDirty();
 
         sceneEditorPanel.resetDestroyEntityRequest();
     }
@@ -1652,6 +1782,8 @@ void GameLayer::handleHierarchyRequests()
             editorContext
         );
 
+        editorDocumentState.markDirty();
+
         hierarchyPanel.resetCreateEntityRequest();
     }
 
@@ -1661,6 +1793,8 @@ void GameLayer::handleHierarchyRequests()
             *scene,
             editorContext
         );
+
+        editorDocumentState.markDirty();
 
         hierarchyPanel.resetDuplicateEntityRequest();
     }
