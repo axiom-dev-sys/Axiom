@@ -351,3 +351,75 @@ for the first playable prototype.
 
 Complete the first playable gameplay prototype and provide a stable
 foundation for future game development using Axiom Engine.
+
+---
+
+## v1.6 — Editor–Engine Integration
+
+### Added
+
+- Editor Context architecture
+- Editor entity operations
+- Editor component operations
+- Editor interaction systems
+- Docking workspace
+- Persistent editor layout
+- ImGuiFileDialog integration
+- Scene Save As workflow
+- Scene Open workflow
+- Scene document state
+- Dirty / saved scene tracking
+- Unsaved Changes protection
+- Safe editor exit workflow
+
+### Improved
+
+- Editor and engine integration
+- Hierarchy and Inspector interaction
+- Scene Editor workflow
+- Asset Browser integration
+- Viewport editing workflow
+- Entity selection and manipulation
+- Scene creation and switching
+- Scene serialization workflow
+- Save / Save As / Open behavior
+- Runtime and editor interaction
+- Editor workspace organization
+- Status Bar scene information
+
+### Refactored
+
+- Editor panel communication
+- Editor request handling
+- GameLayer editor responsibilities
+- Scene editing operations
+- Component editing operations
+- Runtime/editor workflow
+- Scene document management
+- File menu workflow
+
+### Fixed
+
+- Scene Save As behavior
+- Scene Open behavior
+- Unsaved scene transitions
+- Unsaved changes when exiting
+- Window close protection
+- Scene dirty-state synchronization
+- Scene switching state issues
+- Runtime restart from Pause
+- Runtime restart after Win / Game Over
+- Various editor workflow and integration issues
+
+### Goal
+
+Complete the Editor–Engine Integration stage.
+
+Connect the editor more directly with the engine architecture and provide
+a consistent workflow for editing, saving, loading and testing scenes.
+
+Axiom 1.6 establishes a more complete editor workflow with docking,
+scene document state tracking, file dialogs, unsaved changes protection,
+and improved interaction between editor tools and engine systems.
+
+This stage prepares Axiom for Project-Driven Development in v1.7.

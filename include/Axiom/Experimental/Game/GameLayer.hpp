@@ -44,6 +44,7 @@ public:
     void onUpdate(float dt) override;
     void onRender() override;
     bool isExitRequested() const;
+    void requestExit();
 
     GameState getGameState() const
     {
@@ -112,6 +113,18 @@ private:
     void refreshCachedEntities();
     void handleGameRestart();
     void renderGameplayHUD();
+    void renderUnsavedChangesPopup();
+    void saveCurrentScene();
+    void executePendingEditorAction();
+
+    enum class PendingEditorAction
+    {
+        None,
+        LoadScene,
+        NewScene,
+        SwitchScene,
+        Exit
+    };
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -140,6 +153,11 @@ private:
     EditorDocumentState editorDocumentState;
     EditorTransformController editorTransformController;
     EditorCommandController editorCommandController;
+    PendingEditorAction pendingEditorAction = PendingEditorAction::None;
+    std::string pendingSceneSwitchName;
+
+    bool openUnsavedChangesPopup = false;
+
     GameState gameState = GameState::Gameplay;
 
     std::shared_ptr<Scene> editorScene;
@@ -162,7 +180,7 @@ private:
     Entity* camera = nullptr;
 
     bool restartKeyWasPressed = false;
-
+    bool exitConfirmed = false;
 };
 
 }

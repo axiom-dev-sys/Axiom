@@ -80,6 +80,14 @@ namespace Axiom {
 
             m_Window->swapBuffers();
             m_Window->pollEvents();
+
+            if (m_Window->shouldClose() &&
+                !m_GameLayer->isExitRequested())
+            {
+                m_Window->cancelClose();
+
+                m_GameLayer->requestExit();
+            }
         }
     }
 }

@@ -27,13 +27,17 @@ namespace Axiom {
 
         bool isSaveSceneRequested() const;
         void resetSaveSceneRequest();
+        void requestSaveScene();
 
         const std::string& getRequestedSaveScenePath() const;
 
         bool isLoadSceneRequested() const;
         void resetLoadSceneRequest();
+        void requestLoadScene();
 
         const std::string& getRequestedLoadScenePath() const;
+
+        void requestNewScene();
 
         void setEditorContext(EditorContext* context);
 
@@ -65,6 +69,9 @@ namespace Axiom {
 
         bool saveSceneRequested = false;
         bool loadSceneRequested = false;
+
+        bool openSaveDialogRequested = false;
+        bool openLoadDialogRequested = false;
 
         std::string requestedSaveScenePath;
         std::string requestedLoadScenePath;

@@ -97,6 +97,21 @@ namespace Axiom {
             deleteSceneRequested = true;
         }
 
+        if (openSaveDialogRequested)
+        {
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "SaveSceneDialog",
+                "Save Scene As",
+                ".scene",
+                config
+            );
+
+            openSaveDialogRequested = false;
+        }
+
         if (ImGui::Button("Save Scene As..."))
         {
             IGFD::FileDialogConfig config;
@@ -108,6 +123,21 @@ namespace Axiom {
                 ".scene",
                 config
             );
+        }
+
+        if (openLoadDialogRequested)
+        {
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "LoadSceneDialog",
+                "Load Scene",
+                ".scene",
+                config
+            );
+
+            openLoadDialogRequested = false;
         }
 
         if (ImGui::Button("Load Scene..."))
@@ -242,6 +272,11 @@ namespace Axiom {
         requestedSaveScenePath.clear();
     }
 
+    void SceneEditorPanel::requestSaveScene()
+    {
+        openSaveDialogRequested = true;
+    }
+
     const std::string& SceneEditorPanel::getRequestedSaveScenePath() const
     {
         return requestedSaveScenePath;
@@ -258,9 +293,19 @@ namespace Axiom {
         requestedLoadScenePath.clear();
     }
 
+    void SceneEditorPanel::requestLoadScene()
+    {
+        openLoadDialogRequested = true;
+    }
+
     const std::string& SceneEditorPanel::getRequestedLoadScenePath() const
     {
         return requestedLoadScenePath;
+    }
+
+    void SceneEditorPanel::requestNewScene()
+    {
+        newSceneRequested = true;
     }
 
     void SceneEditorPanel::setEditorContext(EditorContext* context)

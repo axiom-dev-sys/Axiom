@@ -55,7 +55,22 @@ GameLayer::GameLayer(Application* application)
 
     bool GameLayer::isExitRequested() const
     {
-        return editorUI.isExitRequested();
+        return exitConfirmed;
+    }
+
+    void GameLayer::requestExit()
+    {
+        if (editorDocumentState.isDirty())
+        {
+            pendingEditorAction =
+                PendingEditorAction::Exit;
+
+            openUnsavedChangesPopup = true;
+        }
+        else
+        {
+            exitConfirmed = true;
+        }
     }
 
     static std::string makeSceneSaveFileName(const std::string& sceneName)
@@ -252,80 +267,69 @@ void GameLayer::handleSceneSerialization()
     
     if (editorUI.isSaveSceneRequested())
     {
-        std::string savePath;
-
-        if (editorDocumentState.hasScenePath())
-        {
-            savePath = editorDocumentState.getScenePath();
-        }
-        else
-        {
-            savePath = Paths::getSave(
-                makeSceneSaveFileName(
-                    sceneManager.getActiveSceneName()
-                )
-            );
-
-            editorDocumentState.setScenePath(savePath);
-        }
-
-        SceneSerializer::save(
-            *scene,
-            savePath
-        );
-
-        editorDocumentState.markSaved();
+        saveCurrentScene();
 
         editorUI.resetSaveSceneRequest();
-
-        Log::info("Scene saved");
     }
 
     if (sceneEditorPanel.isLoadSceneRequested())
     {
-        const std::string& path =
-            sceneEditorPanel.getRequestedLoadScenePath();
-
-        if (!path.empty())
+        if (editorDocumentState.isDirty())
         {
-            editorContext.clearSelection();
+            pendingEditorAction =
+                PendingEditorAction::LoadScene;
 
-            SceneSerializer::load(
-                *scene,
-                path
-            );
-
-            editorDocumentState.setScenePath(path);
-            editorDocumentState.markSaved();
+            openUnsavedChangesPopup = true;
         }
+        else
+        {
+            const std::string& path =
+                sceneEditorPanel.getRequestedLoadScenePath();
 
-        sceneEditorPanel.resetLoadSceneRequest();
+            if (!path.empty())
+            {
+                editorContext.clearSelection();
 
-        Log::info("Scene loaded");
-    }
-    
-    if (editorUI.isLoadSceneRequested())
-    {
-        editorContext.clearSelection();
+                SceneSerializer::load(
+                    *scene,
+                    path
+                );
 
-        SceneSerializer::load(
-            *scene,
-            Paths::getSave(
-                makeSceneSaveFileName(
-                    sceneManager.getActiveSceneName()
-                )
-            )
-        );
+                editorDocumentState.setScenePath(path);
+                editorDocumentState.markSaved();
 
-        editorUI.resetLoadSceneRequest();
+                Log::info("Scene loaded");
+            }
 
-        Log::info("Scene loaded");
+            sceneEditorPanel.resetLoadSceneRequest();
+        }
     }
 }
 
 void GameLayer::handleEditorTools()
 {
     updateEditorPanels();
+
+    if (editorUI.isNewSceneRequested())
+    {
+        sceneEditorPanel.requestNewScene();
+
+        editorUI.resetNewSceneRequest();
+    }
+
+    if (editorUI.isSaveAsSceneRequested())
+    {
+        sceneEditorPanel.requestSaveScene();
+
+        editorUI.resetSaveAsSceneRequest();
+    }
+
+    if (editorUI.isLoadSceneRequested())
+    {
+        sceneEditorPanel.requestLoadScene();
+
+        editorUI.resetLoadSceneRequest();
+    }
 
     handleSceneEditorRequests();
     handleHierarchyRequests();
@@ -430,6 +434,13 @@ void GameLayer::handleEditorTools()
     refreshCachedEntities();
 
     editorContext.validateSelection();
+
+    if (editorUI.isExitRequested())
+    {
+        requestExit();
+        
+        editorUI.resetExitRequest();
+    }
 }
 
 void GameLayer::updateEditorStatus(float dt)
@@ -624,6 +635,8 @@ void GameLayer::handleGameRestart()
             stopRuntime();
             startRuntime();
 
+            gameState = GameState::Gameplay;
+
             m_Application->play();
         }
     }
@@ -687,6 +700,8 @@ void GameLayer::renderGameStateUI()
     {
         stopRuntime();
         startRuntime();
+
+        gameState = GameState::Gameplay;
 
         m_Application->play();
     }
@@ -757,6 +772,8 @@ void GameLayer::renderPauseUI()
     {
         stopRuntime();
         startRuntime();
+
+        gameState = GameState::Gameplay;
 
         m_Application->play();
     }
@@ -1688,23 +1705,39 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isNewSceneRequested())
     {
-        std::string name =
-            "New Scene " + std::to_string(sceneManager.getScenes().size() + 1);
-
-        auto newScene =
-            sceneManager.createScene(name);
-
-        if (newScene)
+        if (editorDocumentState.isDirty())
         {
-            setActiveScene(
-                name,
-                newScene
-            );
+            pendingEditorAction =
+                PendingEditorAction::NewScene;
 
-            editorDocumentState.reset();
+            openUnsavedChangesPopup = true;
+
+            sceneEditorPanel.resetNewSceneRequest();
         }
+        else
+        {
+            std::string name =
+                "New Scene " +
+                std::to_string(
+                    sceneManager.getScenes().size() + 1
+                );
 
-        sceneEditorPanel.resetNewSceneRequest();
+            auto newScene =
+                sceneManager.createScene(name);
+
+            if (newScene)
+            {
+                setActiveScene(
+                    name,
+                    newScene
+                );
+
+                editorDocumentState.reset();
+                editorDocumentState.markDirty();
+            }
+
+            sceneEditorPanel.resetNewSceneRequest();
+        }
     }
 
     if (sceneEditorPanel.isSwitchSceneRequested())
@@ -1712,17 +1745,38 @@ void GameLayer::handleSceneEditorRequests()
         const std::string& name =
             sceneEditorPanel.getRequestedSceneSwitchName();
 
-        if (sceneManager.switchScene(name))
+        if (name != sceneManager.getActiveSceneName())
         {
-            setActiveScene(
-                sceneManager.getActiveSceneName(),
-                sceneManager.getActiveScene()
-            );
+            if (editorDocumentState.isDirty())
+            {
+                pendingEditorAction =
+                    PendingEditorAction::SwitchScene;
 
-            editorDocumentState.reset();
+                pendingSceneSwitchName = name;
+
+                openUnsavedChangesPopup = true;
+
+                sceneEditorPanel.resetSwitchSceneRequest();
+            }
+            else
+            {
+                if (sceneManager.switchScene(name))
+                {
+                    setActiveScene(
+                        sceneManager.getActiveSceneName(),
+                        sceneManager.getActiveScene()
+                    );
+
+                    editorDocumentState.reset();
+                }
+
+                sceneEditorPanel.resetSwitchSceneRequest();
+            }
         }
-
-        sceneEditorPanel.resetSwitchSceneRequest();
+        else
+        {
+            sceneEditorPanel.resetSwitchSceneRequest();
+        }
     }
 
     if (sceneEditorPanel.isDeleteSceneRequested())
@@ -2001,6 +2055,196 @@ void GameLayer::renderGameplayHUD()
     ImGui::End();
 }
 
+void GameLayer::renderUnsavedChangesPopup()
+{
+    if (openUnsavedChangesPopup)
+    {
+        ImGui::OpenPopup("Unsaved Changes");
+        openUnsavedChangesPopup = false;
+    }
+
+    if (ImGui::BeginPopupModal(
+        "Unsaved Changes",
+        nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text(
+            "The current scene has unsaved changes."
+        );
+
+        ImGui::Text(
+            "Do you want to save them?"
+        );
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Save"))
+        {
+            saveCurrentScene();
+
+            executePendingEditorAction();
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Discard"))
+        {
+            executePendingEditorAction();
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel"))
+        {
+            if (pendingEditorAction ==
+                PendingEditorAction::LoadScene)
+            {
+                sceneEditorPanel.resetLoadSceneRequest();
+            }
+            else if (
+                pendingEditorAction ==
+                PendingEditorAction::NewScene)
+            {
+                sceneEditorPanel.resetNewSceneRequest();
+            }
+            else if (
+                pendingEditorAction ==
+                PendingEditorAction::SwitchScene)
+            {
+                pendingSceneSwitchName.clear();
+            }
+
+            pendingEditorAction =
+                PendingEditorAction::None;
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}
+
+void GameLayer::saveCurrentScene()
+{
+    std::string savePath;
+
+    if (editorDocumentState.hasScenePath())
+    {
+        savePath =
+            editorDocumentState.getScenePath();
+    }
+    else
+    {
+        savePath = Paths::getSave(
+            makeSceneSaveFileName(
+                sceneManager.getActiveSceneName()
+            )
+        );
+
+        editorDocumentState.setScenePath(
+            savePath
+        );
+    }
+
+    SceneSerializer::save(
+        *scene,
+        savePath
+    );
+
+    editorDocumentState.markSaved();
+
+    Log::info("Scene saved");
+}
+
+void GameLayer::executePendingEditorAction()
+{
+    if (pendingEditorAction == PendingEditorAction::LoadScene)
+    {
+        const std::string& path =
+            sceneEditorPanel.getRequestedLoadScenePath();
+
+        if (!path.empty())
+        {
+            editorContext.clearSelection();
+
+            SceneSerializer::load(
+                *scene,
+                path
+            );
+
+            editorDocumentState.setScenePath(path);
+            editorDocumentState.markSaved();
+
+            Log::info("Scene loaded");
+        }
+
+        sceneEditorPanel.resetLoadSceneRequest();
+    }
+    else if (
+        pendingEditorAction ==
+        PendingEditorAction::NewScene)
+    {
+        std::string name =
+            "New Scene " +
+            std::to_string(
+                sceneManager.getScenes().size() + 1
+            );
+
+        auto newScene =
+            sceneManager.createScene(name);
+
+        if (newScene)
+        {
+            setActiveScene(
+                name,
+                newScene
+            );
+
+            editorDocumentState.reset();
+            editorDocumentState.markDirty();
+
+            Log::info("New scene created");
+        }
+
+        sceneEditorPanel.resetNewSceneRequest();
+    }
+    else if (
+        pendingEditorAction ==
+        PendingEditorAction::SwitchScene)
+    {
+        if (!pendingSceneSwitchName.empty())
+        {
+            if (sceneManager.switchScene(
+                pendingSceneSwitchName))
+            {
+                setActiveScene(
+                    sceneManager.getActiveSceneName(),
+                    sceneManager.getActiveScene()
+                );
+
+                editorDocumentState.reset();
+
+                Log::info("Scene switched");
+            }
+        }
+
+        pendingSceneSwitchName.clear();
+    }
+    else if (
+        pendingEditorAction ==
+        PendingEditorAction::Exit)
+    {
+        exitConfirmed = true;
+    }
+
+    pendingEditorAction =
+        PendingEditorAction::None;
+}
+
 void GameLayer::onRender()
 {
     if (!scene)
@@ -2071,6 +2315,8 @@ void GameLayer::onRender()
     {
         preferencesPanel.render();
     }
+
+    renderUnsavedChangesPopup();
 }
 
 }

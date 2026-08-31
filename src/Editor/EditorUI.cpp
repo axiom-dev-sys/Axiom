@@ -14,14 +14,26 @@ namespace Axiom {
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Save Scene"))
+                if (ImGui::MenuItem("New Scene"))
+                {
+                    newSceneRequested = true;
+                }
+
+                if (ImGui::MenuItem("Open Scene..."))
+                {
+                    loadSceneRequested = true;
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Save"))
                 {
                     saveSceneRequested = true;
                 }
 
-                if (ImGui::MenuItem("Load Scene"))
+                if (ImGui::MenuItem("Save As..."))
                 {
-                    loadSceneRequested = true;
+                    saveAsSceneRequested = true;
                 }
 
                 ImGui::Separator();
@@ -247,6 +259,21 @@ namespace Axiom {
         saveSceneRequested = true;
     }
 
+    bool EditorUI::isSaveAsSceneRequested() const
+    {
+        return saveAsSceneRequested;
+    }
+
+    void EditorUI::requestSaveAsScene()
+    {
+        saveAsSceneRequested = true;
+    }
+
+    void EditorUI::resetSaveAsSceneRequest()
+    {
+        saveAsSceneRequested = false;
+    }
+
     bool EditorUI::isLoadSceneRequested() const
     {
         return loadSceneRequested;
@@ -255,6 +282,16 @@ namespace Axiom {
     void EditorUI::requestLoadScene()
     {
         loadSceneRequested = true;
+    }
+
+    bool EditorUI::isNewSceneRequested() const
+    {
+        return newSceneRequested;
+    }
+
+    void EditorUI::resetNewSceneRequest()
+    {
+        newSceneRequested = false;
     }
 
     bool EditorUI::isExitRequested() const
