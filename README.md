@@ -9,14 +9,17 @@ Its core systems include ECS, scene management, resource management, scene seria
 
 ## Editor
 
-The second generation of the Axiom Editor.
+The Axiom Editor provides an integrated workspace for building and testing 2D scenes.
 
-The editor now includes a viewport-based workflow with integrated tools
-for scene editing, entity inspection, asset management, debugging,
-and runtime control.
+The editor includes a dockable workspace with tools for scene editing,
+entity inspection, asset management, debugging, and runtime control.
 
-It provides entity selection, dragging, grid snapping, scene management,
-runtime interaction, and development tools for 2D game creation.
+It supports entity selection and manipulation, grid snapping,
+scene creation and switching, scene serialization, file dialogs,
+runtime interaction, and persistent editor layouts.
+
+The editor also tracks the state of the current scene and protects
+unsaved changes when opening, creating, switching scenes, or exiting.
 
 ![Axiom Editor](docs/images/axiom-editor.png)
 
@@ -54,6 +57,17 @@ runtime interaction, and development tools for 2D game creation.
   - Status Bar
   - Preferences Panel
   - Viewport Panel
+  - Docking Workspace
+  - Persistent Editor Layout
+  - Editor Context
+  - Scene Document State
+  - Scene Dirty State Tracking
+  - New / Open / Save / Save As
+  - Unsaved Changes Protection
+  - Scene Switching
+  - Entity Selection and Manipulation
+  - Grid and Snapping Tools
+  - File Dialog Integration
 
 - Runtime
   - Runtime Session Lifecycle
@@ -76,6 +90,7 @@ runtime interaction, and development tools for 2D game creation.
 - GLAD
 - GLM
 - ImGui
+- ImGuiFileDialog
 - stb_image
 - CMake
 
@@ -114,16 +129,22 @@ Build and run the project
 
 ## Current Status
 
-Axiom Engine 1.5.x completes the first playable gameplay prototype.
+Axiom Engine 1.6.x completes the Editor–Engine Integration stage.
 
-The engine now combines the second generation editor with a complete runtime
-workflow, gameplay systems, enemy AI, gameplay balancing, runtime UI,
-and menu-driven game flow.
+The editor and engine systems now work through a more unified workflow
+for scene editing, serialization, runtime testing, and project interaction.
 
-Axiom currently provides a complete foundation for creating 2D games,
-including rendering, ECS, scene management, runtime architecture,
-resource management, gameplay systems, debugging tools,
-and an integrated editor.
+The editor includes a dockable workspace, persistent layouts,
+scene and entity editing tools, file dialogs, scene document state tracking,
+and protection against losing unsaved changes.
 
-The next stage of development will focus on expanding gameplay features
-and preparing the engine for larger original projects.
+The runtime provides Play / Pause / Stop controls, a main menu,
+gameplay systems, enemy AI, power management, gameplay HUD,
+difficulty selection, restart handling, and Win / Game Over states.
+
+Axiom currently provides a stable foundation for developing and testing
+2D games directly through its integrated editor and runtime environment.
+
+The next development stage, Axiom Engine 1.7.x, will focus on
+Project-Driven Development and evolving the engine around the needs
+of an actual game project.

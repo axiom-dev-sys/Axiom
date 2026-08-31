@@ -23,6 +23,11 @@ namespace Axiom {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
 
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+        io.IniFilename = "imgui.ini";
+
         EditorFontManager::loadDefaultFont();
 
         ImGui::StyleColorsDark();
@@ -75,6 +80,14 @@ namespace Axiom {
 
             m_Window->swapBuffers();
             m_Window->pollEvents();
+
+            if (m_Window->shouldClose() &&
+                !m_GameLayer->isExitRequested())
+            {
+                m_Window->cancelClose();
+
+                m_GameLayer->requestExit();
+            }
         }
     }
 }

@@ -1,6 +1,11 @@
 #include "Axiom/Editor/Panels/AssetBrowserPanel.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
+#include "Axiom/Resource/ResourceManager.hpp"
+#include "Axiom/Scene/Components/SpriteComponent.hpp"
+#include "Axiom/Scene/Scene.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <imgui.h>
 
 namespace Axiom {
@@ -11,6 +16,16 @@ namespace Axiom {
             return;
 
         ImGui::Begin("Asset Browser");
+
+        const float footerHeight =
+            ImGui::GetFrameHeightWithSpacing() + 32.0f;
+
+        ImGui::BeginChild(
+            "AssetBrowserContent",
+            ImVec2(0.0f, -footerHeight),
+            false,
+            ImGuiWindowFlags_AlwaysVerticalScrollbar
+        );
 
         ImGui::Text("Assets");
         ImGui::Text("Count: %d", AssetRegistry::getRegisteredTextureCount());
@@ -39,6 +54,38 @@ namespace Axiom {
         {
             for (const std::string& textureID : textureIDs)
             {
+                if (searchBuffer[0] != '\0')
+                {
+                    std::string textureName = textureID;
+                    std::string searchText = searchBuffer;
+
+                    std::transform(
+                        textureName.begin(),
+                        textureName.end(),
+                        textureName.begin(),
+                        [](unsigned char c)
+                        {
+                            return static_cast<char>(std::tolower(c));
+                        }
+                    );
+
+                    std::transform(
+                        searchText.begin(),
+                        searchText.end(),
+                        searchText.begin(),
+                        [](unsigned char c)
+                        {
+                            return static_cast<char>(std::tolower(c));
+                        }
+                    );
+
+                    if (textureName.find(searchText) ==
+                        std::string::npos)
+                    {
+                        continue;
+                    }
+                }
+
                 const bool selected =
                     selectedAsset == textureID;
 
@@ -80,21 +127,65 @@ namespace Axiom {
             ImGui::Text("Type: %s", getAssetType(selectedAsset).c_str());
         }
 
-        ImGui::Text(
-            "Loaded: %s",
-            isAssetLoaded(selectedAsset)
-            ? "Yes"
-            : "No"
-        );
-
-        if (!selectedAsset.empty())
+        if (selectedAsset.empty())
         {
-            if (ImGui::Button("Apply to Selected Entity"))
-            {
-                applyAssetRequested = true;
-            }
+            ImGui::Text("Registered: No");
+            ImGui::Text("Loaded: No");
+        }
+        else
+        {
+            ImGui::Text(
+                "Registered: %s",
+                AssetRegistry::isTextureRegistered(selectedAsset)
+                ? "Yes"
+                : "No"
+            );
+
+            ImGui::Text(
+                "Loaded: %s",
+                isAssetLoaded(selectedAsset)
+                ? "Yes"
+                : "No"
+            );
         }
 
+        ImGui::EndChild();
+
+        ImGui::Dummy(ImVec2(0.0f, 4.0f));
+        
+        Entity* selectedEntity =
+            editorContext
+            ? editorContext->getSelectedEntity()
+            : nullptr;
+        
+        Scene* scene =
+            editorContext
+            ? editorContext->getScene()
+            : nullptr;
+        
+        const bool canApply =
+            !selectedAsset.empty() &&
+            selectedEntity &&
+            scene &&
+            scene->containsEntity(selectedEntity) &&
+            !selectedEntity->isDestroyed() &&
+            selectedEntity->hasComponent<SpriteComponent>();
+        
+        if (!canApply)
+        {
+            ImGui::BeginDisabled();
+        }
+        
+        if (ImGui::Button("Apply to Selected Entity", ImVec2(-1.0f, 0.0f)))
+        {
+            applyAssetRequested = true;
+        }
+        
+        if (!canApply)
+        {
+            ImGui::EndDisabled();
+        }
+        
         ImGui::End();
     }
 
@@ -113,29 +204,9 @@ namespace Axiom {
         visible = !visible;
     }
 
-    void AssetBrowserPanel::addAsset(const std::string& name)
-    {
-        assets.push_back(name);
-    }
-
-    void AssetBrowserPanel::clear()
-    {
-        assets.clear();
-    }
-
     const std::string& AssetBrowserPanel::getSelectedAsset() const
     {
         return selectedAsset;
-    }
-
-    bool AssetBrowserPanel::isApplyAssetRequested() const
-    {
-        return applyAssetRequested;
-    }
-
-    void AssetBrowserPanel::resetApplyAssetRequest()
-    {
-        applyAssetRequested = false;
     }
 
     void AssetBrowserPanel::setEditorContext(EditorContext* context)
@@ -150,7 +221,20 @@ namespace Axiom {
 
     bool AssetBrowserPanel::isAssetLoaded(const std::string& name) const
     {
-        return !name.empty();
+        if (name.empty())
+            return false;
+
+        return ResourceManager::isTextureLoaded(name);
+    }
+
+    bool AssetBrowserPanel::isApplyAssetRequested() const
+    {
+        return applyAssetRequested;
+    }
+
+    void AssetBrowserPanel::resetApplyAssetRequest()
+    {
+        applyAssetRequested = false;
     }
 
 }

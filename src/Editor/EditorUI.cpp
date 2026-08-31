@@ -2,24 +2,38 @@
 #include "Axiom/Core/Version.hpp"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 namespace Axiom {
 
     void EditorUI::render()
     {
+        renderDockSpace();
 
         if (ImGui::BeginMainMenuBar())
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Save Scene"))
+                if (ImGui::MenuItem("New Scene"))
+                {
+                    newSceneRequested = true;
+                }
+
+                if (ImGui::MenuItem("Open Scene..."))
+                {
+                    loadSceneRequested = true;
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Save"))
                 {
                     saveSceneRequested = true;
                 }
 
-                if (ImGui::MenuItem("Load Scene"))
+                if (ImGui::MenuItem("Save As..."))
                 {
-                    loadSceneRequested = true;
+                    saveAsSceneRequested = true;
                 }
 
                 ImGui::Separator();
@@ -45,6 +59,13 @@ namespace Axiom {
                 ImGui::MenuItem("Status Bar", nullptr, &showStatusBar);
                 ImGui::MenuItem("Preferences", nullptr, &showPreferences);
                 ImGui::MenuItem("Viewport", nullptr, &showViewport);
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Reset Layout"))
+                {
+                    m_ResetDockLayoutRequested = true;
+                }
 
                 ImGui::EndMenu();
             }
@@ -112,13 +133,26 @@ namespace Axiom {
 
             if (showStatusBar)
             {
+                ImGuiViewport* viewport =
+                    ImGui::GetMainViewport();
+
+                const float statusBarHeight = 30.0f;
+
                 ImGui::SetNextWindowPos(
-                    ImVec2(0, 690),
+                    ImVec2(
+                        viewport->WorkPos.x,
+                        viewport->WorkPos.y +
+                        viewport->WorkSize.y -
+                        statusBarHeight
+                    ),
                     ImGuiCond_Always
                 );
 
                 ImGui::SetNextWindowSize(
-                    ImVec2(1280, 30),
+                    ImVec2(
+                        viewport->WorkSize.x,
+                        statusBarHeight
+                    ),
                     ImGuiCond_Always
                 );
 
@@ -140,7 +174,7 @@ namespace Axiom {
                 ImGui::SameLine(180);
                 ImGui::Text("Scene: %s", sceneName.c_str());
 
-                ImGui::SameLine(420);
+                ImGui::SameLine(450);
 
                 if (gameState == "Play")
                 {
@@ -225,6 +259,21 @@ namespace Axiom {
         saveSceneRequested = true;
     }
 
+    bool EditorUI::isSaveAsSceneRequested() const
+    {
+        return saveAsSceneRequested;
+    }
+
+    void EditorUI::requestSaveAsScene()
+    {
+        saveAsSceneRequested = true;
+    }
+
+    void EditorUI::resetSaveAsSceneRequest()
+    {
+        saveAsSceneRequested = false;
+    }
+
     bool EditorUI::isLoadSceneRequested() const
     {
         return loadSceneRequested;
@@ -233,6 +282,16 @@ namespace Axiom {
     void EditorUI::requestLoadScene()
     {
         loadSceneRequested = true;
+    }
+
+    bool EditorUI::isNewSceneRequested() const
+    {
+        return newSceneRequested;
+    }
+
+    void EditorUI::resetNewSceneRequest()
+    {
+        newSceneRequested = false;
     }
 
     bool EditorUI::isExitRequested() const
@@ -318,6 +377,142 @@ namespace Axiom {
     bool EditorUI::isViewportVisible() const
     {
         return showViewport;
+    }
+
+    void EditorUI::renderDockSpace()
+    {
+        ImGuiID dockspaceID =
+            ImGui::GetID("AxiomDockSpace");
+
+        ImGui::DockSpaceOverViewport(
+            dockspaceID,
+            ImGui::GetMainViewport(),
+            ImGuiDockNodeFlags_PassthruCentralNode
+        );
+
+        if (m_ResetDockLayoutRequested)
+        {
+            setupDefaultDockLayout(dockspaceID);
+            
+            m_ResetDockLayoutRequested = false;
+            m_DockLayoutInitialized = true;
+            return;
+        }
+
+        if (!m_DockLayoutInitialized)
+        {
+            ImGuiDockNode* node =
+                ImGui::DockBuilderGetNode(dockspaceID);
+
+            if (!node)
+            {
+                setupDefaultDockLayout(dockspaceID);
+            }
+
+            m_DockLayoutInitialized = true;
+        }
+    }
+
+    void EditorUI::setupDefaultDockLayout(
+        ImGuiID dockspaceID)
+    {
+        ImGuiViewport* viewport =
+            ImGui::GetMainViewport();
+
+        ImGui::DockBuilderRemoveNode(
+            dockspaceID
+        );
+
+        ImGui::DockBuilderAddNode(
+            dockspaceID,
+            ImGuiDockNodeFlags_DockSpace
+        );
+
+        ImGui::DockBuilderSetNodeSize(
+            dockspaceID,
+            viewport->WorkSize
+        );
+
+        ImGuiID dockMainID =
+            dockspaceID;
+
+        ImGuiID dockLeftID =
+            ImGui::DockBuilderSplitNode(
+                dockMainID,
+                ImGuiDir_Left,
+                0.18f,
+                nullptr,
+                &dockMainID
+            );
+
+        ImGuiID dockRightID =
+            ImGui::DockBuilderSplitNode(
+                dockMainID,
+                ImGuiDir_Right,
+                0.20f,
+                nullptr,
+                &dockMainID
+            );
+
+        ImGuiID dockBottomID =
+            ImGui::DockBuilderSplitNode(
+                dockMainID,
+                ImGuiDir_Down,
+                0.30f,
+                nullptr,
+                &dockMainID
+            );
+
+        ImGuiID dockBottomLeftID =
+            dockBottomID;
+
+        ImGuiID dockBottomRightID =
+            ImGui::DockBuilderSplitNode(
+                dockBottomLeftID,
+                ImGuiDir_Right,
+                0.40f,
+                nullptr,
+                &dockBottomLeftID
+            );
+
+        ImGui::DockBuilderDockWindow(
+            "Hierarchy",
+            dockLeftID
+        );
+
+        ImGui::DockBuilderDockWindow(
+            "Scene Editor",
+            dockLeftID
+        );
+
+        ImGui::DockBuilderDockWindow(
+            "Inspector",
+            dockRightID
+        );
+
+        ImGui::DockBuilderDockWindow(
+            "Statistics",
+            dockRightID
+        );
+
+        ImGui::DockBuilderDockWindow(
+            "Asset Browser",
+            dockBottomLeftID
+        );
+
+        ImGui::DockBuilderDockWindow(
+            "Console",
+            dockBottomRightID
+        );
+
+        ImGui::DockBuilderDockWindow(
+            "Viewport",
+            dockMainID
+        );
+
+        ImGui::DockBuilderFinish(
+            dockspaceID
+        );
     }
 
 }

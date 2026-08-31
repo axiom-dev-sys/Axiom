@@ -1,4 +1,5 @@
 #include "Axiom/Editor/Panels/HierarchyPanel.hpp"
+#include "Axiom/Scene/Scene.hpp"
 
 #include <imgui.h>
 #include <string>
@@ -35,134 +36,133 @@ namespace Axiom {
 
         ImGui::Separator();
 
-        for (Entity* entity : entities)
+        Scene* scene =
+            editorContext ? editorContext->getScene() : nullptr;
+
+        if (scene)
         {
-            if (!entity)
-                continue;
-
-            if (entity->isDestroyed())
-                continue;
-
-            if (searchBuffer[0] != '\0')
+            scene->forEach([&](Entity* entity)
             {
-                std::string entityName =
-                    entity->getName();
+                if (!entity)
+                    return;
 
-                std::string searchText =
-                    searchBuffer;
+                if (entity->isDestroyed())
+                    return;
 
-                std::transform(
-                    entityName.begin(),
-                    entityName.end(),
-                    entityName.begin(),
-                    [](unsigned char c)
-                    {
-                        return static_cast<char>(
-                            std::tolower(c)
+                if (searchBuffer[0] != '\0')
+                {
+                    std::string entityName =
+                        entity->getName();
+
+                    std::string searchText =
+                        searchBuffer;
+
+                    std::transform(
+                        entityName.begin(),
+                        entityName.end(),
+                        entityName.begin(),
+                        [](unsigned char c)
+                        {
+                            return static_cast<char>(
+                                std::tolower(c)
                             );
-                    }
-                );
-
-                std::transform(
-                    searchText.begin(),
-                    searchText.end(),
-                    searchText.begin(),
-                    [](unsigned char c)
-                    {
-                        return static_cast<char>(
-                            std::tolower(c)
-                            );
-                    }
-                );
-
-                if (entityName.find(searchText) ==
-                    std::string::npos)
-                {
-                    continue;
-                }
-            }
-
-            Entity* selectedEntity =
-                editorContext ? editorContext->getSelectedEntity() : nullptr;
-
-            bool selected = (entity == selectedEntity);
-
-            std::string label =
-                entity->getName() + "##" + std::to_string(entity->getID());
-
-            if (renameEntity == entity)
-            {
-                ImGui::SetNextItemWidth(-1);
-
-                if (ImGui::InputText(
-                    "##Rename",
-                    renameBuffer,
-                    sizeof(renameBuffer),
-                    ImGuiInputTextFlags_EnterReturnsTrue))
-                {
-                    entity->setName(renameBuffer);
-                    renameEntity = nullptr;
-                }
-            }
-            else
-            {
-                if (ImGui::Selectable(label.c_str(),
-                    selected,
-                    ImGuiSelectableFlags_AllowDoubleClick))
-                {
-                    if (editorContext)
-                    {
-                        editorContext->setSelectedEntity(entity);
-                    }
-                }
-            }
-
-            if (ImGui::BeginPopupContextItem())
-            {
-                if (ImGui::MenuItem("Rename"))
-                {
-                    renameEntity = entity;
-
-                    std::strncpy(
-                        renameBuffer,
-                        entity->getName().c_str(),
-                        sizeof(renameBuffer)
+                        }
                     );
 
-                    renameBuffer[sizeof(renameBuffer) - 1] = '\0';
-                }
+                    std::transform(
+                        searchText.begin(),
+                        searchText.end(),
+                        searchText.begin(),
+                        [](unsigned char c)
+                        {
+                            return static_cast<char>(
+                                std::tolower(c)
+                            );
+                        }
+                    );
 
-                if (ImGui::MenuItem("Focus"))
-                {
-                    focusEntityRequest = entity;
-                }
-
-                if (ImGui::MenuItem("Select"))
-                {
-                    if (editorContext)
+                    if (entityName.find(searchText) ==
+                        std::string::npos)
                     {
+                        return;
+                    }
+                }
+
+                Entity* selectedEntity =
+                    editorContext->getSelectedEntity();
+
+                bool selected = entity == selectedEntity;
+
+                std::string label =
+                    entity->getName() + "##" + std::to_string(entity->getID());
+
+                if (renameEntity == entity)
+                {
+                    ImGui::SetNextItemWidth(-1);
+
+                    if (ImGui::InputText(
+                        "##Rename",
+                        renameBuffer,
+                        sizeof(renameBuffer),
+                        ImGuiInputTextFlags_EnterReturnsTrue))
+                    {
+                        entity->setName(renameBuffer);
+                        renameEntity = nullptr;
+                    }
+                }
+                else
+                {
+                    if (ImGui::Selectable(label.c_str(),
+                        selected,
+                        ImGuiSelectableFlags_AllowDoubleClick))
+                    {    
                         editorContext->setSelectedEntity(entity);
                     }
                 }
 
-                if (ImGui::MenuItem("Duplicate"))
+                if (ImGui::BeginPopupContextItem())
                 {
-                    duplicateEntity = entity;
-                }
-
-                if (ImGui::MenuItem("Delete"))
-                {
-                    entity->destroy();
-
-                    if (editorContext &&
-                        editorContext->getSelectedEntity() == entity)
+                    if (ImGui::MenuItem("Rename"))
                     {
-                        editorContext->clearSelection();
-                    }
-                }
+                        renameEntity = entity;
 
-                ImGui::EndPopup();
-            }
+                        std::strncpy(
+                            renameBuffer,
+                            entity->getName().c_str(),
+                            sizeof(renameBuffer)
+                        );
+
+                        renameBuffer[sizeof(renameBuffer) - 1] = '\0';
+                    }
+
+                    if (ImGui::MenuItem("Focus"))
+                    {
+                        focusEntityRequest = entity;
+                    }
+
+                    if (ImGui::MenuItem("Select"))
+                    {
+                        editorContext->setSelectedEntity(entity);
+                    }
+
+                    if (ImGui::MenuItem("Duplicate"))
+                    {
+                        duplicateEntity = entity;
+                    }
+
+                    if (ImGui::MenuItem("Delete"))
+                    {
+                        entity->destroy();
+
+                        if (editorContext->getSelectedEntity() == entity)
+                        {
+                            editorContext->clearSelection();
+                        }
+                    }
+
+                    ImGui::EndPopup();
+                }
+            });
         }
 
         if (ImGui::BeginPopupContextWindow("HierarchyContextWindow", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
@@ -225,19 +225,6 @@ namespace Axiom {
     void HierarchyPanel::toggle()
     {
         visible = !visible;
-    }
-
-    void HierarchyPanel::addEntity(Entity* entity)
-    {
-        if (!entity)
-            return;
-
-        entities.push_back(entity);
-    }
-
-    void HierarchyPanel::clear()
-    {
-        entities.clear();
     }
 
     void HierarchyPanel::setEditorContext(EditorContext* context)

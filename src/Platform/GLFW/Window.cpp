@@ -59,6 +59,14 @@ namespace Axiom {
         glfwSetWindowShouldClose(m_Window, GLFW_TRUE);
     }
 
+    void Window::cancelClose()
+    {
+        glfwSetWindowShouldClose(
+            m_Window,
+            GLFW_FALSE
+        );
+    }
+
     void Window::pollEvents()
     {
         glfwPollEvents();

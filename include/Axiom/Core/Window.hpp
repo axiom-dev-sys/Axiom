@@ -13,6 +13,7 @@ namespace Axiom {
 
 		bool shouldClose() const;
 		void close();
+		void cancelClose();
 		void pollEvents();
 		void swapBuffers();
 

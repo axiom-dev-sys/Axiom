@@ -3,7 +3,6 @@
 #include "Axiom/Scene/Entity.hpp"
 #include "Axiom/Editor/EditorContext.hpp"
 
-#include <vector>
 #include <string>
 
 namespace Axiom {
@@ -17,9 +16,6 @@ namespace Axiom {
         bool isVisible() const;
 
         void toggle();
-
-        void addEntity(Entity* entity);
-        void clear();
 
         void setEditorContext(EditorContext* context);
 
@@ -41,8 +37,6 @@ namespace Axiom {
 
     private:
         bool visible = true;
-
-        std::vector<Entity*> entities;
 
         EditorContext* editorContext = nullptr;
 

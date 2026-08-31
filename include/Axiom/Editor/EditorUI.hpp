@@ -1,5 +1,7 @@
 #pragma once
 
+#include <imgui.h>
+
 #include <string>
 
 namespace Axiom {
@@ -17,8 +19,13 @@ namespace Axiom {
         bool isAssetBrowserVisible() const;
         bool isSaveSceneRequested() const;
         void requestSaveScene();
+        bool isSaveAsSceneRequested() const;
+        void requestSaveAsScene();
+        void resetSaveAsSceneRequest();
         bool isLoadSceneRequested() const;
         void requestLoadScene();
+        bool isNewSceneRequested() const;
+        void resetNewSceneRequest();
         bool isExitRequested() const;
         void resetSaveSceneRequest();
         void resetLoadSceneRequest();
@@ -54,7 +61,9 @@ namespace Axiom {
         bool showHierarchy = true;
         bool showSceneEditor = true;
         bool showAssetBrowser = true;
+        bool newSceneRequested = false;
         bool saveSceneRequested = false;
+        bool saveAsSceneRequested = false;
         bool loadSceneRequested = false;
         bool exitRequested = false;
         bool showAboutWindow = false;
@@ -77,6 +86,13 @@ namespace Axiom {
         bool showViewport = true;
 
         bool snapEnabled = false;
+
+        void renderDockSpace();
+
+        void setupDefaultDockLayout(ImGuiID dockspaceID);
+
+        bool m_DockLayoutInitialized = false;
+        bool m_ResetDockLayoutRequested = false;
     };
 
 }

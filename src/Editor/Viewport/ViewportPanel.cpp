@@ -1,4 +1,5 @@
 #include "Axiom/Editor/ViewPort/ViewportPanel.hpp"
+#include "Axiom/Scene/Scene.hpp"
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -118,6 +119,54 @@ namespace Axiom {
             );
     }
 
+    bool ViewportPanel::getMouseWorldPosition(
+        glm::vec2& worldPosition) const
+    {
+        if (!m_EditorContext)
+            return false;
+
+        Scene* scene =
+            m_EditorContext->getScene();
+
+        if (!scene)
+            return false;
+
+        if (m_Size.x <= 0.0f ||
+            m_Size.y <= 0.0f)
+        {
+            return false;
+        }
+
+        const ImVec2 mousePosition =
+            ImGui::GetMousePos();
+
+        const float localX =
+            mousePosition.x - m_BoundsMin.x;
+
+        const float localY =
+            mousePosition.y - m_BoundsMin.y;
+
+        const float normalizedX =
+            localX / m_Size.x;
+
+        const float normalizedY =
+            localY / m_Size.y;
+
+        worldPosition.x =
+            scene->camera.position.x +
+            (normalizedX * 2.0f - 1.0f) *
+            640.0f *
+            scene->camera.zoom;
+
+        worldPosition.y =
+            scene->camera.position.y +
+            (1.0f - normalizedY * 2.0f) *
+            360.0f *
+            scene->camera.zoom;
+
+        return true;
+    }
+
     void ViewportPanel::beginRender()
     {
         m_Framebuffer->bind();
@@ -160,6 +209,11 @@ namespace Axiom {
     const ImVec2& ViewportPanel::getBoundsMax() const
     {
         return m_BoundsMax;
+    }
+
+    void ViewportPanel::setEditorContext(EditorContext* context)
+    {
+        m_EditorContext = context;
     }
 
 }

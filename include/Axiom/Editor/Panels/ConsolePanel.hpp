@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 namespace Axiom {
 
@@ -19,7 +18,6 @@ namespace Axiom {
 
     private:
         bool visible = true;
-        std::vector<std::string> logs;
 
         bool autoScroll = true;
         bool scrollToBottom = false;

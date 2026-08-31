@@ -18,6 +18,10 @@ namespace Axiom {
 
         static int getLoadedTextureCount();
 
+        static bool isTextureLoaded(
+            const std::string& name
+        );
+
     private:
         static std::unordered_map<std::string, std::unique_ptr<Texture>> s_Textures;
         static std::unique_ptr<Texture> s_FallbackTexture;

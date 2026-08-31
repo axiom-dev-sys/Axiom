@@ -68,6 +68,13 @@ namespace Axiom {
         return static_cast<int>(s_Textures.size());
     }
 
+    bool ResourceManager::isTextureLoaded(
+        const std::string& name)
+    {
+        return s_Textures.find(name) !=
+            s_Textures.end();
+    }
+
     Texture* ResourceManager::getFallback()
     {
         if (!s_FallbackTexture)

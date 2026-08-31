@@ -19,6 +19,12 @@ namespace Axiom {
         cleanupDestroyedEntities();
     }
 
+    void Scene::clear()
+    {
+        m_Entities.clear();
+        m_NextEntityID = 1;
+    }
+
     std::shared_ptr<Scene> Scene::clone() const
     {
         auto newScene = std::make_shared<Scene>();

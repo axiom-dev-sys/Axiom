@@ -2,7 +2,7 @@
 #include "Axiom/Resource/ResourceManager.hpp"
 #include "Axiom/Resource/AssetRegistry.hpp"
 #include "Axiom/Core/Paths.hpp"
-#include "Axiom/Renderer/Renderer.hpp"
+#include "Axiom/Core/Log.hpp"
 #include "Axiom/Scene/SceneSerializer.hpp"
 #include "Axiom/Scene/Components/SpriteComponent.hpp"
 #include "Axiom/Scene/Components/TransformComponent.hpp" 
@@ -18,7 +18,7 @@
 #include <imgui.h>
 #include <cmath>
 #include <string>
-#include <algorithm>
+#include <filesystem>
 
 namespace Axiom {
 
@@ -27,9 +27,9 @@ GameLayer::GameLayer(Application* application)
 {
     initializeDefaultScene();
 
-    consolePanel.addLog("[INFO] Axiom editor started");
-    consolePanel.addLog("[INFO] Gameplay scene loaded");
-    consolePanel.addLog("[INFO] ResourceManager initialized");
+    Log::info("Axiom editor started");
+    Log::info("Gameplay scene loaded");
+    Log::info("ResourceManager initialized");
 }
 
     glm::vec2 GameLayer::getPlayerPosition() const
@@ -55,7 +55,22 @@ GameLayer::GameLayer(Application* application)
 
     bool GameLayer::isExitRequested() const
     {
-        return editorUI.isExitRequested();
+        return exitConfirmed;
+    }
+
+    void GameLayer::requestExit()
+    {
+        if (editorDocumentState.isDirty())
+        {
+            pendingEditorAction =
+                PendingEditorAction::Exit;
+
+            openUnsavedChangesPopup = true;
+        }
+        else
+        {
+            exitConfirmed = true;
+        }
     }
 
     static std::string makeSceneSaveFileName(const std::string& sceneName)
@@ -87,10 +102,8 @@ void GameLayer::onUpdate(float dt)
     updateDebugRenderer();
     handleSceneSerialization();
     handleEditorTools();
-    updateInspectorInfo();
     updateEditorStatus(dt);
     updateGameplay(dt);
-
 }
 
 void GameLayer::handleInteractions()
@@ -133,6 +146,8 @@ void GameLayer::refreshSceneReferences()
     {
         player = nullptr;
         test = nullptr;
+        office = nullptr;
+        camera = nullptr;
         return;
     }
 
@@ -229,135 +244,207 @@ void GameLayer::resetGameSession()
 
 void GameLayer::handleSceneSerialization()
 {
-    if (sceneEditorPanel.isSaveSceneRequested() ||
-        editorUI.isSaveSceneRequested())
+    if (sceneEditorPanel.isSaveSceneRequested())
     {
-        SceneSerializer::save(
-            *scene,
-            Paths::getSave(
-                makeSceneSaveFileName(
-                    sceneManager.getActiveSceneName()
-                )
-            )
-        );
+        const std::string& path =
+            sceneEditorPanel.getRequestedSaveScenePath();
+
+        if (!path.empty())
+        {
+            SceneSerializer::save(
+                *scene,
+                path
+            );
+
+            editorDocumentState.setScenePath(path);
+            editorDocumentState.markSaved();
+
+            Log::info("Scene saved");
+        }
 
         sceneEditorPanel.resetSaveSceneRequest();
-        editorUI.resetSaveSceneRequest();
+    }
+    
+    if (editorUI.isSaveSceneRequested())
+    {
+        saveCurrentScene();
 
-        consolePanel.addLog("[INFO] Scene saved");
+        editorUI.resetSaveSceneRequest();
     }
 
-    if (sceneEditorPanel.isLoadSceneRequested() ||
-        editorUI.isLoadSceneRequested())
+    if (sceneEditorPanel.isLoadSceneRequested())
     {
-        SceneSerializer::load(
-            *scene,
-            Paths::getSave(
-                makeSceneSaveFileName(
-                    sceneManager.getActiveSceneName()
-                )
-            )
-        );
+        if (editorDocumentState.isDirty())
+        {
+            pendingEditorAction =
+                PendingEditorAction::LoadScene;
 
-        refreshSceneReferences();
+            openUnsavedChangesPopup = true;
+        }
+        else
+        {
+            const std::string& path =
+                sceneEditorPanel.getRequestedLoadScenePath();
 
-        sceneEditorPanel.resetLoadSceneRequest();
-        editorUI.resetLoadSceneRequest();
+            if (!path.empty())
+            {
+                editorContext.clearSelection();
 
-        consolePanel.addLog("[INFO] Scene loaded");
+                SceneSerializer::load(
+                    *scene,
+                    path
+                );
+
+                editorDocumentState.setScenePath(path);
+                editorDocumentState.markSaved();
+
+                Log::info("Scene loaded");
+            }
+
+            sceneEditorPanel.resetLoadSceneRequest();
+        }
     }
 }
 
 void GameLayer::handleEditorTools()
 {
     updateEditorPanels();
+
+    if (editorUI.isNewSceneRequested())
+    {
+        sceneEditorPanel.requestNewScene();
+
+        editorUI.resetNewSceneRequest();
+    }
+
+    if (editorUI.isSaveAsSceneRequested())
+    {
+        sceneEditorPanel.requestSaveScene();
+
+        editorUI.resetSaveAsSceneRequest();
+    }
+
+    if (editorUI.isLoadSceneRequested())
+    {
+        sceneEditorPanel.requestLoadScene();
+
+        editorUI.resetLoadSceneRequest();
+    }
+
     handleSceneEditorRequests();
     handleHierarchyRequests();
-    handleAssetBrowserRequests();
+    
+    if (inspectorPanel.isDestroyEntityRequested())
+    {
+        editorEntityOperations.destroyEntity(
+            editorContext.getSelectedEntity(),
+            *scene,
+            editorContext
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetDestroyEntityRequest();
+    }
+
+    if (inspectorPanel.isAddVelocityRequested())
+    {
+        editorComponentOperations.addVelocityComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetAddVelocityRequest();
+    }
+
+    if (inspectorPanel.isRemoveVelocityRequested())
+    {
+        editorComponentOperations.removeVelocityComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetRemoveVelocityRequest();
+    }
+
+    if (inspectorPanel.isAddColliderRequested())
+    {
+        editorComponentOperations.addColliderComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetAddColliderRequest();
+    }
+
+    if (inspectorPanel.isRemoveColliderRequested())
+    {
+        editorComponentOperations.removeColliderComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetRemoveColliderRequest();
+    }
+
+    if (inspectorPanel.isAddSpriteRequested())
+    {
+        editorComponentOperations.addSpriteComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetAddSpriteRequest();
+    }
+
+    if (inspectorPanel.isRemoveSpriteRequested())
+    {
+        editorComponentOperations.removeSpriteComponent(
+            editorContext.getSelectedEntity()
+        );
+
+        editorDocumentState.markDirty();
+
+        inspectorPanel.resetRemoveSpriteRequest();
+    }
+
+    if (assetBrowserPanel.isApplyAssetRequested())
+    {
+        const std::string& assetID =
+            assetBrowserPanel.getSelectedAsset();
+
+        if (!assetID.empty())
+        {
+            editorComponentOperations.setSpriteTexture(
+                editorContext.getSelectedEntity(),
+                assetID
+            );
+
+            editorDocumentState.markDirty();
+        }
+
+        assetBrowserPanel.resetApplyAssetRequest();
+    }
+
     refreshCachedEntities();
 
-    Entity* selectedEntity = editorContext.getSelectedEntity();
+    editorContext.validateSelection();
 
-    if (selectedEntity && selectedEntity->isDestroyed())
+    if (editorUI.isExitRequested())
     {
-        editorContext.clearSelection();
+        requestExit();
+        
+        editorUI.resetExitRequest();
     }
-}
-
-void GameLayer::updateInspectorInfo()
-{
-    Entity* selectedEntity =
-        editorContext.getSelectedEntity();
-
-    if (!scene ||
-        !selectedEntity ||
-        !scene->containsEntity(selectedEntity))
-    {
-        editorContext.clearSelection();
-
-        inspectorPanel.setHasSprite(false);
-        inspectorPanel.setHasVelocity(false);
-        inspectorPanel.setHasCollider(false);
-        inspectorPanel.setHasPlayerController(false);
-        inspectorPanel.setHasPlayerTag(false);
-
-        return;
-    }
-
-    if (selectedEntity->isDestroyed())
-    {
-        inspectorPanel.setHasSprite(false);
-        inspectorPanel.setHasVelocity(false);
-        inspectorPanel.setHasCollider(false);
-        inspectorPanel.setHasPlayerController(false);
-        inspectorPanel.setHasPlayerTag(false);
-
-        return;
-    }
-
-    inspectorPanel.setHasSprite(
-        selectedEntity->hasComponent<SpriteComponent>()
-    );
-
-    inspectorPanel.setHasVelocity(
-        selectedEntity->hasComponent<VelocityComponent>()
-    );
-
-    inspectorPanel.setHasCollider(
-        selectedEntity->hasComponent<ColliderComponent>()
-    );
-
-    inspectorPanel.setHasPlayerController(
-        selectedEntity->hasComponent<PlayerControllerComponent>()
-    );
-
-    inspectorPanel.setHasPlayerTag(
-        selectedEntity->hasComponent<PlayerTag>()
-    );
 }
 
 void GameLayer::updateEditorStatus(float dt)
 {
-    int spriteCount = 0;
-    int colliderCount = 0;
-    int velocityCount = 0;
-    int playerControllerCount = 0;
-
-    scene->forEach([&](Entity* entity)
-        {
-            if (entity->hasComponent<SpriteComponent>())
-                spriteCount++;
-
-            if (entity->hasComponent<ColliderComponent>())
-                colliderCount++;
-
-            if (entity->hasComponent<VelocityComponent>())
-                velocityCount++;
-
-            if (entity->hasComponent<PlayerControllerComponent>())
-                playerControllerCount++;
-        });
-
     debugOverlay.setSceneInfo(
         sceneManager.getActiveSceneName(),
         getEntityCount()
@@ -418,17 +505,7 @@ void GameLayer::updateEditorStatus(float dt)
     statisticsPanel.setStats(
         dt > 0.0f ? 1.0f / dt : 0.0f,
         dt,
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(getEntityCount()),
-        scene->camera.position,
-        scene->camera.zoom,
         getPlayerPosition(),
-        spriteCount,
-        colliderCount,
-        velocityCount,
-        playerControllerCount,
-        AssetRegistry::getRegisteredTextureCount(),
-        ResourceManager::getLoadedTextureCount(),
         stateText,
         1280,
         720
@@ -436,12 +513,33 @@ void GameLayer::updateEditorStatus(float dt)
 
     debugOverlay.setGameState(stateText);
 
+    std::string displaySceneName =
+        sceneManager.getActiveSceneName();
+
+    if (editorDocumentState.isDirty())
+    {
+        displaySceneName += " *";
+    }
+
+    if (editorDocumentState.hasScenePath())
+    {
+        displaySceneName += " | ";
+        displaySceneName +=
+            std::filesystem::path(
+                editorDocumentState.getScenePath()
+            ).filename().string();
+    }
+    else
+    {
+        displaySceneName += " | Unsaved";
+    }
+
     editorUI.setStatusInfo(
-        sceneManager.getActiveSceneName(),
+        displaySceneName,
         stateText,
         static_cast<int>(getEntityCount()),
         dt > 0.0f ? 1.0f / dt : 0.0f,
-        m_SnapEnabled
+        editorTransformController.isSnapEnabled()
     );
 
     sceneEditorPanel.setSceneMode(stateText);
@@ -508,28 +606,18 @@ void GameLayer::updateGameSystems(float dt)
     }
 }
 
-Entity* GameLayer::findPlayer() const
-{
-    if (!scene)
-    {
-        return nullptr;
-    }
-
-    return scene->findEntityByName("Player");
-}
-
 void GameLayer::handleGameStateTransitions()
 {
     if (gameContext.win)
     {
         gameState = GameState::Win;
-        consolePanel.addLog("[INFO] YOU WIN");
+        Log::info("YOU WIN");
     }
 
     if (gameContext.gameOver)
     {
         gameState = GameState::GameOver;
-        consolePanel.addLog("[INFO] GAME OVER");
+        Log::info("GAME OVER");
     }
 }
 
@@ -546,6 +634,8 @@ void GameLayer::handleGameRestart()
         {
             stopRuntime();
             startRuntime();
+
+            gameState = GameState::Gameplay;
 
             m_Application->play();
         }
@@ -610,6 +700,8 @@ void GameLayer::renderGameStateUI()
     {
         stopRuntime();
         startRuntime();
+
+        gameState = GameState::Gameplay;
 
         m_Application->play();
     }
@@ -680,6 +772,8 @@ void GameLayer::renderPauseUI()
     {
         stopRuntime();
         startRuntime();
+
+        gameState = GameState::Gameplay;
 
         m_Application->play();
     }
@@ -1044,40 +1138,15 @@ void GameLayer::initializeDefaultScene()
     scene = gameplayScene;
     sceneManager.setActiveScene("Gameplay", scene);
 
+    editorContext.setScene(scene.get());
+
     office = createOfficeEntity();
     camera = createCameraEntity();
 
     test = createTestEntity();
     player = createPlayerEntity();
 
-    editorScenes.push_back({ "Gameplay", gameplayScene });
-}
-
-Entity* GameLayer::createDefaultEntity(
-    const std::string& name
-)
-{
-    if (!scene)
-    {
-        return nullptr;
-    }
-
-    Entity* entity =
-        scene->createEntity(name);
-
-    auto* transform =
-        entity->addComponent<TransformComponent>();
-
-    transform->position = { 0.0f, 0.0f };
-    transform->scale = { 128.0f, 128.0f };
-    transform->rotation = 0.0f;
-
-    entity->addComponent<SpriteComponent>(
-        "test",
-        ResourceManager::getTexture("test")
-    );
-
-    return entity;
+    sceneManager.addScene("Gameplay", gameplayScene);
 }
 
 Entity* GameLayer::createTestEntity()
@@ -1206,6 +1275,13 @@ void GameLayer::setActiveScene(const std::string& name, std::shared_ptr<Scene> n
 
     sceneManager.setActiveScene(name, scene);
 
+    if (m_Application->getMode() == EngineMode::Edit)
+    {
+        editorScene = scene;
+    }
+
+    editorContext.setScene(scene.get());
+
     refreshSceneReferences();
 }
 
@@ -1239,27 +1315,13 @@ void GameLayer::exitToEditor()
 
 void GameLayer::resetEditorInteractionState()
 {
-    m_EntityDragging = false;
-    m_DraggedEntity = nullptr;
+    editorInteractionSystem.stopDragging();
 
-    m_ViewportPanning = false;
+    editorCameraController.reset();
 
-    m_LeftArrowPressedLastFrame = false;
-    m_RightArrowPressedLastFrame = false;
-    m_UpArrowPressedLastFrame = false;
-    m_DownArrowPressedLastFrame = false;
+    editorTransformController.resetInputState();
 
-    m_SnapKeyPressedLastFrame = false;
-    m_GridKeyPressedLastFrame = false;
-
-    m_DeleteKeyPressedLastFrame = false;
-
-    m_DuplicateKeyPressedLastFrame = false;
-
-    m_FocusKeyPressedLastFrame = false;
-
-    m_SaveKeyPressedLastFrame = false;
-    m_LoadKeyPressedLastFrame = false;
+    editorCommandController.resetInputState();
 }
 
 void GameLayer::handleViewportCamera(float dt)
@@ -1270,70 +1332,14 @@ void GameLayer::handleViewportCamera(float dt)
     if (!editorUI.isViewportVisible())
         return;
 
-    const bool ctrlPressed =
-        Input::isKeyDown(GLFW_KEY_LEFT_CONTROL) ||
-        Input::isKeyDown(GLFW_KEY_RIGHT_CONTROL);
+    if (!scene)
+        return;
 
-    if (viewportPanel.isFocused() &&
-        !ctrlPressed)
-    {
-        const float cameraSpeed = 400.0f;
-
-        if (Input::isKeyPressed(GLFW_KEY_W))
-            scene->camera.position.y += cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_S))
-            scene->camera.position.y -= cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_A))
-            scene->camera.position.x -= cameraSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_D))
-            scene->camera.position.x += cameraSpeed * dt;
-    }
-
-    if (viewportPanel.isHovered())
-    {
-        if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE))
-        {
-            const double mouseX = Input::getMouseX();
-            const double mouseY = Input::getMouseY();
-
-            if (!m_ViewportPanning)
-            {
-                m_LastMouseX = mouseX;
-                m_LastMouseY = mouseY;
-                m_ViewportPanning = true;
-            }
-            else
-            {
-                const double deltaX =
-                    mouseX - m_LastMouseX;
-
-                const double deltaY =
-                    mouseY - m_LastMouseY;
-
-                scene->camera.position.x -=
-                    static_cast<float>(deltaX) *
-                    scene->camera.zoom;
-
-                scene->camera.position.y +=
-                    static_cast<float>(deltaY) *
-                    scene->camera.zoom;
-
-                m_LastMouseX = mouseX;
-                m_LastMouseY = mouseY;
-            }
-        }
-        else
-        {
-            m_ViewportPanning = false;
-        }
-    }
-    else
-    {
-        m_ViewportPanning = false;
-    }
+    editorCameraController.update(
+        viewportPanel,
+        *scene,
+        dt
+    );
 }
 
 void GameLayer::handleSceneEditingInput(float dt)
@@ -1346,29 +1352,8 @@ void GameLayer::handleSceneEditingInput(float dt)
         return;
     }
 
-    const bool snapKeyPressed =
-        Input::isKeyDown(GLFW_KEY_G);
-
-    if (snapKeyPressed &&
-        !m_SnapKeyPressedLastFrame)
-    {
-        m_SnapEnabled = !m_SnapEnabled;
-    }
-
-    m_SnapKeyPressedLastFrame =
-        snapKeyPressed;
-
-    const bool gridKeyPressed =
-        Input::isKeyDown(GLFW_KEY_H);
-
-    if (gridKeyPressed &&
-        !m_GridKeyPressedLastFrame)
-    {
-        m_GridVisible = !m_GridVisible;
-    }
-
-    m_GridKeyPressedLastFrame =
-        gridKeyPressed;
+    editorTransformController.updateSnapToggle();
+    editorTransformController.updateGridToggle();
 
     if (!editorUI.isViewportVisible() ||
         !viewportPanel.isFocused())
@@ -1376,200 +1361,76 @@ void GameLayer::handleSceneEditingInput(float dt)
         return;
     }
 
-    const bool deleteKeyPressed =
-        Input::isKeyDown(GLFW_KEY_DELETE);
+    editorInteractionSystem.updateDelete(
+        editorContext,
+        *scene
+    );
 
-    Entity* selectedEntity =
-        editorContext.getSelectedEntity();
-
-    if (deleteKeyPressed &&
-        !m_DeleteKeyPressedLastFrame &&
-        selectedEntity &&
-        scene->containsEntity(selectedEntity) &&
-        !selectedEntity->isDestroyed())
+    if (editorInteractionSystem.consumeDuplicateRequest())
     {
-        selectedEntity->destroy();
-
-        editorContext.clearSelection();
-
-        if (m_DraggedEntity == selectedEntity)
-        {
-            m_EntityDragging = false;
-            m_DraggedEntity = nullptr;
-        }
+        editorEntityOperations.duplicateEntity(
+            editorContext.getSelectedEntity(),
+            *scene,
+            editorContext
+        );
     }
 
-    m_DeleteKeyPressedLastFrame =
-        deleteKeyPressed;
-
-    const bool ctrlPressed =
-        Input::isKeyDown(GLFW_KEY_LEFT_CONTROL) ||
-        Input::isKeyDown(GLFW_KEY_RIGHT_CONTROL);
-
-    const bool duplicateKeyPressed =
-        Input::isKeyDown(GLFW_KEY_D);
-
-    const bool duplicateShortcutPressed =
-        ctrlPressed &&
-        duplicateKeyPressed;
-
-    if (duplicateShortcutPressed &&
-        !m_DuplicateKeyPressedLastFrame)
-    {
-        Entity* selectedEntity =
-            editorContext.getSelectedEntity();
-
-        duplicateEntity(selectedEntity);
-    }
-
-    m_DuplicateKeyPressedLastFrame =
-        duplicateShortcutPressed;
-
-    const bool saveKeyPressed =
-        Input::isKeyDown(GLFW_KEY_S);
-
-    const bool saveShortcutPressed =
-        ctrlPressed &&
-        saveKeyPressed;
-
-    if (saveShortcutPressed &&
-        !m_SaveKeyPressedLastFrame)
+    if (editorCommandController.consumeSaveRequest())
     {
         editorUI.requestSaveScene();
     }
 
-    m_SaveKeyPressedLastFrame =
-        saveShortcutPressed;
-
-    const bool loadKeyPressed =
-        Input::isKeyDown(GLFW_KEY_O);
-
-    const bool loadShortcutPressed =
-        ctrlPressed &&
-        loadKeyPressed;
-
-    if (loadShortcutPressed &&
-        !m_LoadKeyPressedLastFrame)
+    if (editorCommandController.consumeLoadRequest())
     {
         editorUI.requestLoadScene();
     }
 
-    m_LoadKeyPressedLastFrame =
-        loadShortcutPressed;
+    editorInteractionSystem.updateFocus(
+        editorContext,
+        *scene
+    );
 
-    if (!selectedEntity ||
-        !scene->containsEntity(selectedEntity) ||
-        selectedEntity->isDestroyed())
+    if (!editorInteractionSystem.isDragging())
     {
-        return;
-    }
+        Entity* selectedEntity =
+            editorContext.getSelectedEntity();
 
-    const bool focusKeyPressed =
-        Input::isKeyDown(GLFW_KEY_F);
+        TransformComponent* transform =
+            selectedEntity
+            ? selectedEntity->getComponent<TransformComponent>()
+            : nullptr;
 
-    if (focusKeyPressed &&
-        !m_FocusKeyPressedLastFrame &&
-        selectedEntity &&
-        scene->containsEntity(selectedEntity) &&
-        !selectedEntity->isDestroyed())
-    {
-        auto* transform =
-            selectedEntity->getComponent<TransformComponent>();
+        glm::vec2 oldPosition;
+        glm::vec2 oldScale;
+        float oldRotation = 0.0f;
 
         if (transform)
         {
-            scene->camera.position =
-                transform->position;
+            oldPosition = transform->position;
+            oldScale = transform->scale;
+            oldRotation = transform->rotation;
         }
-    }
 
-    m_FocusKeyPressedLastFrame =
-        focusKeyPressed;
+        editorTransformController.update(
+            editorContext,
+            *scene,
+            dt
+        );
 
-    auto* transform =
-        selectedEntity->getComponent<TransformComponent>();
-
-    if (!transform ||
-        m_EntityDragging)
-    {
-        return;
-    }
-
-    if (m_SnapEnabled)
-    {
-        const bool leftPressed =
-            Input::isKeyDown(GLFW_KEY_LEFT);
-
-        const bool rightPressed =
-            Input::isKeyDown(GLFW_KEY_RIGHT);
-
-        const bool upPressed =
-            Input::isKeyDown(GLFW_KEY_UP);
-
-        const bool downPressed =
-            Input::isKeyDown(GLFW_KEY_DOWN);
-
-        transform->position.x =
-            std::round(
-                transform->position.x /
-                m_GridSize
-            ) * m_GridSize;
-
-        transform->position.y =
-            std::round(
-                transform->position.y /
-                m_GridSize
-            ) * m_GridSize;
-
-        if (leftPressed &&
-            !m_LeftArrowPressedLastFrame)
+        if (transform)
         {
-            transform->position.x -= m_GridSize;
+            const bool changed =
+                transform->position.x != oldPosition.x ||
+                transform->position.y != oldPosition.y ||
+                transform->scale.x != oldScale.x ||
+                transform->scale.y != oldScale.y ||
+                transform->rotation != oldRotation;
+
+            if (changed)
+            {
+                editorDocumentState.markDirty();
+            }
         }
-
-        if (rightPressed &&
-            !m_RightArrowPressedLastFrame)
-        {
-            transform->position.x += m_GridSize;
-        }
-
-        if (upPressed &&
-            !m_UpArrowPressedLastFrame)
-        {
-            transform->position.y += m_GridSize;
-        }
-
-        if (downPressed &&
-            !m_DownArrowPressedLastFrame)
-        {
-            transform->position.y -= m_GridSize;
-        }
-
-        m_LeftArrowPressedLastFrame = leftPressed;
-        m_RightArrowPressedLastFrame = rightPressed;
-        m_UpArrowPressedLastFrame = upPressed;
-        m_DownArrowPressedLastFrame = downPressed;
-    }
-    else
-    {
-        m_LeftArrowPressedLastFrame = false;
-        m_RightArrowPressedLastFrame = false;
-        m_UpArrowPressedLastFrame = false;
-        m_DownArrowPressedLastFrame = false;
-
-        const float moveSpeed = 200.0f;
-
-        if (Input::isKeyPressed(GLFW_KEY_LEFT))
-            transform->position.x -= moveSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_RIGHT))
-            transform->position.x += moveSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_UP))
-            transform->position.y += moveSpeed * dt;
-
-        if (Input::isKeyPressed(GLFW_KEY_DOWN))
-            transform->position.y -= moveSpeed * dt;
     }
 }
 
@@ -1581,98 +1442,14 @@ void GameLayer::handleViewportSelection()
     if (!editorUI.isViewportVisible())
         return;
 
-    if (!viewportPanel.isLeftMouseClicked())
+    if (!scene)
         return;
 
-    const ImVec2 mousePosition =
-        ImGui::GetMousePos();
-
-    const ImVec2 boundsMin =
-        viewportPanel.getBoundsMin();
-
-    const ImVec2 viewportSize =
-        viewportPanel.getSize();
-
-    if (viewportSize.x <= 0.0f ||
-        viewportSize.y <= 0.0f)
-    {
-        return;
-    }
-
-    const float localX =
-        mousePosition.x - boundsMin.x;
-
-    const float localY =
-        mousePosition.y - boundsMin.y;
-
-    const float normalizedX =
-        localX / viewportSize.x;
-
-    const float normalizedY =
-        localY / viewportSize.y;
-
-    const float worldX =
-        scene->camera.position.x +
-        (normalizedX * 2.0f - 1.0f) *
-        640.0f *
-        scene->camera.zoom;
-
-    const float worldY =
-        scene->camera.position.y +
-        (1.0f - normalizedY * 2.0f) *
-        360.0f *
-        scene->camera.zoom;
-
-    Entity* selectedEntity = nullptr;
-
-    scene->forEach([&](Entity* entity)
-    {
-        auto* transform =
-            entity->getComponent<TransformComponent>();
-
-        if (!transform)
-            return;
-
-        glm::vec2 size =
-            transform->scale;
-
-        if (auto* collider =
-            entity->getComponent<ColliderComponent>())
-        {
-            size = collider->size;
-        }
-
-        const glm::vec2 halfSize =
-            size * 0.5f;
-
-        const bool inside =
-            worldX >= transform->position.x - halfSize.x &&
-            worldX <= transform->position.x + halfSize.x &&
-            worldY >= transform->position.y - halfSize.y &&
-            worldY <= transform->position.y + halfSize.y;
-
-        if (inside)
-        {
-            selectedEntity = entity;
-        }
-    });
-
-    if (selectedEntity)
-    {
-        editorContext.setSelectedEntity(
-            selectedEntity
-        );
-
-        m_EntityDragging = true;
-        m_DraggedEntity = selectedEntity;
-    }
-    else
-    {
-        editorContext.clearSelection();
-
-        m_EntityDragging = false;
-        m_DraggedEntity = nullptr;
-    }
+    editorInteractionSystem.updateSelection(
+        editorContext,
+        viewportPanel,
+        *scene
+    );
 }
 
 void GameLayer::handleEntityDragging()
@@ -1680,89 +1457,39 @@ void GameLayer::handleEntityDragging()
     if (m_Application->getMode() != EngineMode::Edit)
         return;
 
-    if (!m_EntityDragging)
+    if (!scene)
         return;
 
-    const bool leftMouseDown =
-        ImGui::IsMouseDown(
-            ImGuiMouseButton_Left
-        );
+    Entity* selectedEntity =
+        editorContext.getSelectedEntity();
 
-    if (!leftMouseDown)
+    TransformComponent* transform =
+        selectedEntity
+        ? selectedEntity->getComponent<TransformComponent>()
+        : nullptr;
+
+    glm::vec2 oldPosition;
+
+    if (transform)
     {
-        m_EntityDragging = false;
-        m_DraggedEntity = nullptr;
-        return;
+        oldPosition = transform->position;
     }
 
-    if (!m_DraggedEntity ||
-        !scene->containsEntity(m_DraggedEntity) ||
-        m_DraggedEntity->isDestroyed())
+    editorInteractionSystem.updateDragging(
+        viewportPanel,
+        *scene
+    );
+
+    if (transform)
     {
-        m_EntityDragging = false;
-        m_DraggedEntity = nullptr;
-        return;
-    }
+        const bool changed =
+            transform->position.x != oldPosition.x ||
+            transform->position.y != oldPosition.y;
 
-    const ImVec2 mouseDelta =
-        ImGui::GetIO().MouseDelta;
-
-    const ImVec2 viewportSize =
-        viewportPanel.getSize();
-
-    auto* transform =
-        m_DraggedEntity
-        ->getComponent<TransformComponent>();
-
-    if (!transform ||
-        viewportSize.x <= 0.0f ||
-        viewportSize.y <= 0.0f)
-    {
-        return;
-    }
-
-    const float worldPerPixelX =
-        1280.0f *
-        scene->camera.zoom /
-        viewportSize.x;
-
-    const float worldPerPixelY =
-        720.0f *
-        scene->camera.zoom /
-        viewportSize.y;
-
-    transform->position.x +=
-        mouseDelta.x *
-        worldPerPixelX;
-
-    transform->position.y -=
-        mouseDelta.y *
-        worldPerPixelY;
-}
-
-void GameLayer::handleViewportZoom()
-{
-    if (m_Application->getMode() != EngineMode::Edit)
-        return;
-
-    if (!editorUI.isViewportVisible() ||
-        !viewportPanel.isHovered())
-    {
-        return;
-    }
-    
-    const float wheel =
-        ImGui::GetIO().MouseWheel;
-    
-    if (wheel != 0.0f)
-    {
-        scene->camera.zoom -= wheel * 0.1f;
-        
-        scene->camera.zoom = std::clamp(
-            scene->camera.zoom,
-            0.1f,
-            5.0f
-        );
+        if (changed)
+        {
+            editorDocumentState.markDirty();
+        }
     }
 }
 
@@ -1850,26 +1577,32 @@ void GameLayer::updateDebugRenderer()
 {
     debugRenderer.clear();
 
+    if (!scene)
+        return;
+
     if (!editorUI.isDebugRendererVisible())
         return;
 
-    if (m_GridVisible)
+    if (editorTransformController.isGridVisible())
     {
-        const float m_GridExtent = 2048.0f;
+        const float gridExtent = 2048.0f;
 
-        for (float x = -m_GridExtent; x <= m_GridExtent; x += m_GridSize)
+        const float gridSize =
+            editorTransformController.getGridSize();
+
+        for (float x = -gridExtent; x <= gridExtent; x += gridSize)
         {
             debugRenderer.drawLine(
-                { x, -m_GridExtent },
-                { x,  m_GridExtent }
+                { x, -gridExtent },
+                { x,  gridExtent }
             );
         }
 
-        for (float y = -m_GridExtent; y <= m_GridExtent; y += m_GridSize)
+        for (float y = -gridExtent; y <= gridExtent; y += gridSize)
         {
             debugRenderer.drawLine(
-                { -m_GridExtent, y },
-                { m_GridExtent,  y }
+                { -gridExtent, y },
+                { gridExtent,  y }
             );
         }
     }
@@ -1940,119 +1673,23 @@ void GameLayer::updateDebugRenderer()
     );
 }
 
-void GameLayer::handleViewportReset()
-{
-    if (viewportPanel.consumeResetCameraRequest())
-    {
-        scene->camera.position = { 0.0f, 0.0f };
-        scene->camera.zoom = 1.0f;
-    }
-}
-
-Entity* GameLayer::duplicateEntity(Entity* source)
-{
-    if (!source ||
-        source->isDestroyed() ||
-        !scene->containsEntity(source))
-    {
-        return nullptr;
-    }
-
-    Entity* copy =
-        scene->createEntity(
-            source->getName() + " Copy"
-        );
-
-    if (auto* sourceTransform =
-        source->getComponent<TransformComponent>())
-    {
-        auto* transform =
-            copy->addComponent<TransformComponent>();
-
-        *transform = *sourceTransform;
-
-        transform->position.x += 32.0f;
-        transform->position.y += 32.0f;
-    }
-
-    if (auto* sourceSprite =
-        source->getComponent<SpriteComponent>())
-    {
-        copy->addComponent<SpriteComponent>(
-            sourceSprite->getTextureID(),
-            sourceSprite->getTexture()
-        );
-    }
-
-    if (auto* sourceVelocity =
-        source->getComponent<VelocityComponent>())
-    {
-        auto* velocity =
-            copy->addComponent<VelocityComponent>();
-
-        *velocity = *sourceVelocity;
-    }
-
-    if (auto* sourceCollider =
-        source->getComponent<ColliderComponent>())
-    {
-        auto* collider =
-            copy->addComponent<ColliderComponent>();
-
-        *collider = *sourceCollider;
-    }
-
-    if (auto* sourceController =
-        source->getComponent<PlayerControllerComponent>())
-    {
-        auto* controller =
-            copy->addComponent<PlayerControllerComponent>();
-
-        *controller = *sourceController;
-    }
-
-    if (source->hasComponent<PlayerTag>())
-    {
-        copy->addComponent<PlayerTag>();
-    }
-
-    editorContext.setSelectedEntity(copy);
-
-    return copy;
-}
-
 void GameLayer::updateEditorPanels()
 {
     hierarchyPanel.setEditorContext(&editorContext);
     inspectorPanel.setEditorContext(&editorContext);
     sceneEditorPanel.setEditorContext(&editorContext);
     assetBrowserPanel.setEditorContext(&editorContext);
+    viewportPanel.setEditorContext(&editorContext);
 
-    sceneEditorPanel.setSceneInfo(
-        sceneManager.getActiveSceneName(),
-        static_cast<int>(scene->getEntityCount())
+    statisticsPanel.setEditorContext(
+        &editorContext
     );
 
-    sceneEditorPanel.clearSceneNames();
+    statisticsPanel.setSceneManager(
+        &sceneManager
+    );
 
-    for (const auto& sceneInfo : editorScenes)
-    {
-        sceneEditorPanel.addSceneName(sceneInfo.first);
-    }
-
-    hierarchyPanel.clear();
-
-    scene->forEach([&](Entity* entity)
-        {
-            hierarchyPanel.addEntity(entity);
-        });
-
-    assetBrowserPanel.clear();
-
-    assetBrowserPanel.addAsset("player");
-    assetBrowserPanel.addAsset("test");
-    assetBrowserPanel.addAsset("office");
-    assetBrowserPanel.addAsset("fallback");
+    sceneEditorPanel.setSceneManager(&sceneManager);
 }
 
 void GameLayer::handleSceneEditorRequests()
@@ -2068,18 +1705,39 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isNewSceneRequested())
     {
-        auto newScene = std::make_shared<Scene>();
+        if (editorDocumentState.isDirty())
+        {
+            pendingEditorAction =
+                PendingEditorAction::NewScene;
 
-        std::string name =
-            "New Scene " + std::to_string(editorScenes.size() + 1);
+            openUnsavedChangesPopup = true;
 
-        editorScenes.push_back({ name, newScene });
+            sceneEditorPanel.resetNewSceneRequest();
+        }
+        else
+        {
+            std::string name =
+                "New Scene " +
+                std::to_string(
+                    sceneManager.getScenes().size() + 1
+                );
 
-        setActiveScene(name, newScene);
+            auto newScene =
+                sceneManager.createScene(name);
 
-        editorContext.clearSelection();
+            if (newScene)
+            {
+                setActiveScene(
+                    name,
+                    newScene
+                );
 
-        sceneEditorPanel.resetNewSceneRequest();
+                editorDocumentState.reset();
+                editorDocumentState.markDirty();
+            }
+
+            sceneEditorPanel.resetNewSceneRequest();
+        }
     }
 
     if (sceneEditorPanel.isSwitchSceneRequested())
@@ -2087,42 +1745,57 @@ void GameLayer::handleSceneEditorRequests()
         const std::string& name =
             sceneEditorPanel.getRequestedSceneSwitchName();
 
-        for (const auto& sceneInfo : editorScenes)
+        if (name != sceneManager.getActiveSceneName())
         {
-            if (sceneInfo.first == name)
+            if (editorDocumentState.isDirty())
             {
-                setActiveScene(sceneInfo.first, sceneInfo.second);
-                break;
+                pendingEditorAction =
+                    PendingEditorAction::SwitchScene;
+
+                pendingSceneSwitchName = name;
+
+                openUnsavedChangesPopup = true;
+
+                sceneEditorPanel.resetSwitchSceneRequest();
+            }
+            else
+            {
+                if (sceneManager.switchScene(name))
+                {
+                    setActiveScene(
+                        sceneManager.getActiveSceneName(),
+                        sceneManager.getActiveScene()
+                    );
+
+                    editorDocumentState.reset();
+                }
+
+                sceneEditorPanel.resetSwitchSceneRequest();
             }
         }
-
-        sceneEditorPanel.resetSwitchSceneRequest();
+        else
+        {
+            sceneEditorPanel.resetSwitchSceneRequest();
+        }
     }
 
     if (sceneEditorPanel.isDeleteSceneRequested())
     {
-        if (editorScenes.size() > 1)
-        {
-            const std::string activeName =
-                sceneManager.getActiveSceneName();
+        std::string nextSceneName;
 
-            editorScenes.erase(
-                std::remove_if(
-                    editorScenes.begin(),
-                    editorScenes.end(),
-                    [&](const auto& sceneInfo)
-                    {
-                        return sceneInfo.first == activeName;
-                    }
-                ),
-                editorScenes.end()
+        auto nextScene =
+            sceneManager.removeActiveScene(
+                nextSceneName
             );
 
-            const auto& nextScene = editorScenes.front();
+        if (nextScene)
+        {
+            setActiveScene(
+                nextSceneName,
+                nextScene
+            );
 
-            setActiveScene(nextScene.first, nextScene.second);
-
-            editorContext.clearSelection();
+            editorDocumentState.reset();
         }
 
         sceneEditorPanel.resetDeleteSceneRequest();
@@ -2130,25 +1803,25 @@ void GameLayer::handleSceneEditorRequests()
 
     if (sceneEditorPanel.isCreateEntityRequested())
     {
-        Entity* entity = createDefaultEntity("New Entity");
+        editorEntityOperations.createEntity(
+            *scene,
+            editorContext
+        );
 
-        if (entity)
-        {
-            editorContext.setSelectedEntity(entity);
-        }
+        editorDocumentState.markDirty();
 
         sceneEditorPanel.resetCreateEntityRequest();
     }
 
     if (sceneEditorPanel.isDestroyEntityRequested())
     {
-        Entity* selectedEntity = editorContext.getSelectedEntity();
+        editorEntityOperations.destroyEntity(
+            editorContext.getSelectedEntity(),
+            *scene,
+            editorContext
+        );
 
-        if (selectedEntity && !selectedEntity->isDestroyed())
-        {
-            selectedEntity->destroy();
-            editorContext.clearSelection();
-        }
+        editorDocumentState.markDirty();
 
         sceneEditorPanel.resetDestroyEntityRequest();
     }
@@ -2158,19 +1831,24 @@ void GameLayer::handleHierarchyRequests()
 {
     if (hierarchyPanel.isCreateEntityRequested())
     {
-        Entity* entity = createDefaultEntity("New Entity");
+        editorEntityOperations.createEntity(
+            *scene,
+            editorContext
+        );
 
-        if (entity)
-        {
-            editorContext.setSelectedEntity(entity);
-        }
+        editorDocumentState.markDirty();
 
         hierarchyPanel.resetCreateEntityRequest();
     }
 
     if (Entity* source = hierarchyPanel.getDuplicateEntity())
     {
-        duplicateEntity(source);
+        editorEntityOperations.duplicateEntity(source,
+            *scene,
+            editorContext
+        );
+
+        editorDocumentState.markDirty();
 
         hierarchyPanel.resetDuplicateEntityRequest();
     }
@@ -2178,55 +1856,20 @@ void GameLayer::handleHierarchyRequests()
     if (Entity* target =
         hierarchyPanel.getFocusEntity())
     {
-        if (!target->isDestroyed() &&
-            scene->containsEntity(target))
-        {
-            auto* transform =
-                target->getComponent<TransformComponent>();
-
-            if (transform)
-            {
-                scene->camera.position =
-                    transform->position;
-            }
-        }
+        editorInteractionSystem.focusEntity(
+            target,
+            *scene
+        );
 
         hierarchyPanel.resetFocusEntityRequest();
     }
 }
 
-void GameLayer::handleAssetBrowserRequests()
-{
-    if (!assetBrowserPanel.isApplyAssetRequested())
-        return;
-
-    Entity* selectedEntity =
-        editorContext.getSelectedEntity();
-
-    if (selectedEntity &&
-        scene->containsEntity(selectedEntity) &&
-        !selectedEntity->isDestroyed())
-    {
-        auto* sprite =
-            selectedEntity->getComponent<SpriteComponent>();
-
-        if (sprite)
-        {
-            const std::string& asset =
-                assetBrowserPanel.getSelectedAsset();
-
-            sprite->setTexture(
-                asset,
-                ResourceManager::getTexture(asset)
-            );
-        }
-    }
-
-    assetBrowserPanel.resetApplyAssetRequest();
-}
-
 void GameLayer::refreshCachedEntities()
 {
+    if (!scene)
+        return;
+
     scene->cleanupDestroyedEntities();
 
     player = scene->findEntityByName("Player");
@@ -2412,12 +2055,200 @@ void GameLayer::renderGameplayHUD()
     ImGui::End();
 }
 
+void GameLayer::renderUnsavedChangesPopup()
+{
+    if (openUnsavedChangesPopup)
+    {
+        ImGui::OpenPopup("Unsaved Changes");
+        openUnsavedChangesPopup = false;
+    }
+
+    if (ImGui::BeginPopupModal(
+        "Unsaved Changes",
+        nullptr,
+        ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text(
+            "The current scene has unsaved changes."
+        );
+
+        ImGui::Text(
+            "Do you want to save them?"
+        );
+
+        ImGui::Separator();
+
+        if (ImGui::Button("Save"))
+        {
+            saveCurrentScene();
+
+            executePendingEditorAction();
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Discard"))
+        {
+            executePendingEditorAction();
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel"))
+        {
+            if (pendingEditorAction ==
+                PendingEditorAction::LoadScene)
+            {
+                sceneEditorPanel.resetLoadSceneRequest();
+            }
+            else if (
+                pendingEditorAction ==
+                PendingEditorAction::NewScene)
+            {
+                sceneEditorPanel.resetNewSceneRequest();
+            }
+            else if (
+                pendingEditorAction ==
+                PendingEditorAction::SwitchScene)
+            {
+                pendingSceneSwitchName.clear();
+            }
+
+            pendingEditorAction =
+                PendingEditorAction::None;
+
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}
+
+void GameLayer::saveCurrentScene()
+{
+    std::string savePath;
+
+    if (editorDocumentState.hasScenePath())
+    {
+        savePath =
+            editorDocumentState.getScenePath();
+    }
+    else
+    {
+        savePath = Paths::getSave(
+            makeSceneSaveFileName(
+                sceneManager.getActiveSceneName()
+            )
+        );
+
+        editorDocumentState.setScenePath(
+            savePath
+        );
+    }
+
+    SceneSerializer::save(
+        *scene,
+        savePath
+    );
+
+    editorDocumentState.markSaved();
+
+    Log::info("Scene saved");
+}
+
+void GameLayer::executePendingEditorAction()
+{
+    if (pendingEditorAction == PendingEditorAction::LoadScene)
+    {
+        const std::string& path =
+            sceneEditorPanel.getRequestedLoadScenePath();
+
+        if (!path.empty())
+        {
+            editorContext.clearSelection();
+
+            SceneSerializer::load(
+                *scene,
+                path
+            );
+
+            editorDocumentState.setScenePath(path);
+            editorDocumentState.markSaved();
+
+            Log::info("Scene loaded");
+        }
+
+        sceneEditorPanel.resetLoadSceneRequest();
+    }
+    else if (
+        pendingEditorAction ==
+        PendingEditorAction::NewScene)
+    {
+        std::string name =
+            "New Scene " +
+            std::to_string(
+                sceneManager.getScenes().size() + 1
+            );
+
+        auto newScene =
+            sceneManager.createScene(name);
+
+        if (newScene)
+        {
+            setActiveScene(
+                name,
+                newScene
+            );
+
+            editorDocumentState.reset();
+            editorDocumentState.markDirty();
+
+            Log::info("New scene created");
+        }
+
+        sceneEditorPanel.resetNewSceneRequest();
+    }
+    else if (
+        pendingEditorAction ==
+        PendingEditorAction::SwitchScene)
+    {
+        if (!pendingSceneSwitchName.empty())
+        {
+            if (sceneManager.switchScene(
+                pendingSceneSwitchName))
+            {
+                setActiveScene(
+                    sceneManager.getActiveSceneName(),
+                    sceneManager.getActiveScene()
+                );
+
+                editorDocumentState.reset();
+
+                Log::info("Scene switched");
+            }
+        }
+
+        pendingSceneSwitchName.clear();
+    }
+    else if (
+        pendingEditorAction ==
+        PendingEditorAction::Exit)
+    {
+        exitConfirmed = true;
+    }
+
+    pendingEditorAction =
+        PendingEditorAction::None;
+}
+
 void GameLayer::onRender()
 {
     if (!scene)
         return;
-
-    handleViewportZoom();
 
     viewportPanel.beginRender();
 
@@ -2440,13 +2271,23 @@ void GameLayer::onRender()
     {
         viewportPanel.render();
 
+        editorCameraController.updateZoom(
+            viewportPanel,
+            *scene
+        );
+
+        if (viewportPanel.consumeResetCameraRequest())
+        {
+            editorCameraController.resetCamera(
+                *scene
+            );
+        }
+
         renderGameplayHUD();
 
         handleViewportSelection();
         handleEntityDragging();
     }
-
-    handleViewportReset();
     
     debugOverlay.render();
 
@@ -2474,6 +2315,8 @@ void GameLayer::onRender()
     {
         preferencesPanel.render();
     }
+
+    renderUnsavedChangesPopup();
 }
 
 }

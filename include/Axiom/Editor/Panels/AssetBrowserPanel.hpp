@@ -3,7 +3,6 @@
 #include "Axiom/Editor/EditorContext.hpp"
 
 #include <string>
-#include <vector>
 
 namespace Axiom {
 
@@ -17,13 +16,7 @@ namespace Axiom {
 
         void toggle();
 
-        void addAsset(const std::string& name);
-        void clear();
-
         const std::string& getSelectedAsset() const;
-
-        bool isApplyAssetRequested() const;
-        void resetApplyAssetRequest();
 
         void setEditorContext(EditorContext* context);
 
@@ -31,15 +24,17 @@ namespace Axiom {
 
         bool isAssetLoaded(const std::string& name) const;
 
+        bool isApplyAssetRequested() const;
+        void resetApplyAssetRequest();
+
     private:
         bool visible = true;
 
-        std::vector<std::string> assets;
         std::string selectedAsset;
 
-        char searchBuffer[128] = {};
-
         bool applyAssetRequested = false;
+
+        char searchBuffer[128] = {};
 
         EditorContext* editorContext = nullptr;
     };

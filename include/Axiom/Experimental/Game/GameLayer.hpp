@@ -18,14 +18,19 @@
 #include "Axiom/Editor/Panels/StatisticsPanel.hpp"
 #include "Axiom/Editor/EditorContext.hpp"
 #include "Axiom/Editor/EditorUI.hpp"
+#include "Axiom/Editor/EditorCommandController.hpp"
+#include "Axiom/Editor/EditorEntityOperations.hpp"
+#include "Axiom/Editor/EditorComponentOperations.hpp"
+#include "Axiom/Editor/EditorDocumentState.hpp"
 #include "Axiom/Editor/Panels/PreferencesPanel.hpp"
 #include "Axiom/Editor/Viewport/ViewportPanel.hpp"
+#include "Axiom/Editor/Viewport/EditorCameraController.hpp"
+#include "Axiom/Editor/Systems/EditorInteractionSystem.hpp"
+#include "Axiom/Editor/Viewport/EditorTransformController.hpp"
 
 #include <memory>
 #include <string>
 #include <glm/glm.hpp>
-#include <vector>
-#include <utility>
 
 namespace Axiom {
 
@@ -39,6 +44,7 @@ public:
     void onUpdate(float dt) override;
     void onRender() override;
     bool isExitRequested() const;
+    void requestExit();
 
     GameState getGameState() const
     {
@@ -63,13 +69,10 @@ private:
 
     void initializeDefaultScene();
 
-    Entity* createDefaultEntity(const std::string& name);
     Entity* createPlayerEntity();
     Entity* createTestEntity();
     Entity* createOfficeEntity();
     Entity* createCameraEntity();
-    Entity* duplicateEntity(Entity* source);
-    Entity* findPlayer() const;
 
     void handleInteractions();
     void refreshSceneReferences();
@@ -80,7 +83,6 @@ private:
     void handleGameStateTransitions();
     void handleSceneSerialization();
     void handleEditorTools();
-    void updateInspectorInfo();
     void updateEditorStatus(float dt);
     void updateGameplay(float dt);
     void handleGameplayPause();
@@ -103,17 +105,26 @@ private:
     void handleSceneEditingInput(float dt);
     void handleViewportSelection();
     void handleEntityDragging();
-    void handleViewportZoom();
     void handleEditorShortcuts();
     void updateDebugRenderer();
-    void handleViewportReset();
     void updateEditorPanels();
     void handleSceneEditorRequests();
     void handleHierarchyRequests();
-    void handleAssetBrowserRequests();
     void refreshCachedEntities();
     void handleGameRestart();
     void renderGameplayHUD();
+    void renderUnsavedChangesPopup();
+    void saveCurrentScene();
+    void executePendingEditorAction();
+
+    enum class PendingEditorAction
+    {
+        None,
+        LoadScene,
+        NewScene,
+        SwitchScene,
+        Exit
+    };
     
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Scene> gameplayScene;
@@ -135,12 +146,22 @@ private:
     EditorUI editorUI;
     ViewportPanel viewportPanel;
     PreferencesPanel preferencesPanel;
+    EditorCameraController editorCameraController;
+    EditorInteractionSystem editorInteractionSystem;
+    EditorEntityOperations editorEntityOperations;
+    EditorComponentOperations editorComponentOperations;
+    EditorDocumentState editorDocumentState;
+    EditorTransformController editorTransformController;
+    EditorCommandController editorCommandController;
+    PendingEditorAction pendingEditorAction = PendingEditorAction::None;
+    std::string pendingSceneSwitchName;
+
+    bool openUnsavedChangesPopup = false;
+
     GameState gameState = GameState::Gameplay;
 
     std::shared_ptr<Scene> editorScene;
     std::shared_ptr<Scene> runtimeScene;
-
-    std::vector<std::pair<std::string, std::shared_ptr<Scene>>> editorScenes;
 
     bool pauseKeyWasPressed = false;
     bool sceneSwitchKeyWasPressed = false;
@@ -158,39 +179,8 @@ private:
     Entity* office = nullptr;
     Entity* camera = nullptr;
 
-    bool m_ViewportPanning = false;
-
-    double m_LastMouseX = 0.0;
-    double m_LastMouseY = 0.0;
-
-    bool m_SnapEnabled = true;
-    float m_GridSize = 64.0f;
-
-    bool m_GridVisible = true;
-    bool m_GridKeyPressedLastFrame = false;
-
-    bool m_SnapKeyPressedLastFrame = false;
-
-    bool m_LeftArrowPressedLastFrame = false;
-    bool m_RightArrowPressedLastFrame = false;
-    bool m_UpArrowPressedLastFrame = false;
-    bool m_DownArrowPressedLastFrame = false;
-
-    bool m_DeleteKeyPressedLastFrame = false;
-
-    bool m_EntityDragging = false;
-
-    bool m_DuplicateKeyPressedLastFrame = false;
-
-    bool m_FocusKeyPressedLastFrame = false;
-
-    bool m_SaveKeyPressedLastFrame = false;
-
-    bool m_LoadKeyPressedLastFrame = false;
-
     bool restartKeyWasPressed = false;
-
-    Entity* m_DraggedEntity = nullptr;
+    bool exitConfirmed = false;
 };
 
 }

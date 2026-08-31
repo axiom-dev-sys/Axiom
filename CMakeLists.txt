@@ -82,15 +82,24 @@ add_executable(Axiom
     src/Editor/Panels/PreferencesPanel.cpp
     src/Editor/Viewport/ViewportPanel.cpp
     src/Editor/Viewport/Framebuffer.cpp
+    src/Editor/Viewport/EditorCameraController.cpp
+    src/Editor/Viewport/EditorTransformController.cpp
+    src/Editor/Systems/EditorInteractionSystem.cpp
     src/Editor/EditorContext.cpp
     src/Editor/EditorUI.cpp
     src/Editor/EditorFontManager.cpp
+    src/Editor/EditorCommandController.cpp
+    src/Editor/EditorEntityOperations.cpp
+    src/Editor/EditorComponentOperations.cpp
+    src/Editor/EditorDocumentState.cpp
+    external/ImGuiFileDialog/ImGuiFileDialog.cpp
     src/Runtime/RuntimeSession.cpp
 )
 
 target_include_directories(Axiom PUBLIC
 ${CMAKE_SOURCE_DIR}/include
 ${CMAKE_SOURCE_DIR}/src
+${CMAKE_SOURCE_DIR}/external/ImGuiFileDialog
 )
 
 target_link_libraries(Axiom glfw glad glm::glm imgui)

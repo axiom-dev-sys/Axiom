@@ -1,6 +1,9 @@
 #include "Axiom/Editor/Panels/SceneEditorPanel.hpp"
 #include "Axiom/Scene/Entity.hpp"
+#include "Axiom/Scene/Scene.hpp"
+#include "Axiom/Scene/SceneManager.hpp"
 
+#include <ImGuiFileDialog.h>
 #include <imgui.h>
 #include <cstring>
 
@@ -11,7 +14,15 @@ namespace Axiom {
         if (!visible)
             return;
 
+        const std::string activeSceneName =
+            sceneManager
+            ? sceneManager->getActiveSceneName()
+            : "Unknown";
+
         ImGui::Begin("Scene Editor");
+
+        Scene* scene =
+            editorContext ? editorContext->getScene() : nullptr;
 
         ImGui::Text("Scene Information");
         ImGui::Separator();
@@ -25,35 +36,42 @@ namespace Axiom {
 
             std::strncpy(
                 sceneNameBuffer,
-                sceneName.c_str(),
+                activeSceneName.c_str(),
                 sizeof(sceneNameBuffer)
             );
 
             sceneNameBuffer[sizeof(sceneNameBuffer) - 1] = '\0';
         }
 
-        ImGui::Text("Entities: %d", sceneEntityCount);
+        ImGui::Text("Entities: %d", scene ? static_cast<int>(scene->getEntityCount()) : 0);
         ImGui::Text("Mode: %s", sceneMode.c_str());
 
-        if (ImGui::BeginCombo("Active Scene", sceneName.c_str()))
+        if (sceneManager)
         {
-            for (const std::string& name : sceneNames)
+            if (ImGui::BeginCombo("Active Scene", activeSceneName.c_str()))
             {
-                bool selected = (name == sceneName);
-
-                if (ImGui::Selectable(name.c_str(), selected))
+                for (const auto& sceneInfo : sceneManager->getScenes())
                 {
-                    requestedSceneSwitchName = name;
-                    switchSceneRequested = true;
+                    const std::string& name =
+                        sceneInfo.first;
+
+                    const bool selected =
+                        name == activeSceneName;
+
+                    if (ImGui::Selectable(name.c_str(), selected))
+                    {
+                        requestedSceneSwitchName = name;
+                        switchSceneRequested = true;
+                    }
+
+                    if (selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
                 }
 
-                if (selected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
+                ImGui::EndCombo();
             }
-
-            ImGui::EndCombo();
         }
 
         ImGui::Separator();
@@ -79,14 +97,90 @@ namespace Axiom {
             deleteSceneRequested = true;
         }
 
-        if (ImGui::Button("Save Scene"))
+        if (openSaveDialogRequested)
         {
-            saveSceneRequested = true;
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "SaveSceneDialog",
+                "Save Scene As",
+                ".scene",
+                config
+            );
+
+            openSaveDialogRequested = false;
         }
 
-        if (ImGui::Button("Load Scene"))
+        if (ImGui::Button("Save Scene As..."))
         {
-            loadSceneRequested = true;
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "SaveSceneDialog",
+                "Save Scene As",
+                ".scene",
+                config
+            );
+        }
+
+        if (openLoadDialogRequested)
+        {
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "LoadSceneDialog",
+                "Load Scene",
+                ".scene",
+                config
+            );
+
+            openLoadDialogRequested = false;
+        }
+
+        if (ImGui::Button("Load Scene..."))
+        {
+            IGFD::FileDialogConfig config;
+            config.path = ".";
+
+            ImGuiFileDialog::Instance()->OpenDialog(
+                "LoadSceneDialog",
+                "Load Scene",
+                ".scene",
+                config
+            );
+        }
+
+        if (ImGuiFileDialog::Instance()->Display(
+            "SaveSceneDialog"))
+        {
+            if (ImGuiFileDialog::Instance()->IsOk())
+            {
+                requestedSaveScenePath =
+                    ImGuiFileDialog::Instance()
+                    ->GetFilePathName();
+
+                saveSceneRequested = true;
+            }
+
+            ImGuiFileDialog::Instance()->Close();
+        }
+
+        if (ImGuiFileDialog::Instance()->Display(
+            "LoadSceneDialog"))
+        {
+            if (ImGuiFileDialog::Instance()->IsOk())
+            {
+                requestedLoadScenePath =
+                    ImGuiFileDialog::Instance()
+                    ->GetFilePathName();
+
+                loadSceneRequested = true;
+            }
+
+            ImGuiFileDialog::Instance()->Close();
         }
 
         ImGui::Separator();
@@ -126,7 +220,7 @@ namespace Axiom {
         }
         else
         {
-            ImGui::Text("%s", sceneName.c_str());
+            ImGui::Text("%s", activeSceneName.c_str());
         }
 
         ImGui::End();
@@ -175,6 +269,17 @@ namespace Axiom {
     void SceneEditorPanel::resetSaveSceneRequest()
     {
         saveSceneRequested = false;
+        requestedSaveScenePath.clear();
+    }
+
+    void SceneEditorPanel::requestSaveScene()
+    {
+        openSaveDialogRequested = true;
+    }
+
+    const std::string& SceneEditorPanel::getRequestedSaveScenePath() const
+    {
+        return requestedSaveScenePath;
     }
 
     bool SceneEditorPanel::isLoadSceneRequested() const
@@ -185,6 +290,22 @@ namespace Axiom {
     void SceneEditorPanel::resetLoadSceneRequest()
     {
         loadSceneRequested = false;
+        requestedLoadScenePath.clear();
+    }
+
+    void SceneEditorPanel::requestLoadScene()
+    {
+        openLoadDialogRequested = true;
+    }
+
+    const std::string& SceneEditorPanel::getRequestedLoadScenePath() const
+    {
+        return requestedLoadScenePath;
+    }
+
+    void SceneEditorPanel::requestNewScene()
+    {
+        newSceneRequested = true;
     }
 
     void SceneEditorPanel::setEditorContext(EditorContext* context)
@@ -192,13 +313,10 @@ namespace Axiom {
         editorContext = context;
     }
 
-    void SceneEditorPanel::setSceneInfo(
-        const std::string& name,
-        int entityCount
-    )
+    void SceneEditorPanel::setSceneManager(
+        SceneManager* manager)
     {
-        sceneName = name;
-        sceneEntityCount = entityCount;
+        sceneManager = manager;
     }
 
     void SceneEditorPanel::setSceneMode(const std::string& mode)
@@ -230,16 +348,6 @@ namespace Axiom {
     void SceneEditorPanel::resetNewSceneRequest()
     {
         newSceneRequested = false;
-    }
-
-    void SceneEditorPanel::addSceneName(const std::string& name)
-    {
-        sceneNames.push_back(name);
-    }
-
-    void SceneEditorPanel::clearSceneNames()
-    {
-        sceneNames.clear();
     }
 
     bool SceneEditorPanel::isSwitchSceneRequested() const

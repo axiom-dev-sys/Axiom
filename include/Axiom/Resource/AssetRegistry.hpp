@@ -25,6 +25,10 @@ namespace Axiom {
 
         static std::vector<std::string> getRegisteredTextureIDs();
 
+        static bool isTextureRegistered(
+            const std::string& id
+        );
+
     private:
         static std::unordered_map<std::string, std::string> s_Textures;
     };
